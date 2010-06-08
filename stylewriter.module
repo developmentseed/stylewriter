@@ -1,0 +1,77 @@
+<?php
+// $Id$
+
+
+/**
+ * @file
+ * StyleWriter
+ */
+
+/**
+ * Implementation of hook_views_api().
+ */
+function stylewriter_views_api() {
+  return array(
+    'api' => 2,
+    'path' => drupal_get_path('module', 'stylewriter') .'/views',
+  );
+}
+/**
+ * Implementation of hook_theme().
+ */
+function wfs_theme() {
+  $path = drupal_get_path('module', 'stylewriter');
+  return array(
+    /*
+    'wfs_placemark' => array(
+      'arguments' => array(
+        'point' => array(),
+        'feature_type' => ''),
+      'file' => 'wfs_views.theme.inc',
+      'template' => 'wfs-placemark',
+      'path' => $path . "/views",
+    ),
+    'wfs_placemark_geometry' => array(
+      'arguments' => array(
+        'point' => array(),
+        'feature_type' => ''),
+      'file' => 'wfs_views.theme.inc',
+      'template' => 'wfs-placemark-geometry',
+      'path' => $path . "/views",
+    ),
+    'wfs_getcapabilities' => array(
+      'arguments' => array(
+        'view_url' => '',
+        'feature_types' => array(),
+        'site_name' => ''),
+      'file' => 'wfs_views.theme.inc',
+      'template' => 'wfs-getcapabilities',
+      'path' => $path . "/views",
+    ),
+    'wfs_describefeaturetype' => array(
+      'arguments' => array(
+        'feature_type' => '', 
+        'field_names' => array()),
+      'file' => 'wfs_views.theme.inc',
+      'template' => 'wfs-describefeaturetype',
+      'path' => $path . '/views',
+    ),
+    'wfs_describefeaturetype_geometry' => array(
+      'arguments' => array(
+        'feature_type' => '', 
+        'field_names' => array()),
+      'file' => 'wfs_views.theme.inc',
+      'template' => 'wfs-describefeaturetype-geometry',
+      'path' => $path . '/views',
+    ),
+    'wfs_exception' => array(
+      'arguments' => array(
+        'exceptionCode' => '', 
+        'exceptionText' => array()),
+      'file' => 'wfs_views.theme.inc',
+      'template' => 'wfs-exception',
+      'path' => $path . '/views',
+    ),
+     */
+  );
+}

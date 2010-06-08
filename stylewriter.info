@@ -1,0 +1,5 @@
+; $Id$
+name = "StyleWriter"
+description = "Writes Styles for Maps"
+dependencies[] = views
+core = "6.x"
