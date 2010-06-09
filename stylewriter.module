@@ -22,15 +22,19 @@ function stylewriter_views_api() {
 function wfs_theme() {
   $path = drupal_get_path('module', 'stylewriter');
   return array(
-    /*
-    'wfs_placemark' => array(
+    'stylewriter_rule' => array(
       'arguments' => array(
-        'point' => array(),
-        'feature_type' => ''),
-      'file' => 'wfs_views.theme.inc',
-      'template' => 'wfs-placemark',
+        'value' => '',
+        'join_field' => '',
+        'value_field' => '',
+        'high' => '',
+        'color' => '',
+        'low' => ''),
+      'file' => 'stylewriter.theme.inc',
+      'template' => 'stylewriter-rule',
       'path' => $path . "/views",
     ),
+    /*
     'wfs_placemark_geometry' => array(
       'arguments' => array(
         'point' => array(),
