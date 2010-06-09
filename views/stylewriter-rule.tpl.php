@@ -3,18 +3,14 @@
 /**
  * Style a Mapnik Rule
  *
- * @param $join_field
- * @param $value_field
- * @param $value
+ * @param $join_field_name
+ * @param $join_field_value
  *
- * @param $low
- * @param $high
  * @param $color
  */
 ?>
 <Rule>
-  <Filter>[<?php echo $join_field; ?>] &eq; <?php echo $value; ?></Filter>
-  <Filter>[<?php echo $value_field; ?>] &gt; <?php echo $low; ?> and [<?php echo $value_field; ?>] &lt; <?php echo $high; ?></Filter>
+  <Filter>[<?php echo $join_field_name; ?>] &eq; "<?php echo $join_field_value; ?>"</Filter>
   <PolygonSymbolizer>
   <CssParameter name="fill"><?php echo $color; ?></CssParameter>
   </PolygonSymbolizer>

@@ -7,13 +7,17 @@ function template_preprocess_stylewriter_mapfile(&$vars) {
 
   $rows = '';
   foreach ($points as $point) {
-    $rows .= theme('stylewriter_rule', $point['value'], $point['join_field']);
+    $rows .= theme('stylewriter_rule', 
+      $point['join_field_name'],
+      $point['join_field_value'],
+      $point['color']);
   }
 
-  exit($rows);
 
   $vars['rows'] = $rows;
   $vars['viewtitle'] = $view->name;  
+
+  exit(theme('stylewriter_document', $rows));
 
   // drupal_set_header('Content-Type: text/xml');
 }

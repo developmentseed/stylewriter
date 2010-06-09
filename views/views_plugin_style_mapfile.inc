@@ -54,6 +54,37 @@ class views_plugin_style_mapfile extends views_plugin_style {
         '#weight' => -10,
       );
 
+      $form['colors'] = array(
+        '#type' => 'fieldset',
+        '#title' => 'Colors',
+        '#description' => t(''),
+        '#weight' => -20,
+      );
+      
+      $form['colors']['color_min'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Minimum color'),
+        '#default_value' => $this->options['colors']['color_min'],
+      );
+ 
+      $form['colors']['color_max'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Maximum color'),
+        '#default_value' => $this->options['colors']['color_max'],
+      );
+       
+      $form['colors']['steps'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Gradations'),
+        '#default_value' => $this->options['colors']['steps'],
+      );
+
+      $form['fields']['join_field_name'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Join Field Name'),
+        '#default_value' => $this->options['fields']['join_field_name'],
+      );
+
       $form['fields']['join_field'] = array(
         '#type' => 'select',
         '#title' => t('Join Field'),
@@ -93,21 +124,52 @@ class views_plugin_style_mapfile extends views_plugin_style {
     }  
 
     $points = array();
+    $values = array();
 
     foreach ($renders as $id => $row) {
       $point = array();
 
       foreach ($this->view->field as $key => $field) {
+        $point['join_field_name'] = $this->options['fields']['join_field_name'];
         if ($key == $this->options['fields']['join_field']) {
-          $point['join_field'] = $row[$key];
+          $point['join_field_value'] = $row[$key];
         }
+        // echo "[{$key}]";
+        // TODO temporary hack
+        // TODO getting bad invalid output here
+        if ($key == 'wbapi_data_value_2007 wbapi_data_value') {
+          $point['value'] = $row[$key];
+          $values[] = intval($row[$key]);
+        }
+        /*
         if ($key == $this->options['fields']['value']) {
           $point['value'] = $row[$key];
         }
+         */
       }
       $points[] = $point;
     }
-    print_r($points);
+
+    $value_min = min($values);
+    $value_max = max($values);
+
+    if ($value_max == 0) {
+      // TODO: allow for 0
+      throw new Exception('Maximum value cannot be 0');
+    }
+
+    $color_ramp = stylewriter_color_ramp(
+      $this->options['colors']['color_min'], 
+      $this->options['colors']['color_max'], 
+      $this->options['colors']['steps']);
+
+    foreach ($points as $i => $point) {
+      $rank = ($point['value'] - $value_min) / $value_max; // 0 -> 1
+      // TODO: floor or ceil?
+      $ramp_idx = floor($rank * $this->options['colors']['steps']);
+      $points[$i]['color'] = $color_ramp[$ramp_idx];
+    }
+
     return $points;
   }
 }
