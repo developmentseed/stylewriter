@@ -2,4 +2,5 @@
 name = "StyleWriter"
 description = "Writes Styles for Maps"
 dependencies[] = views
+dependencies[] = color 
 core = "6.x"
