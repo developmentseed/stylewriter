@@ -10,7 +10,7 @@
  */
 ?>
 <Rule>
-  <Filter>[<?php echo $join_field_name; ?>] &eq; "<?php echo $join_field_value; ?>"</Filter>
+  <Filter>[<?php echo $join_field_name; ?>] = '<?php echo $join_field_value; ?>'</Filter>
   <PolygonSymbolizer>
   <CssParameter name="fill"><?php echo $color; ?></CssParameter>
   </PolygonSymbolizer>
