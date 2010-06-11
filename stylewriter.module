@@ -108,12 +108,29 @@ function stylewriter_theme() {
       'template' => 'stylewriter-rule',
       'path' => $path . "/views",
     ),
+    'stylewriter_swatch' => array(
+      'arguments' => array(
+        'value' => '',
+        'color' => '',
+      ),
+      'file' => 'stylewriter.theme.inc',
+      'template' => 'stylewriter-swatch',
+      'path' => $path . "/views",
+    ),
     'stylewriter_document' => array(
       'arguments' => array(
         'rules' => '',
       ),
       'file' => 'stylewriter.theme.inc',
       'template' => 'stylewriter-document',
+      'path' => $path . "/views",
+    ),
+    'stylewriter_legend' => array(
+      'arguments' => array(
+        'swatches' => '',
+      ),
+      'file' => 'stylewriter.theme.inc',
+      'template' => 'stylewriter-legend',
       'path' => $path . "/views",
     ),
   );

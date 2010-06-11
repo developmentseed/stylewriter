@@ -112,7 +112,9 @@ class openlayers_layer_type_stylewriter extends openlayers_layer_type {
         }
       }
 
-      // $features = $view->execute_display($display_name, $args);
+      // $view->style_plugin->legend_data();
+      $args['legend'] = TRUE;
+      $features = $view->execute_display($display_name, $args);
       // print_r($features);
 
       $view->destroy();
