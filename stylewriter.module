@@ -18,6 +18,18 @@ function stylewriter_views_api() {
 }
 
 /**
+ * Implementation of hook_ctools_plugin_api().
+ */
+function stylewriter_ctools_plugin_api($module, $api) {
+  if ($module == "openlayers") {
+    switch ($api) {
+      case 'openlayers_layers':
+        return array('version' => 1);
+    }
+  }
+}
+
+/**
  * Get a ramp between two values that has $steps steps
  * @param $a
  * @param $b
@@ -103,6 +115,25 @@ function stylewriter_theme() {
       'file' => 'stylewriter.theme.inc',
       'template' => 'stylewriter-document',
       'path' => $path . "/views",
+    ),
+  );
+}
+
+/**
+ * Implementation of openlayers_layer_type
+ */
+function stylewriter_openlayers_layer_types() {
+  return array(
+    'openlayers_layer_type_stylewriter' => array(
+      'title' => t('Stylewriter'),
+      'description' => t('Stylewriter Dynamic Maps'),
+      'type' => 'layer',
+      'path' => drupal_get_path('module', 'stylewriter') .'/includes/layer_types',
+      'file' => 'stylewriter.inc',
+      'layer_type' => array(
+        'class' => 'openlayers_layer_type_stylewriter',
+        'parent' => 'openlayers_layer_type',
+      ),
     ),
   );
 }

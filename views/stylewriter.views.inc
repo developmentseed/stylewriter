@@ -45,6 +45,20 @@ function stylewriter_views_plugins() {
         'type' => 'feed',
         'even empty' => TRUE,
       ),
+      'legend' => array(
+        'title' => t('Map Legend'),
+        'help' => t(''),
+        'handler' => 'views_plugin_style_maplegend',
+        'theme' => 'stylewriter_maplegend',
+        'theme path' => drupal_get_path('module', 'stylewriter') .'/views',
+        'path' => drupal_get_path('module', 'stylewriter') .'/views',
+        'uses fields' => TRUE,
+        'uses row plugin' => FALSE,
+        'uses options' => TRUE,
+        'uses grouping' => TRUE,
+        'type' => 'normal',
+        'even empty' => TRUE,
+      ),
     ),
   );
 }

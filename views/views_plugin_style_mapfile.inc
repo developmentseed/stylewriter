@@ -137,26 +137,73 @@ class views_plugin_style_mapfile extends views_plugin_style {
         // echo "[{$key}]";
         // TODO temporary hack
         // TODO getting bad invalid output here
-        if ($key == 'wbapi_data_value_2007 wbapi_data_value') {
+        if ($key == $this->options['fields']['value']) {
           $point['value'] = $row[$key];
           $values[] = intval($row[$key]);
         }
-        /*
-        if ($key == $this->options['fields']['value']) {
-          $point['value'] = $row[$key];
-        }
-         */
       }
+
       $points[] = $point;
     }
+
 
     $value_min = min($values);
     $value_max = max($values);
 
-    if ($value_max == 0) {
-      // TODO: allow for 0
-      throw new Exception('Maximum value cannot be 0');
+
+    $color_ramp = stylewriter_color_ramp(
+      $this->options['colors']['color_min'], 
+      $this->options['colors']['color_max'], 
+      $this->options['colors']['steps']);
+
+    foreach ($points as $i => $point) {
+      $rank = ($point['value'] - $value_min) / $value_max; // 0 -> 1
+      // TODO: floor or ceil?
+      $ramp_idx = floor($rank * $this->options['colors']['steps']);
+      $points[$i]['color'] = $color_ramp[$ramp_idx];
     }
+
+    return $points;
+  }
+
+
+  function legend_data($rows) {
+    $renders = array();
+    $keys = array_keys($this->view->field);
+
+    foreach ($rows as $count => $row) {
+      foreach ($keys as $id) {
+        $renders[$count][$id] = $this->view->field[$id]->theme($row);
+      }
+    }  
+
+    $points = array();
+    $values = array();
+
+    foreach ($renders as $id => $row) {
+      $point = array();
+
+      foreach ($this->view->field as $key => $field) {
+        $point['join_field_name'] = $this->options['fields']['join_field_name'];
+        if ($key == $this->options['fields']['join_field']) {
+          $point['join_field_value'] = $row[$key];
+        }
+        // echo "[{$key}]";
+        // TODO temporary hack
+        // TODO getting bad invalid output here
+        if ($key == $this->options['fields']['value']) {
+          $point['value'] = $row[$key];
+          $values[] = intval($row[$key]);
+        }
+      }
+
+      $points[] = $point;
+    }
+
+
+    $value_min = min($values);
+    $value_max = max($values);
+
 
     $color_ramp = stylewriter_color_ramp(
       $this->options['colors']['color_min'], 
