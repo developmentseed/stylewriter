@@ -1,11 +1,30 @@
 <?php
 // $Id$
 
-
 /**
  * @file
  * StyleWriter
  */
+
+/**
+ * Implementation of hook_menu()
+ */
+function stylewriter_menu() {
+  $items = array();
+
+  // Core OpenLayers settings pages.
+  $items['admin/settings/stylewriter'] = array(
+    'title' => 'StyleWriter',
+    'description' => 'StyleWriter server and cache management.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('stylewriter_settings'),
+    'access arguments' => array('administer stylewriter'),
+    'file' => 'includes/stylewriter.admin.inc',
+    'type' => MENU_NORMAL_ITEM
+  );
+
+  return $items;
+}
 
 /**
  * Implementation of hook_views_api().
@@ -112,6 +131,7 @@ function stylewriter_theme() {
       'arguments' => array(
         'value' => '',
         'color' => '',
+        'place' => '', // first, last, middle
       ),
       'file' => 'stylewriter.theme.inc',
       'template' => 'stylewriter-swatch',
