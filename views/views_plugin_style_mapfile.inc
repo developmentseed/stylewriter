@@ -179,53 +179,51 @@ class views_plugin_style_mapfile extends views_plugin_style {
     function legend_data($rows) {
       $renders = array();
       $keys = array_keys($this->view->field);
-
       foreach ($rows as $count => $row) {
         foreach ($keys as $id) {
           $renders[$count][$id] = $this->view->field[$id]->theme($row);
         }
       }  
-
       $points = array();
       $values = array();
-
       foreach ($renders as $id => $row) {
         $point = array();
-
         foreach ($this->view->field as $key => $field) {
-          $point['join_field_name'] = $this->options['fields']['join_field_name'];
-          if ($key == $this->options['fields']['join_field']) {
-            $point['join_field_value'] = $row[$key];
-          }
-          // echo "[{$key}]";
-          // TODO temporary hack
-          // TODO getting bad invalid output here
           if ($key == $this->options['fields']['value']) {
             $point['value'] = $row[$key];
             $values[] = intval($row[$key]);
           }
         }
-
         $points[] = $point;
       }
 
-
       $value_min = min($values);
       $value_max = max($values);
-
 
       $color_ramp = stylewriter_color_ramp(
         $this->options['colors']['color_min'], 
         $this->options['colors']['color_max'], 
         $this->options['colors']['steps']);
 
-      foreach ($points as $i => $point) {
-        $rank = ($point['value'] - $value_min) / $value_max; // 0 -> 1
-        // TODO: floor or ceil?
-        $ramp_idx = floor($rank * $this->options['colors']['steps']);
-        $points[$i]['color'] = $color_ramp[$ramp_idx];
-      }
+      $value_ramp = range(
+        $value_min, 
+        $value_max, 
+        ($value_max - $value_min) / $this->options['colors']['steps']);
 
-      return $points;
+      array_push($value_ramp, $value_max);
+
+      $value_ramp = array_map('strval', $value_ramp);
+     
+      return array_combine($value_ramp, $color_ramp);
+    }
+
+    function theme_legend($points) {
+      $swatches = '';
+      foreach ($points as $value => $color) {
+        $swatches .= theme('stylewriter_swatch', 
+          $value,
+          $color);
+      }
+      return theme('stylewriter_legend', $swatches);
     }
 }

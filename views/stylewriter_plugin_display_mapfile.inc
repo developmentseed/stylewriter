@@ -12,9 +12,6 @@ class stylewriter_plugin_display_mapfile extends views_plugin_display_feed {
   function uses_breadcrumb() { return FALSE; }
   function get_style_type() { return 'mapfile'; }
 
-  /**
-   * OpenLayers data features are used directly in the map object.
-   */
   function execute() {
     return $this->view->render();
   }
@@ -34,7 +31,13 @@ class stylewriter_plugin_display_mapfile extends views_plugin_display_feed {
    * to the style handler.
    */
   function render() {
-    return $this->view->style_plugin->render($this->view->result);
+    if (isset($this->view->args['legend'])) {
+      $points = $this->view->style_plugin->legend_data($this->view->result);
+      return $this->view->style_plugin->theme_legend($points);
+    }
+    else {
+      return $this->view->style_plugin->render($this->view->result);
+    }
   }
 
   function option_definition() {
