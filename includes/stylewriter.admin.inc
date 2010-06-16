@@ -11,7 +11,6 @@ function stylewriter_get_json_url($url) {
 
   if ($contents) {
     return json_decode($contents);
-  } else {
   }
 }
 
@@ -40,12 +39,20 @@ function stylewriter_stylewriter_mapfile_facets() {
  */
 function stylewriter_settings() {
   $form = array();
-  // Define Form
+
   $form['stylewriter_server'] = array(
     '#type' => 'textfield',
-    '#title' => t('StyleWriter Server'),
-    '#description' => t('The URL of your StyleWriter server'),
+    '#title' => t('TileLite Server'),
+    '#description' => t('The URL of your TileLite server'),
     '#default_value' => variable_get('stylewriter_server', ''),
+  );
+
+  $form['stylewriter_key'] = array(
+    '#type' => 'textfield',
+    '#title' => t('TileLite server Key'),
+    '#description' => t('The shared key which allows you to 
+      query and modify the TileLite server'),
+    '#default_value' => variable_get('stylewriter_key', ''),
   );
 
   $form['cache'] = array(
@@ -53,22 +60,24 @@ function stylewriter_settings() {
     '#title' => t('Cache'),
     '#tree' => FALSE,
   );
+
   $form['cache']['wbapi_cache_data_facets'] = array(
     '#type' => 'checkboxes',
     '#options' => module_invoke_all('stylewriter_data_facets'),
     '#title' => t('Data Facets'),
   );
+
   $form['cache']['wbapi_cache_mapfile_facets'] = array(
     '#type' => 'checkboxes',
     '#options' => module_invoke_all('stylewriter_mapfile_facets'),
     '#title' => t('Mapfile Facets'),
   );
+  
   $form['cache']['stylewriter_cache_clear'] = array(
     '#type' => 'submit',
     '#value' => t('Clear cache'),
     '#submit' => array('stylewriter_cache_clear'),
   );
 
-  // Make a system setting form and return
   return system_settings_form($form);
 }
