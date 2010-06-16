@@ -115,10 +115,34 @@ class openlayers_layer_type_stylewriter extends openlayers_layer_type {
       $args['legend'] = TRUE; // trigger plugin rendering to return legend
       $features = $view->execute_display($display_name, $args);
       $view->destroy();
+
       return $features;
     }
   }
 
+  /**
+   * @param $view_display colon-separated view-display
+   *
+   * return a string representing the URL of a view that returns a Mapnik style
+   * with arguments inherited from the current view
+   */
+  function viewurlargs($view_display) {
+    list($view_name, $display_name) = explode(':', $view_display);
+    if ($view = views_get_view($view_name)) {
+      $args = array();
+      // Retrieve args/filters from current view
+      // to pass on to our vector layer.
+      $current_view = views_get_current_view();
+      if (isset($current_view)) {
+        $args = $current_view->args;
+        if (isset($current_view->exposed_input)) {
+          $view->set_exposed_input($current_view->exposed_input);
+        }
+      }
+
+      return $features;
+    }
+  }
 
   /**
    * Render.
@@ -129,13 +153,11 @@ class openlayers_layer_type_stylewriter extends openlayers_layer_type {
     // drupal_add_css(drupal_get_path('module', 'stylewriter') .'/js/mapbox.css');
     $this->data['options'] = array();
     $this->data['options']['legend'] = $this->get_legend($this->data['style_view']);
-    $this->data['base_url'] = str_replace(
-      $this->data['base_url'],
-      array(
-        '${mapfile}' => $this->data['mapfile_url'],
-        '${data}' => $this->data['data_url']
-      )
-    ) . '${z}/${x}/${y}.png';
+    $this->data['base_url'] = 
+      $this->data['base_url'] . 
+      stylewriter_base64en($this->data['data_url']) . '/' .
+      stylewriter_base64en($this->viewurlargs($this->data['style_url'])) . '/' .
+      '${z}/${x}/${y}.png';
     return $this->options;
   }
 }

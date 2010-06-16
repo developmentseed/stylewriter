@@ -67,7 +67,7 @@ function stylewriter_color_ramp_merge($h_grad, $s_grad, $l_grad) {
  * @param $text base64-decoded text
  */
 function stylewriter_base64en($text) {
-  return strtr(base64_encode($base64), '+/', '-_');
+  return strtr(base64_encode($text), '+/=', '-_,');
 }
 
 /**
@@ -75,5 +75,5 @@ function stylewriter_base64en($text) {
  * @param $text base64-encoded text
  */
 function stylewriter_base64de($text) {
-  return base64_decode(strtr($text, '-_', '+/'));
+  return base64_decode(strtr($text, '-_,', '+/='));
 }

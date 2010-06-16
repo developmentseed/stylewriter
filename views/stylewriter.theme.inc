@@ -7,24 +7,16 @@
 
 function template_preprocess_stylewriter_mapfile(&$vars) {
   $view = $vars['view'];
-  $points = $view->style_plugin->legend_data($vars['rows']);
+  $points = $view->style_plugin->map_rows($vars['rows']);
 
-  $swatches = '';
-  $place = 'first';
-  foreach ($points as $value => $color) {
-    if ($color == end($points)) {
-      $place = 'last';
-    }
-    elseif ($color == reset($points)) {
-      $place = 'first';
-    }
-    else {
-      $place = 'mid';
-    }
-    $swatches .= theme('stylewriter_swatch', 
-      $value,
-      $color,
-      $place);
+  $rows = '';
+  foreach ($points as $point) {
+    $rows .= theme('stylewriter_rule', 
+      $point['join_field_name'],
+      $point['join_field_value'],
+      $point['color']);
   }
-  return theme('stylewriter_legend', $swatches);
- }
+  $vars['rows'] = $rows;
+  $vars['viewtitle'] = $view->name;  
+  exit(theme('stylewriter_document', $rows));
+}

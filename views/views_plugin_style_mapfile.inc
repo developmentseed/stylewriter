@@ -191,7 +191,7 @@ class views_plugin_style_mapfile extends views_plugin_style {
         foreach ($this->view->field as $key => $field) {
           if ($key == $this->options['fields']['value']) {
             $point['value'] = $row[$key];
-            $values[] = intval($row[$key]);
+            $values[] = floatval($row[$key]);
           }
         }
         $points[] = $point;
@@ -210,7 +210,7 @@ class views_plugin_style_mapfile extends views_plugin_style {
         $value_max, 
         ($value_max - $value_min) / $this->options['colors']['steps']);
 
-      array_push($value_ramp, $value_max);
+      // array_push($value_ramp);
 
       $value_ramp = array_map('strval', $value_ramp);
      
