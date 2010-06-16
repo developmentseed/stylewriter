@@ -150,7 +150,7 @@ class openlayers_layer_type_stylewriter extends openlayers_layer_type {
   function render(&$map) {
     module_load_include('inc', 'stylewriter', 'stylewriter');
     drupal_add_js(drupal_get_path('module',  'stylewriter') .'/includes/layer_types/stylewriter.js');
-    // drupal_add_css(drupal_get_path('module', 'stylewriter') .'/js/mapbox.css');
+    drupal_add_css(drupal_get_path('module', 'stylewriter') .'/stylewriter.css');
     $this->data['options'] = array();
     $this->data['options']['legend'] = $this->get_legend($this->data['style_view']);
     $this->data['base_url'] = 

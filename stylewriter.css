@@ -10,5 +10,9 @@
   display: block;
   float: left;
   height: 14px;
-  width: 14px;
+  width: 3px;
+}
+
+.stylewriter-swatch-place-mid span {
+  display: none;
 }
