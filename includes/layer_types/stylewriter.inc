@@ -135,13 +135,11 @@ class openlayers_layer_type_stylewriter extends openlayers_layer_type {
       $current_view = views_get_current_view();
       if (isset($current_view)) {
         $args = $current_view->args;
-        if (isset($current_view->exposed_input)) {
-          $view->set_exposed_input($current_view->exposed_input);
-        }
       }
-
-      return $features;
+      $view->set_display($display_name);
+      return $view->get_url($args);
     }
+    
   }
 
   /**
@@ -156,7 +154,7 @@ class openlayers_layer_type_stylewriter extends openlayers_layer_type {
     $this->data['base_url'] = 
       $this->data['base_url'] . 
       stylewriter_base64en($this->data['data_url']) . '/' .
-      stylewriter_base64en($this->viewurlargs($this->data['style_url'])) . '/' .
+      stylewriter_base64en($this->viewurlargs($this->data['style_view'])) . '/' .
       '${z}/${x}/${y}.png';
     return $this->options;
   }
