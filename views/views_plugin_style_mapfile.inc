@@ -119,12 +119,13 @@ class views_plugin_style_mapfile extends views_plugin_style {
 
       foreach ($rows as $count => $row) {
         foreach ($keys as $id) {
-          $renders[$count][$id] = $this->view->field[$id]->theme($row);
+          $renders[$count][$id] = $row->{$this->view->field[$id]->field_alias};
         }
-      }  
+      }
 
       $points = array();
       $values = array();
+
 
       foreach ($renders as $id => $row) {
         $point = array();
@@ -134,15 +135,13 @@ class views_plugin_style_mapfile extends views_plugin_style {
           if ($key == $this->options['fields']['join_field']) {
             $point['join_field_value'] = $row[$key];
           }
-          // echo "[{$key}]";
           // TODO temporary hack
           // TODO getting bad invalid output here
           if ($key == $this->options['fields']['value']) {
             $point['value'] = $row[$key];
-            $values[] = intval($row[$key]);
+            $values[] = floatval($row[$key]);
           }
         }
-
         $points[] = $point;
       }
 
@@ -155,9 +154,10 @@ class views_plugin_style_mapfile extends views_plugin_style {
         $this->options['colors']['steps']);
 
       foreach ($points as $i => $point) {
-        $rank = ($point['value'] - $value_min) / $value_max; // 0 -> 1
+        $rank = (floatval($point['value']) - $value_min) / floatval($value_max); // 0 -> 1
         // TODO: floor or ceil?
-        $ramp_idx = floor($rank * $this->options['colors']['steps']);
+        // range is 0-(steps - 1)
+        $ramp_idx = floor($rank * ($this->options['colors']['steps'] - 1));
         $points[$i]['color'] = $color_ramp[$ramp_idx];
       }
 
