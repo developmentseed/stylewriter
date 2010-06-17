@@ -2,24 +2,39 @@
 // $Id$
 
 
-function stylewriter_get_json_url($url) {
-  $c = curl_init();
-  curl_setopt($c, CURLOPT_RETURNTRANSFER, 1);
-  curl_setopt($c, CURLOPT_URL, $url);
-  $contents = curl_exec($c);
-  curl_close($c);
+function stylewriter_get_json_url($url, $key) {
+  // Copied from http_request.inc in Feeds
+  // TODO: work without curl
+  $headers = array('User-Agent: Drupal (+http://drupal.org/)');
+  $result = new stdClass();
 
-  if ($contents) {
-    return json_decode($contents);
-  }
+  $request = curl_init($url);
+  curl_setopt($request, CURLOPT_POST, TRUE);
+  curl_setopt($request, CURLOPT_POSTFIELDS, urlencode(array('key' => $key)));
+  curl_setopt($request, CURLOPT_HEADER, TRUE);
+  curl_setopt($request, CURLOPT_HTTPHEADER, $headers);
+  curl_setopt($request, CURLOPT_RETURNTRANSFER, TRUE);
+  $data = curl_exec($request);
+
+  $result->code = curl_getinfo($request, CURLINFO_HTTP_CODE);
+  $header_size = curl_getinfo($request, CURLINFO_HEADER_SIZE);
+  $header = substr($data, 0, $header_size - 1);
+  $result->data = substr($data, $header_size);
+
+  return json_decode($result->data);
 }
+
+// TODO: divide, these will come from the same place
 
 /**
  * Implementation of hook_stylewriter_data_facets()
  */
 function stylewriter_stylewriter_data_facets() {
   // TODO: replace with something more robust
-  $cache_json = stylewriter_get_json_url(variable_get('stylewriter_server', '') . 'cache.json');
+  $cache_json = stylewriter_get_json_url(
+    variable_get('stylewriter_server', '') . 'cache.json',
+    variable_get('stylewriter_key', '')
+  );
   return $cache_json->data;
 }
 
@@ -28,7 +43,10 @@ function stylewriter_stylewriter_data_facets() {
  * Implementation of hook_stylewriter_style_facets()
  */
 function stylewriter_stylewriter_mapfile_facets() {
-  $cache_json = stylewriter_get_json_url(variable_get('stylewriter_server', '') . 'cache.json');
+  $cache_json = stylewriter_get_json_url(
+    variable_get('stylewriter_server', '') . 'cache.json',
+    variable_get('stylewriter_key', '')
+  );
   return $cache_json->mapfile;
 }
 
@@ -54,6 +72,12 @@ function stylewriter_settings() {
       query and modify the TileLite server'),
     '#default_value' => variable_get('stylewriter_key', ''),
   );
+
+  return system_settings_form($form);
+}
+
+function stylewriter_cache_form() {
+  $form = array();
 
   $form['cache'] = array(
     '#type' => 'fieldset',

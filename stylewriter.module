@@ -25,6 +25,23 @@ function stylewriter_menu() {
     'type' => MENU_NORMAL_ITEM
   );
 
+  $items['admin/settings/stylewriter/settings'] = array(
+    'title' => 'Settings',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -20,
+  );
+
+  // Core OpenLayers settings pages.
+  $items['admin/settings/stylewriter/cache'] = array(
+    'title' => 'Cache',
+    'description' => 'StyleWriter server and cache management.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('stylewriter_cache_form'),
+    'access arguments' => array('administer stylewriter'),
+    'file' => 'includes/stylewriter.admin.inc',
+    'type' => MENU_LOCAL_TASK
+  );
+
   return $items;
 }
 

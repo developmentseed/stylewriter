@@ -12,10 +12,7 @@
 <Rule>
   <Filter>[<?php echo $join_field_name; ?>] = '<?php echo $join_field_value; ?>'</Filter>
   <PolygonSymbolizer>
-  <CssParameter name="fill"><?php echo $color; ?></CssParameter>
+    <CssParameter name="fill"><?php echo $color; ?></CssParameter>
+    <CssParameter name="fill-opacity">0.4</CssParameter>
   </PolygonSymbolizer>
-  <LineSymbolizer>
-    <CssParameter name="stroke">#FFFFFF</CssParameter>
-    <CssParameter name="stroke-width">1</CssParameter>
-  </LineSymbolizer>
 </Rule>
