@@ -205,12 +205,10 @@ class views_plugin_style_mapfile extends views_plugin_style {
         $this->options['colors']['color_max'], 
         $this->options['colors']['steps']);
 
-      $value_ramp = range(
+      $value_ramp = stylewriter_range(
         $value_min, 
         $value_max, 
-        ($value_max - $value_min) / $this->options['colors']['steps']);
-
-      // array_push($value_ramp);
+        $this->options['colors']['steps']);
 
       $value_ramp = array_map('strval', $value_ramp);
      

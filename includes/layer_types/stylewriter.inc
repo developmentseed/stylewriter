@@ -127,6 +127,7 @@ class openlayers_layer_type_stylewriter extends openlayers_layer_type {
    * with arguments inherited from the current view
    */
   function viewurlargs($view_display) {
+    global $base_url;
     list($view_name, $display_name) = explode(':', $view_display);
     if ($view = views_get_view($view_name)) {
       $args = array();
@@ -137,9 +138,8 @@ class openlayers_layer_type_stylewriter extends openlayers_layer_type {
         $args = $current_view->args;
       }
       $view->set_display($display_name);
-      return $view->get_url($args);
+      return $base_url . '/' . $view->get_url($args);
     }
-    
   }
 
   /**
@@ -147,8 +147,9 @@ class openlayers_layer_type_stylewriter extends openlayers_layer_type {
    */
   function render(&$map) {
     module_load_include('inc', 'stylewriter', 'stylewriter');
-    drupal_add_js(drupal_get_path('module',  'stylewriter') .'/includes/layer_types/stylewriter.js');
-    drupal_add_css(drupal_get_path('module', 'stylewriter') .'/stylewriter.css');
+    drupal_add_js(drupal_get_path('module',  'stylewriter') . '/includes/layer_types/stylewriter_xyz.js');
+    drupal_add_js(drupal_get_path('module',  'stylewriter') . '/includes/layer_types/stylewriter.js');
+    drupal_add_css(drupal_get_path('module', 'stylewriter') . '/stylewriter.css');
     $this->data['options'] = array();
     $this->data['options']['legend'] = $this->get_legend($this->data['style_view']);
     $this->data['base_url'] = 
