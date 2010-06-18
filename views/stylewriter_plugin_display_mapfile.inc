@@ -20,12 +20,6 @@ class stylewriter_plugin_display_mapfile extends views_plugin_display_feed {
     return '<pre>' . check_plain($this->view->render()) . '</pre>';
   }
 
-  function init(&$view, &$display, $options = NULL) {
-    $_GET = array_change_key_case($_GET, CASE_LOWER);
-    // $this->process_filter(&$view, &$display);
-    parent::init($view, $display, $options);
-  }
-
   /**
    * Instead of going through the standard views_view.tpl.php, delegate this
    * to the style handler.

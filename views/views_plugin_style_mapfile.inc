@@ -12,8 +12,28 @@ class views_plugin_style_mapfile extends views_plugin_style {
      *
      * Set feed image for shared rendering later.
      */
+  /*
     function init(&$view, &$display, $options = NULL) {
       parent::init($view, $display, $options = NULL);
+    }
+   */
+
+    /**
+     * Set default options
+     */
+    function option_definition() {
+      $options = parent::option_definition();
+      $options['fields'] = array(
+        'join_field_name' => '',
+        'join_field' => '',
+        'value' => '',
+      );
+      $options['colors'] = array(
+        'color_min' => '',
+        'color_max' => '',
+        'steps' => '',
+      );
+      return $options;
     }
 
     /**
@@ -24,9 +44,10 @@ class views_plugin_style_mapfile extends views_plugin_style {
      */
     function options_form(&$form, &$form_state) { 
       parent::options_form($form, $form_state);                  
-      $options = parent::option_definition();
+      // $options = parent::option_definition();
 
       $handlers = $this->display->handler->get_handlers('field');
+
       if (empty($handlers)) {
         $form['error_markup'] = array(
           '#value' => t('You need at least one field before you can 
