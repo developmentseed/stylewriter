@@ -32,6 +32,40 @@ the combo can handle situations in which the data does not and cannot reside
 on the tile server itself, and in which the styles applied to the data are 
 not limited in any sense.
 
+## Using StyleWriter with Views
+
+Given the complex nature of what StyleWriter's views integration does, it 
+requires the use of a display plugin and style plugin in conjunction. The 
+style plugin is written to be close to the OpenLayers Data style plugin 
+in configuration, despite the fact that the underlying structure is much 
+different.
+
+1. Add a new *Mapfile* display to a View
+2. Set the style to *Mapfile*
+3. Configure the style plugin
+
+    Minimum & maximum colors: these are the colors that will be assigned to 
+      the minimum and maximum (in numeric terms) values of the dataset. 
+      The colors are blended together into shades numbering the value of 
+      'Gradations' by converting the colors to HSL (Hue, Saturation, Luminosity)
+      and linearly stretching between each component
+
+    Join field name: This is the name of the join field _in the datasource_ - 
+      thus, if the Shapefile refers to countries by a column named 'FIPS', 
+      then this field should contain the text FIPS. This is equivalent to 
+      a foriegn key in other systems.
+
+    Join field: the value of the join field for this view. The options are 
+      taken from the fields that are available to the view.
+
+    Value: the value of the data. This can be an integer or float field. Note 
+      that the join and value fields are pushed into mapfiles without 
+      being rendered by the views stack - so that they are most likely 
+      'pure' values without formatting
+
+4. If the view is properly configured, it will be available when creating 
+   a new StyleWriter layer.
+
 ## Using StyleWriter with Drush
 
 StyleWriter includes a [Drush][d] command called 'stylewriter-cache-all.' 
