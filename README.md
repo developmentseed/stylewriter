@@ -22,7 +22,7 @@ you have both a point and a choropleth map displaying the same information.
 * It provides an administration interface that allows you to view the 
   currently-cached data / mapfile combinations and clear those caches on command
 
-## Why is this necessary
+## Why This Is Necessary
 
 StyleWriter and its branch of TileLite don't follow the typical convention of 
 map servers and clients. Instead of configuring layers on the tile server, 
