@@ -17,7 +17,7 @@
 function stylewriter_drush_command() {
   $items = array();
 
-  $items['stylewriter'] = array(
+  $items['stylewriter-cache-all'] = array(
     'callback' => 'stylewriter_seed',
     'description' => "Seed StyleWriter Tiles",
     'drupal dependencies' => array('stylewriter'),
