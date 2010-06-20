@@ -159,6 +159,24 @@ require extensive cooperation of Drupal and the datasource.
 Although [Cascadenik][c] support is planned, the current implementation isn't 
 viable for this project.
 
+## Assumptions and customizations
+
+There are defaults built into this module - the default rule template - 
+contained in `views/stylewriter-rule.tpl.php` sets the `fill-opacity` of polygons 
+to 0.4 and doesn't add a stroke of any kind to the rendered polygons. Also, 
+it is a current assumption of the module that the data file contains shapes, 
+rather than points or lines, as the default rule doesn't contain anything 
+but PolygonSymbolizer. Also, this module doesn't aim to create maps in projects 
+other than EPSG:900913, the Spherical Mercator Google-style projection, or to 
+create maps with backgrounds other than 'transparent'.
+
+One can currently override these assumptions by including a custom 
+`stylewriter-rule.tpl.php` in a theme, but this is a global override - there is 
+no real, current functionality for having different 'rule styles' per different 
+kinds of maps. One can also override the default document style (the fact that 
+maps have a transparent background) by adding a `stylewriter-document.tpl.php` 
+file to a theme.
+
 ## Data
 
 Originally the TileLite branch included support for both GeoJSON and Shapefiles.
