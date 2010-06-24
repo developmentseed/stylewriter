@@ -112,11 +112,11 @@ class openlayers_layer_type_stylewriter extends openlayers_layer_type {
         }
       }
 
-      $args['legend'] = TRUE; // trigger plugin rendering to return legend
-      $features = $view->execute_display($display_name, $args);
-      $view->destroy();
-
-      return $features;
+      $view->set_display($display_name);
+      $view->set_arguments($args);
+      $view->execute();
+      $points = $view->style_plugin->legend_data($view->result);
+      return $view->style_plugin->theme_legend($points);
     }
   }
 

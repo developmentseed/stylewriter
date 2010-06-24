@@ -2,6 +2,10 @@
  * StyleWriter Styles
  */
 
+.stylewriter-legend {
+  height: 20px;
+}
+
 .stylewriter-swatch {
   display: inline;
 }
@@ -10,9 +14,36 @@
   display: block;
   float: left;
   height: 20px;
-  width: 2px;
+  width: 3px;
+  margin-right: 1px;
+  position: relative;
+  bottom: 0;
 }
 
-.stylewriter-swatch-place-mid span {
-  display: none;
+
+.stylewriter-swatch-value {
+  font-size: 13px;
+  padding: 4px 4px;
 }
+
+.stylewriter-swatch-value {
+  float: left;
+}
+
+.stylewriter-legend {
+  padding: 5px;
+}
+
+.stylewriter-swatch-color-dist-0 { height: 2px; }
+.stylewriter-swatch-color-dist-01 { height: 4px; }
+.stylewriter-swatch-color-dist-02 { height: 6px; }
+.stylewriter-swatch-color-dist-03 { height: 8px; }
+.stylewriter-swatch-color-dist-04 { height: 10px; }
+.stylewriter-swatch-color-dist-05 { height: 12px; }
+.stylewriter-swatch-color-dist-06 { height: 14px; }
+.stylewriter-swatch-color-dist-07 { height: 16px; }
+.stylewriter-swatch-color-dist-08 { height: 18px; }
+.stylewriter-swatch-color-dist-09 { height: 20px; }
+.stylewriter-swatch-color-dist-1  { height: 20px; }
+
+

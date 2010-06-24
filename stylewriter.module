@@ -88,6 +88,7 @@ function stylewriter_theme() {
       'arguments' => array(
         'value' => '',
         'color' => '',
+        'dist' => '',
         'place' => '', // first, last, middle
       ),
       'file' => 'stylewriter.theme.inc',
