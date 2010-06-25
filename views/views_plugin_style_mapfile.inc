@@ -237,7 +237,7 @@ class views_plugin_style_mapfile extends views_plugin_style {
 
       $points = array();
       $values = array();
-
+      $formatted_values = array();
       
       foreach ($renders as $id => $row) {
         foreach ($this->view->field as $key => $field) {
@@ -245,7 +245,8 @@ class views_plugin_style_mapfile extends views_plugin_style {
           // TODO getting bad invalid output here
           if ($key == $this->options['fields']['value']) {
             $point['value'] = $row[$key];
-            $values[] = floatval($row[$key]);
+            $values[$id] = floatval($row[$key]);
+            $formatted_values[$id] = $formatted_renders[$id][$key];
           }
         }
       }
@@ -287,26 +288,30 @@ class views_plugin_style_mapfile extends views_plugin_style {
         $value_max,
         $this->options['colors']['steps']);
       $value_ramp = array_map('strval', $value_ramp);
-     
-      $legend = array();
 
+      $legend = array(
+        'points' => array(),
+        'values' => array(
+          'min' => $formatted_values[array_search($value_min, $values)],
+          'max' => $formatted_values[array_search($value_max, $values)],
+        ),
+      );
       for ($i = 0; $i < $this->options['colors']['steps']; $i++) {
-        $legend[] = array(
+        $legend['points'][] = array(
           'color' => $color_ramp[$i],
           'dist' => $dist[$i],
-          'value' => $value_ramp[$i]);
+        );
       }
-
       return $legend;
     }
 
-    function theme_legend($points) {
+    function theme_legend($points, $values) {
       $swatches = '';
       foreach ($points as $point) {
         $swatches .= theme('stylewriter_swatch', $point['color'], $point['dist']);
       }
       $first = current($points);
       $last = end($points);
-      return theme('stylewriter_legend', $swatches, $first['value'], $last['value']);
+      return theme('stylewriter_legend', $swatches, $values['min'], $values['max']);
     }
 }
