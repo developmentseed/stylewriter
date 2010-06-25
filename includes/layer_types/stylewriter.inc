@@ -27,6 +27,7 @@ class openlayers_layer_type_stylewriter extends openlayers_layer_type {
       'layer_handler' => 'stylewriter',
       'layer_type' => 'openlayers_layer_type_stylewriter',
       'type' => 'png',
+      'minzoom' => '0',
     );
   }
 
@@ -91,10 +92,18 @@ class openlayers_layer_type_stylewriter extends openlayers_layer_type {
           '#type' => 'hidden',
           '#value' => '900913',
         ),
-      ),
-      '#default_value' => ($this->data['resolutions']) ? 
+        '#default_value' => ($this->data['resolutions']) ? 
         $this->data['resolutions'] : 
         array_map('strval', openlayers_get_resolutions('900913'))
+
+      ),
+      'minzoom' => array(
+        '#type' => 'textfield',
+        '#title' => t('Minimum Zoom Level'),
+        '#description' => t('Adjust the farthest that this layer can be zoomed
+        out'),
+        '#default_value' => $this->data['minzoom'],
+      ),
     );
   }
 

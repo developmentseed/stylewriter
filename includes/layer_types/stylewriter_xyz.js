@@ -110,12 +110,17 @@ OpenLayers.Layer.XYZ2 = OpenLayers.Class(OpenLayers.Layer.Grid, {
 
         var url = this.url;
         var s = '' + x + y + z;
+
+        if (this.minzoom !== null) {
+          z += parseInt(this.minzoom);
+        }
+
         if (url instanceof Array)
         {
             url = this.selectUrl(s, url);
         }
         
-        var path = OpenLayers.String.format(url, {'x': x, 'y': y, 'z': z + 1});
+        var path = OpenLayers.String.format(url, {'x': x, 'y': y, 'z': z});
 
         return path;
     },
