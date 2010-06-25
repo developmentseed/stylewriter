@@ -186,10 +186,20 @@ class views_plugin_style_mapfile extends views_plugin_style {
         $this->options['colors']['steps']);
 
       foreach ($points as $i => $point) {
+        // Example: If there are 3 steps, $ramp_idx will be between 0 and 3,
+        // inclusive. Values are then floor()'d such that the following values
+        // map to corresponding color ramp keys:
+        //   0-0.99 => 0
+        //   1-1.99 => 1
+        //   2-3.00 => 2
         $rank = (floatval($point['value']) - $value_min) / $value_range; // 0 -> 1
-        // TODO: floor or ceil?
-        // range is 0-(steps - 1)
-        $ramp_idx = floor($rank * ($this->options['colors']['steps'] - 1));
+        // Include high endpoint.
+        if ($rank == 1) {
+          $ramp_idx = count($color_ramp) - 1;
+        }
+        else {
+          $ramp_idx = floor($rank * $this->options['colors']['steps']);
+        }
         $points[$i]['color'] = $color_ramp[$ramp_idx];
       }
 
@@ -242,30 +252,28 @@ class views_plugin_style_mapfile extends views_plugin_style {
 
       $value_min = min($values);
       $value_max = max($values);
+      $value_range = $value_max - $value_min;
 
-      $value_ramp = stylewriter_range(
-        $value_min, 
-        $value_max, 
-        $this->options['colors']['steps']);
-
+      // Build distribution counts.
       $dist = array_fill(0, $this->options['colors']['steps'], 0);
-
-      for ($i = 0; $i < ($this->options['colors']['steps'] - 1); $i++) {
-        foreach ($values as $value) {
-          if ($value >= $value_ramp[$i] && $value < $value_ramp[$i + 1]) {
-            $dist[$i] = (isset($dist[$i])) ? $dist[$i] + 1 : 1;
-          }
-          elseif ($value == $value_ramp[$i + 1]) {
-            $dist[$i + 1] = (isset($dist[$i + 1])) ? $dist[$i + 1] + 1 : 1;
-          }
+      foreach ($values as $value) {
+        $rank = ($value - $value_min) / $value_range; // 0 -> 1
+        // Include high endpoint.
+        if ($rank == 1) {
+          $ramp_idx = count($dist) - 1;
         }
+        else {
+          $ramp_idx = floor($rank * $this->options['colors']['steps']);
+        }
+        $dist[$ramp_idx] = isset($dist[$ramp_idx]) ? $dist[$ramp_idx] + 1 : 1;
       }
 
-      // normalize distributions
+      // Normalize distribution counts and format as usable CSS class strings.
       $dist_min = min($dist);
       $dist_max = max($dist);
+      $dist_range = $dist_max - $dist_min;
       foreach ($dist as &$d) {
-        $d = str_replace('.', '', strval(round(($d - $dist_min) / (($dist_max - $dist_min) / 10), 1)));
+        $d = str_replace('.', '', strval(round(($d - $dist_min) / $dist_range, 1)));
       }
 
       $color_ramp = stylewriter_color_ramp(
@@ -273,6 +281,11 @@ class views_plugin_style_mapfile extends views_plugin_style {
         $this->options['colors']['color_max'], 
         $this->options['colors']['steps']);
 
+
+      $value_ramp = stylewriter_range(
+        $value_min,
+        $value_max,
+        $this->options['colors']['steps']);
       $value_ramp = array_map('strval', $value_ramp);
      
       $legend = array();
