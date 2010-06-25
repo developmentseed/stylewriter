@@ -33,16 +33,21 @@ function stylewriter_color_ramp($a, $b, $steps) {
  */
 function stylewriter_range($a, $b, $parts) {
   $range = array();
+
+  // If $a > $b we must flip at the end to preserve direction.
+  $reverse = FALSE;
   if ($a > $b) {
     $c = $a;
     $a = $b;
     $b = $c;
+    $reverse = TRUE;
   }
+
   $step = (($b - $a) / ($parts - 1));
   for ($i = 0; $i < $parts; $i++) {
     $range[] = $a + ($step * $i);
   }
-  return $range;
+  return $reverse ? array_reverse($range) : $range;
 }
 
 /**
