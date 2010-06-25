@@ -302,27 +302,11 @@ class views_plugin_style_mapfile extends views_plugin_style {
 
     function theme_legend($points) {
       $swatches = '';
+      foreach ($points as $point) {
+        $swatches .= theme('stylewriter_swatch', $point['color'], $point['dist']);
+      }
       $first = current($points);
       $last = end($points);
-      foreach ($points as $point) {
-        switch ($point) {
-          case $first:
-            $place = 'first';
-            break;
-          case $last:
-            $place = 'last';
-            break;
-          default:
-            $place = 'mid';
-            break;
-        }
-        $swatches .= theme('stylewriter_swatch', 
-          $point['value'],
-          $point['color'],
-          $point['dist'],
-          $place
-          );
-      }
-      return theme('stylewriter_legend', $swatches);
+      return theme('stylewriter_legend', $swatches, $first['value'], $last['value']);
     }
 }

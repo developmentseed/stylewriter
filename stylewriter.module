@@ -87,10 +87,8 @@ function stylewriter_theme() {
     ),
     'stylewriter_swatch' => array(
       'arguments' => array(
-        'value' => '',
         'color' => '',
         'dist' => '',
-        'place' => '', // first, last, middle
       ),
       'file' => 'stylewriter.theme.inc',
       'template' => 'stylewriter-swatch',
@@ -107,6 +105,8 @@ function stylewriter_theme() {
     'stylewriter_legend' => array(
       'arguments' => array(
         'swatches' => '',
+        'value_min' => '',
+        'value_max' => '',
       ),
       'file' => 'stylewriter.theme.inc',
       'template' => 'stylewriter-legend',

@@ -3,8 +3,12 @@
 
 /**
  * @param $swatches string
+ * @param $value_min string
+ * @param $value_max string
  */
 ?>
 <div class='stylewriter-legend'>
-  <?php echo $swatches; ?>
+  <div class='stylewriter-value'><?php echo $value_min ?></div>
+  <div class='stylewriter-swatches'><?php echo $swatches; ?></div>
+  <div class='stylewriter-value'><?php echo $value_max ?></div>
 </div>
