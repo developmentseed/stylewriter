@@ -163,7 +163,7 @@ viable for this project.
 
 There are defaults built into this module - the default rule template - 
 contained in `views/stylewriter-rule.tpl.php` sets the `fill-opacity` of polygons 
-to 0.4 and doesn't add a stroke of any kind to the rendered polygons. Also, 
+to 0.5 and doesn't add a stroke of any kind to the rendered polygons. Also,
 it is a current assumption of the module that the data file contains shapes, 
 rather than points or lines, as the default rule doesn't contain anything 
 but PolygonSymbolizer. Also, this module doesn't aim to create maps in projects 
