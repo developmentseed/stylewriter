@@ -79,6 +79,7 @@ function stylewriter_theme() {
         'join_field_name' => '',
         'join_field_value' => '',
         'color' => '',
+        'opacity' => '',
       ),
       'file' => 'stylewriter.theme.inc',
       'template' => 'stylewriter-rule',

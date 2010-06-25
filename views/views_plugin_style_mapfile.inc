@@ -24,14 +24,19 @@ class views_plugin_style_mapfile extends views_plugin_style {
     function option_definition() {
       $options = parent::option_definition();
       $options['fields'] = array(
-        'join_field_name' => '',
-        'join_field' => '',
-        'value' => '',
+        'default' => array(
+          'join_field_name' => '',
+          'join_field' => '',
+          'value' => '',
+        ),
       );
       $options['colors'] = array(
-        'color_min' => '',
-        'color_max' => '',
-        'steps' => '',
+        'default' => array(
+          'color_min' => '',
+          'color_max' => '',
+          'steps' => '',
+          'opacity' => 0.5,
+        ),
       );
       return $options;
     }
@@ -43,8 +48,7 @@ class views_plugin_style_mapfile extends views_plugin_style {
      * @param array $form_state
      */
     function options_form(&$form, &$form_state) { 
-      parent::options_form($form, $form_state);                  
-      // $options = parent::option_definition();
+      parent::options_form($form, $form_state);
 
       $handlers = $this->display->handler->get_handlers('field');
 
@@ -81,23 +85,29 @@ class views_plugin_style_mapfile extends views_plugin_style {
           '#description' => t(''),
           '#weight' => -20,
         );
-        
+
         $form['colors']['color_min'] = array(
           '#type' => 'textfield',
           '#title' => t('Minimum color'),
           '#default_value' => $this->options['colors']['color_min'],
         );
-   
+
         $form['colors']['color_max'] = array(
           '#type' => 'textfield',
           '#title' => t('Maximum color'),
           '#default_value' => $this->options['colors']['color_max'],
         );
-         
+
         $form['colors']['steps'] = array(
           '#type' => 'textfield',
           '#title' => t('Gradations'),
           '#default_value' => $this->options['colors']['steps'],
+        );
+
+        $form['colors']['opacity'] = array(
+          '#type' => 'textfield',
+          '#title' => t('Opacity'),
+          '#default_value' => $this->options['colors']['opacity'],
         );
 
         $form['fields']['join_field_name'] = array(
