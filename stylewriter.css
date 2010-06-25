@@ -32,6 +32,7 @@
   position:absolute;
   bottom:0px;
   left:0px;
+  min-height:2px;
   }
 
 .stylewriter-swatch-color-dist-0 { height: 5%; }
