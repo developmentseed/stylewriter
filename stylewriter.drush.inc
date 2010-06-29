@@ -20,6 +20,9 @@ function stylewriter_drush_command() {
   $items['stylewriter-cache-all'] = array(
     'callback' => 'stylewriter_seed',
     'description' => "Seed StyleWriter Tiles",
+    'options' => array(
+      'tileserver_url' => 'Base URL of the TileLive server'
+    ),
     'drupal dependencies' => array('stylewriter'),
   );
 
@@ -37,34 +40,48 @@ function stylewriter_drush_help($section) {
 }
 
 function stylewriter_seed() {
-  drush_print(dt("Seeding tiles on a TileLite instance..."));
-  
-  $data_facets = module_invoke_all('stylewriter_data_possible_facets');
+  if ($tileserver_url = drush_get_option('tileserver_url')) {
+    drush_print(dt("Seeding tiles on a TileLite instance..."));
+    
+    $data_facets = module_invoke_all('stylewriter_data_possible_facets');
 
-  drush_print(dt("## DATA FACETS"));
-  foreach ($data_facets as $facet) {
-    drush_print(dt("* !facet", array('!facet' => $facet)));
+    /*
+    drush_print(dt("## DATA FACETS"));
+    foreach ($data_facets as $facet) {
+      drush_print(dt("* !facet", array('!facet' => $facet)));
+    }
+     */
+
+    $mapfile_facets = module_invoke_all('stylewriter_mapfile_possible_facets');
+
+
+    /*
+    drush_print(dt("## MAPFILE FACETS"));
+    foreach ($mapfile_facets as $facet) {
+      drush_print(dt("* !facet", array('!facet' => $facet)));
+    }
+     */
+
+    if (count($data_facets) > 1) {
+      exit('Only one data facet is currently supported');
+    }
+
+    foreach ($mapfile_facets as $facet) {
+      drush_print(dt('Caching !facet', array('!facet' => $facet)));
+      $mapfile = $facet;
+      $data = $data_facets[0];
+      $url = 'http://localhost:8000/';
+      $cmd = 'tileseed.py ' .
+        '--url="' . $tileserver_url . '" ' .
+        '--data="' . $data . '" ' .
+        '--extension="' . 'png' . '" ' .
+        '--mapfile="' . $mapfile . '" ' .
+        '0 5 &';
+      drush_print('Running ' . $cmd);
+      _drush_proc_open($cmd);
+    }
   }
-
-  $mapfile_facets = module_invoke_all('stylewriter_mapfile_possible_facets');
-
-  drush_print(dt("## MAPFILE FACETS"));
-  foreach ($mapfile_facets as $facet) {
-    drush_print(dt("* !facet", array('!facet' => $facet)));
-  }
-
-  if (count($data_facets) > 1) {
-    exit('Only one data facet is currently supported');
-  }
-
-  foreach ($mapfile_facets as $facet) {
-    $mapfile = $facet;
-    $data = $data_facets[0];
-    $url = 'http://localhost:8000/';
-    _drush_proc_open('./tilelite-seed.py ' .
-      '--url="' . $url . '" ' .
-      '--data="' . $data . '" ' .
-      '--mapfile="' . $mapfile . '" ' .
-      '0 1 2 3 &');
+  else {
+    drush_print('--tileserver_url required');
   }
 }
