@@ -70,13 +70,12 @@ function stylewriter_seed() {
       drush_print(dt('Caching !facet', array('!facet' => $facet)));
       $mapfile = $facet;
       $data = $data_facets[0];
-      $url = 'http://localhost:8000/';
       $cmd = 'tileseed.py ' .
         '--url="' . $tileserver_url . '" ' .
         '--data="' . $data . '" ' .
         '--extension="' . 'png' . '" ' .
         '--mapfile="' . $mapfile . '" ' .
-        '0 5 &';
+        '0 2';
       drush_print('Running ' . $cmd);
       _drush_proc_open($cmd);
     }
