@@ -2,7 +2,7 @@
 // $Id$
 
 
-function stylewriter_get_json_url($url, $key) {
+function stylewriter_get_json_url($url, $params) {
   // Copied from http_request.inc in Feeds
   // TODO: work without curl
   $headers = array('User-Agent: Drupal (+http://drupal.org/)');
@@ -10,7 +10,7 @@ function stylewriter_get_json_url($url, $key) {
 
   $request = curl_init($url);
   curl_setopt($request, CURLOPT_POST, TRUE);
-  curl_setopt($request, CURLOPT_POSTFIELDS, urlencode(array('key' => $key)));
+  curl_setopt($request, CURLOPT_POSTFIELDS, urlencode($params));
   curl_setopt($request, CURLOPT_HEADER, TRUE);
   curl_setopt($request, CURLOPT_HTTPHEADER, $headers);
   curl_setopt($request, CURLOPT_RETURNTRANSFER, TRUE);
@@ -24,7 +24,19 @@ function stylewriter_get_json_url($url, $key) {
   return json_decode($result->data);
 }
 
-// TODO: divide, these will come from the same place
+function stylewriter_cache_clear(&$form, &$form_state) {
+  $data_facets = $form_state['values']['cache']['wbapi_cache_data_facets'];
+  $mapfile_facts = $form_state['values']['cache']['wbapi_cache_mapfile_facets'];
+
+  $cache_json = stylewriter_get_json_url(
+    variable_get('stylewriter_server', '') . 'cache.json',
+    array(
+      'key' => variable_get('stylewriter_key', ''),
+      'data' => $data_facets,
+      'mapfile' => $mapfile_facets
+    )
+  ); 
+}
 
 /**
  * Implementation of hook_stylewriter_data_facets()
@@ -33,7 +45,8 @@ function stylewriter_stylewriter_data_facets() {
   // TODO: replace with something more robust
   $cache_json = stylewriter_get_json_url(
     variable_get('stylewriter_server', '') . 'cache.json',
-    variable_get('stylewriter_key', '')
+    array(
+      'key' => variable_get('stylewriter_key', ''))
   );
   return $cache_json->data;
 }
@@ -45,7 +58,8 @@ function stylewriter_stylewriter_data_facets() {
 function stylewriter_stylewriter_mapfile_facets() {
   $cache_json = stylewriter_get_json_url(
     variable_get('stylewriter_server', '') . 'cache.json',
-    variable_get('stylewriter_key', '')
+    array(
+      'key' => variable_get('stylewriter_key', ''))
   );
   return $cache_json->mapfile;
 }

@@ -80,6 +80,7 @@ function stylewriter_theme() {
         'join_field_value' => '',
         'color' => '',
         'opacity' => '',
+        'stroke' => array(),
       ),
       'file' => 'stylewriter.theme.inc',
       'template' => 'stylewriter-rule',

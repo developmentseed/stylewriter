@@ -15,7 +15,9 @@ function template_preprocess_stylewriter_mapfile(&$vars) {
       $point['join_field_name'],
       $point['join_field_value'],
       $point['color'],
-      $view->style_plugin->options['colors']['opacity']);
+      $view->style_plugin->options['colors']['opacity'],
+      $view->style_plugin->options['colors']['stroke']
+    );
   }
   $vars['rows'] = $rows;
   $vars['viewtitle'] = $view->name;

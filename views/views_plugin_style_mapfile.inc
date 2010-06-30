@@ -86,6 +86,40 @@ class views_plugin_style_mapfile extends views_plugin_style {
           '#weight' => -20,
         );
 
+        /*=== Stroke =======*/
+        // TODO: use CTools dependencies to kill stroke options
+        // if no stroke is selected
+        $form['colors']['stroke'] = array(
+          '#type' => 'fieldset'
+        );
+
+        $form['colors']['stroke']['enable'] = array(
+          '#type' => 'checkbox',
+          '#title' => t('Include stroke'),
+          '#default_value' => $this->options['colors']['stroke']['enable'],
+        );
+
+        $form['colors']['stroke']['color'] = array(
+          '#type' => 'textfield',
+          '#title' => t('Stroke color'),
+          '#process' => array('views_process_dependency'),
+          '#default_value' => $this->options['colors']['stroke']['color'],
+        );
+
+        $form['colors']['stroke']['width'] = array(
+          '#type' => 'textfield',
+          '#title' => t('Stroke width'),
+          '#process' => array('views_process_dependency'),
+          '#default_value' => $this->options['colors']['stroke']['width'],
+        );
+
+        $form['colors']['stroke']['opacity'] = array(
+          '#type' => 'textfield',
+          '#title' => t('Stroke opacity'),
+          '#default_value' => $this->options['colors']['stroke']['opacity'],
+        );
+
+        /*=== Color Ramp ===*/
         $form['colors']['color_min'] = array(
           '#type' => 'textfield',
           '#title' => t('Minimum color'),
