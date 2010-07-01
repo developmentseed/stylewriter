@@ -3,7 +3,7 @@
 Here's a quick guide to StyleWriter!
 
 StyleWriter is tailored to choropleth maps. It collaborates with a verson of 
-[TileLite][tilelite] that is available on BitBucket as a Mercurial repository. 
+[TileLite][tilelite] called [TileLive][tlv] that is available on GitHub.
 It requires the [OpenLayers module][olmod], and also works with the 
 [openlayers_plus][olp] module to provide legends and allow quick swapping if 
 you have both a point and a choropleth map displaying the same information.
@@ -71,10 +71,10 @@ different.
 StyleWriter includes a [Drush][d] command called 'stylewriter-cache-all.' 
 Running
 
-    $ drush stylewriter
+    $ drush stylewriter-cache-all
 
 Causes StyleWriter to prepopulate _tile_ caches by calling a Python script 
-called `tilelite-seed.py`, which must be provided by the user. This script 
+called `tileseed.py`, which must be provided by the user. This script 
 is included in the branch of TileLite and is dependent on [TileStache][ts]. 
 However, if two hooks aren't implemented in any other modules, no caches will 
 be populated - since maps are dependent on a data and mapfile URL argument, 
@@ -200,3 +200,4 @@ freeform or with this module.
 [m]: http://www.mapnik.org/
 [d]: http://drupal.org/project/drush
 [ts]: http://tilestache.org/
+[tlv]: http://github.com/tmcw/TileLiteLive
