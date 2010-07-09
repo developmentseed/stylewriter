@@ -339,13 +339,13 @@ class views_plugin_style_mapfile extends views_plugin_style {
       return $legend;
     }
 
-    function theme_legend($points, $values) {
+    function theme_legend($points, $values, $label) {
       $swatches = '';
       foreach ($points as $point) {
         $swatches .= theme('stylewriter_swatch', $point['color'], $point['dist']);
       }
       $first = current($points);
       $last = end($points);
-      return theme('stylewriter_legend', $swatches, $values['min'], $values['max']);
+      return theme('stylewriter_legend', $swatches, $values['min'], $values['max'], $label);
     }
 }

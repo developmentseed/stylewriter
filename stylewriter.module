@@ -108,6 +108,7 @@ function stylewriter_theme() {
         'swatches' => '',
         'value_min' => '',
         'value_max' => '',
+        'label' => '',
       ),
       'file' => 'stylewriter.theme.inc',
       'template' => 'stylewriter-legend',
