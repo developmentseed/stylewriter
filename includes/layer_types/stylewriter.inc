@@ -167,16 +167,14 @@ class openlayers_layer_type_stylewriter extends openlayers_layer_type {
       for($i = 0; $i < count($this->data['base_url']); $i++) {
         $this->data['base_url'][$i] = 
           $this->data['base_url'][$i] . 
-          stylewriter_base64en($this->data['data_url']) . '/' .
-          stylewriter_base64en($this->viewurlargs($this->data['style_view'])) . '/' .
+          stylewriter_safe64en($this->viewurlargs($this->data['style_view'])) . '/' .
           '${z}/${x}/${y}.png';
       }
     }
     else {
       $this->data['base_url'] = 
         $this->data['base_url'] . 
-        stylewriter_base64en($this->data['data_url']) . '/' .
-        stylewriter_base64en($this->viewurlargs($this->data['style_view'])) . '/' .
+        stylewriter_safe64en($this->viewurlargs($this->data['style_view'])) . '/' .
         '${z}/${x}/${y}.png';
     }
     return $this->options;

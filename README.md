@@ -1,4 +1,6 @@
-# StyleWriter
+# StyleWriter v2
+
+**Currently the 'master' branch of this repository is used for developing version 2 of StyleWriter, compatible with version 2 of TileLiteLive. Use the 'v1' branch for compatibility with version 1.**
 
 Here's a quick guide to StyleWriter!
 

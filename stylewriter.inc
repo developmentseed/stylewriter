@@ -96,8 +96,13 @@ function stylewriter_color_ramp_merge($h_grad, $s_grad, $l_grad) {
  * Compatible with Python's base64.urlsafe_b64decode
  * @param $text base64-decoded text
  */
-function stylewriter_base64en($text) {
-  return strtr(base64_encode($text), '+/', '-_');
+function stylewriter_safe64en($text) {
+  return implode('/', 
+    chunk_split(
+      strtr(
+        base64_encode($text), '+/', '-_'), 
+      255)
+    );
 }
 
 /**
@@ -105,6 +110,9 @@ function stylewriter_base64en($text) {
  * Compatible with Python's base64.urlsafe_b64encode
  * @param $text base64-encoded text
  */
-function stylewriter_base64de($text) {
-  return base64_decode(strtr($text, '-_', '+/'));
+function stylewriter_safe64de($text) {
+  return base64_decode(
+    strtr(
+      str_replace('/', '', $text), '-_', '+/')
+    );
 }
