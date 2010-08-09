@@ -65,13 +65,6 @@ class openlayers_layer_type_stylewriter extends openlayers_layer_type {
         '#type' => 'hidden',
         '#value' => 'openlayers_layer_type_stylewriter'
       ),
-      'data_url' => array(
-        '#type' => 'textfield',
-        '#default_value' => $this->data['data_url'],
-        '#title' => t('Data URL'),
-        '#description' => t('URL to the zipped shapefile or other 
-          vector data source')
-      ),
       'style_view' => array(
         '#type' => 'select',
         '#default_value' => $this->data['style_view'],
@@ -126,7 +119,10 @@ class openlayers_layer_type_stylewriter extends openlayers_layer_type {
       $view->execute();
       if ($view->style_plugin instanceof views_plugin_style_mapfile) {
         $legend_data = $view->style_plugin->legend_data($view->result);
-        return $view->style_plugin->theme_legend($legend_data['points'], $legend_data['values'], $view->get_title());
+        return $view->style_plugin->theme_legend(
+          $legend_data['points'], 
+          $legend_data['values'], 
+          $view->get_title());
       }
     }
   }
@@ -158,11 +154,16 @@ class openlayers_layer_type_stylewriter extends openlayers_layer_type {
    */
   function render(&$map) {
     module_load_include('inc', 'stylewriter', 'stylewriter');
-    drupal_add_js(drupal_get_path('module',  'stylewriter') . '/includes/layer_types/stylewriter_xyz.js');
-    drupal_add_js(drupal_get_path('module',  'stylewriter') . '/includes/layer_types/stylewriter.js');
-    drupal_add_css(drupal_get_path('module', 'stylewriter') . '/stylewriter.css');
-    $this->data['options'] = array();
-    $this->data['options']['legend'] = $this->get_legend($this->data['style_view']);
+    drupal_add_js(drupal_get_path('module',  'stylewriter') . 
+      '/includes/layer_types/stylewriter_xyz.js');
+    drupal_add_js(drupal_get_path('module',  'stylewriter') . 
+      '/includes/layer_types/stylewriter.js');
+    drupal_add_css(drupal_get_path('module', 'stylewriter') . 
+      '/stylewriter.css');
+
+    $this->data['options'] = array(
+      'legend' => $this->get_legend($this->data['style_view']));
+
     if (is_array($this->data['base_url'])) {
       for($i = 0; $i < count($this->data['base_url']); $i++) {
         $this->data['base_url'][$i] = 

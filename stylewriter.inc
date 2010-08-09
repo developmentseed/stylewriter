@@ -97,11 +97,12 @@ function stylewriter_color_ramp_merge($h_grad, $s_grad, $l_grad) {
  * @param $text base64-decoded text
  */
 function stylewriter_safe64en($text) {
-  return implode('/', 
+  return strtr( 
     chunk_split(
       strtr(
         base64_encode($text), '+/', '-_'), 
-      255)
+      255),
+      '\n', '/'
     );
 }
 

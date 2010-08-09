@@ -19,7 +19,7 @@ function template_preprocess_stylewriter_mapfile(&$vars) {
       $view->style_plugin->options['colors']['stroke']
     );
   }
-  $vars['rows'] = $rows;
-  $vars['viewtitle'] = $view->name;
-  exit(theme('stylewriter_document', $rows));
+  exit(theme('stylewriter_document', 
+    $rows, 
+    $view->style_plugin->options['fields']['data_url']));
 }

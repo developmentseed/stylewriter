@@ -74,7 +74,7 @@ class views_plugin_style_mapfile extends views_plugin_style {
 
         $form['fields'] = array(
           '#type' => 'fieldset',
-          '#title' => 'Field usage',
+          '#title' => 'Field usage and dataset',
           '#description' => t(''),
           '#weight' => -10,
         );
@@ -143,7 +143,13 @@ class views_plugin_style_mapfile extends views_plugin_style {
           '#title' => t('Opacity'),
           '#default_value' => $this->options['colors']['opacity'],
         );
-
+        $form['fields']['data_url'] = array(
+          '#type' => 'textfield',
+          '#default_value' => $this->options['fields']['data_url'],
+          '#title' => t('Data URL'),
+          '#description' => t('URL to the zipped shapefile or other 
+            vector data source')
+        );
         $form['fields']['join_field_name'] = array(
           '#type' => 'textfield',
           '#title' => t('Join Field Name'),
@@ -188,9 +194,7 @@ class views_plugin_style_mapfile extends views_plugin_style {
         }
       }
 
-      $points = array();
-      $values = array();
-
+      $points = $values = array();
 
       foreach ($renders as $id => $row) {
         $point = array();
@@ -236,7 +240,6 @@ class views_plugin_style_mapfile extends views_plugin_style {
         }
         $points[$i]['color'] = $color_ramp[$ramp_idx];
       }
-
       return $points;
     }
 
@@ -253,25 +256,17 @@ class views_plugin_style_mapfile extends views_plugin_style {
      *    )
      */
     function legend_data($rows) {
-      $renders = array();
-      $formatted_renders = array();
+      $renders = $formatted_renders = array();
       $keys = array_keys($this->view->field);
 
       foreach ($rows as $count => $row) {
         foreach ($keys as $id) {
           $renders[$count][$id] = $row->{$this->view->field[$id]->field_alias};
-        }
-      }
-
-      foreach ($rows as $count => $row) {
-        foreach ($keys as $id) {
           $formatted_renders[$count][$id] = $this->view->field[$id]->theme($row);
         }
       }  
 
-      $points = array();
-      $values = array();
-      $formatted_values = array();
+      $points = $values = $formatted_values = array();
       
       foreach ($renders as $id => $row) {
         foreach ($this->view->field as $key => $field) {

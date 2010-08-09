@@ -2,6 +2,11 @@
 
 **Currently the 'master' branch of this repository is used for developing version 2 of StyleWriter, compatible with version 2 of TileLiteLive. Use the 'v1' branch for compatibility with version 1.**
 
+### Changes from v1
+
+* The location of the data file is now owned by the view style plugin, rather
+  than the layer.
+
 Here's a quick guide to StyleWriter!
 
 StyleWriter is tailored to choropleth maps. It collaborates with a verson of 

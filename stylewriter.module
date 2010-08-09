@@ -98,6 +98,7 @@ function stylewriter_theme() {
     'stylewriter_document' => array(
       'arguments' => array(
         'rules' => '',
+        'data_url' => '',
       ),
       'file' => 'stylewriter.theme.inc',
       'template' => 'stylewriter-document',
