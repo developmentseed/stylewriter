@@ -4,6 +4,7 @@
  * @param $bgcolor 
  * @param $data_url 
  * @param $rules array of style rules
+ * @param $data_type 
  */
 ?>
 <?php echo '<?xml version="1.0" encoding="utf-8"?>'; ?>
@@ -12,12 +13,11 @@
   <Stylesheet><![CDATA[
     <?php echo $rules; ?>
   ]]></Stylesheet>
-  <!-- Any layers named with the prefix (NIKTILE*) will get data from the JSON applied -->
   <Layer id="data" name="data" srs="+proj=latlong +datum=WGS84">
     <StyleName>data</StyleName>
     <Datasource> 
       <Parameter name="file"><?php echo $data_url; ?></Parameter> 
-      <Parameter name="type">shape</Parameter> 
+      <Parameter name="type"><?php echo $data_type; ?></Parameter> 
       <Parameter name="id">data</Parameter> 
     </Datasource> 
   </Layer>

@@ -23,3 +23,11 @@ function template_preprocess_stylewriter_mapfile(&$vars) {
     $rows, 
     $view->style_plugin->options['fields']['data_url']));
 }
+
+function template_preprocess_stylewriter_datamapfile(&$vars) {
+  $view = $vars['view'];
+  exit(theme('stylewriter_document', 
+    $view->style_plugin->options['rules'], 
+    $view->style_plugin->data_url(),
+    'ogr'));
+}

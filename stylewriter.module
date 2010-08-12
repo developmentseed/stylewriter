@@ -99,6 +99,7 @@ function stylewriter_theme() {
       'arguments' => array(
         'rules' => '',
         'data_url' => '',
+        'data_type' => 'shape',
       ),
       'file' => 'stylewriter.theme.inc',
       'template' => 'stylewriter-document',
@@ -131,6 +132,17 @@ function stylewriter_openlayers_layer_types() {
       'file' => 'stylewriter.inc',
       'layer_type' => array(
         'class' => 'openlayers_layer_type_stylewriter',
+        'parent' => 'openlayers_layer_type',
+      ),
+    ),
+    'openlayers_layer_type_styleclicker' => array(
+      'title' => t('Stylewriter Interaction'),
+      'description' => t('Stylewriter Dynamic Map Interaction'),
+      'type' => 'layer',
+      'path' => drupal_get_path('module', 'stylewriter') .'/includes/layer_types',
+      'file' => 'styleclicker.inc',
+      'layer_type' => array(
+        'class' => 'openlayers_layer_type_styleclicker',
         'parent' => 'openlayers_layer_type',
       ),
     ),
