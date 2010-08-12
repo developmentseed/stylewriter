@@ -14,6 +14,7 @@ class openlayers_layer_type_stylewriter extends openlayers_layer_type {
       $this->data = $this->options_init();
     }
   }
+
   /**
    * Provide initial values for options.
    */
@@ -31,15 +32,19 @@ class openlayers_layer_type_stylewriter extends openlayers_layer_type {
     );
   }
 
+  /**
+   * Get all views that could be used for data sources
+   */
   function stylewriter_options() {
     $views = views_get_all_views();
     $options = array();
     foreach ($views as $view) {
       foreach ($view->display as $display => $data) {
         $view->set_display($display);
-        if ($data->display_plugin == 'mapfile') {
+        if (in_array($data->display_plugin, array('mapfile', 'datamapfile'))) {
           // TODO: probably not best to count on no colon
-          $options[$view->name . ':' . $display] = $view->title . '(' . $view->name . ' - ' . $display . ')';
+          $options[$view->name . ':' . $display] = 
+            $view->title . '(' . $view->name . ' - ' . $display . ')';
         }
       }
       $view->destroy();
@@ -51,9 +56,8 @@ class openlayers_layer_type_stylewriter extends openlayers_layer_type {
    * Options form which generates layers
    */
   function options_form() {
-    if (!$this->data) {
-      $this->data = $this->options_init();
-    }
+    $this->data = isset($this->data) ? $this->data : $this->options_init();
+
     return array(
       'base_url' => array(
         '#type' => 'textfield',
@@ -85,9 +89,9 @@ class openlayers_layer_type_stylewriter extends openlayers_layer_type {
           '#type' => 'hidden',
           '#value' => '900913',
         ),
-        '#default_value' => ($this->data['resolutions']) ? 
-        $this->data['resolutions'] : 
-        array_map('strval', openlayers_get_resolutions('900913'))
+        '#default_value' => isset($this->data['resolutions']) ? 
+          $this->data['resolutions'] : 
+          array_map('strval', openlayers_get_resolutions('900913'))
 
       ),
       'minzoom' => array(
@@ -100,6 +104,12 @@ class openlayers_layer_type_stylewriter extends openlayers_layer_type {
     );
   }
 
+  /**
+   * get legend data
+   * 
+   * @param string $view_display colon-separated view id
+   * @return string $themed_legend html for the final legend
+   */
   function get_legend($view_display) {
     list($view_name, $display_name) = explode(':', $view_display);
     if ($view = views_get_view($view_name)) {
@@ -137,13 +147,8 @@ class openlayers_layer_type_stylewriter extends openlayers_layer_type {
     global $base_url;
     list($view_name, $display_name) = explode(':', $view_display);
     if ($view = views_get_view($view_name)) {
-      $args = array();
-      // Retrieve args/filters from current view
-      // to pass on to our vector layer.
       $current_view = views_get_current_view();
-      if (isset($current_view)) {
-        $args = $current_view->args;
-      }
+      $args = (isset($current_view)) ? $current_view->args : array();
       $view->set_display($display_name);
       return $base_url . '/' . $view->get_url($args);
     }

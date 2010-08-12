@@ -18,6 +18,7 @@
     <Datasource> 
       <Parameter name="file"><?php echo $data_url; ?></Parameter> 
       <Parameter name="type"><?php echo $data_type; ?></Parameter> 
+      <Parameter name="layer">kml_test</Parameter>
       <Parameter name="id">data</Parameter> 
     </Datasource> 
   </Layer>
