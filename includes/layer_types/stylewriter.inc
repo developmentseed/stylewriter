@@ -165,24 +165,9 @@ class openlayers_layer_type_stylewriter extends openlayers_layer_type {
       '/includes/layer_types/stylewriter.js');
     drupal_add_css(drupal_get_path('module', 'stylewriter') . 
       '/stylewriter.css');
-
     $this->data['options'] = array(
       'legend' => $this->get_legend($this->data['style_view']));
-
-    if (is_array($this->data['base_url'])) {
-      for ($i = 0; $i < count($this->data['base_url']); $i++) {
-        $this->data['base_url'][$i] = 
-          $this->data['base_url'][$i] . 
-          stylewriter_safe64en($this->viewurlargs($this->data['style_view'])) . '/' .
-          '${z}/${x}/${y}.png';
-      }
-    }
-    else {
-      $this->data['base_url'] = 
-        $this->data['base_url'] . 
-        stylewriter_safe64en($this->viewurlargs($this->data['style_view'])) . '/' .
-        '${z}/${x}/${y}.png';
-    }
+    $this->data['mapfile'] = $this->viewurlargs($this->data['style_view']);
     return $this->options;
   }
 }
