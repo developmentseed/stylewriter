@@ -1,6 +1,10 @@
 <?php
 // $Id$
 
+/**
+ * @file StyleWriter Admin Functionality
+ */
+
 
 function stylewriter_get_json_url($url, $params) {
   // Copied from http_request.inc in Feeds

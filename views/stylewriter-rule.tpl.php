@@ -12,7 +12,7 @@
  * @param $stroke
  */
 ?>
-#data[<?php echo $join_field_name; ?> = '<?php echo $join_field_value; ?>'] {
+#data [<?php echo $join_field_name; ?> = "<?php echo $join_field_value; ?>"] {
     polygon-fill: <?php echo $color; ?>;
     polygon-opacity: <?php echo $opacity; ?>;
 <?php if ($stroke['enable'] == '1'): ?>

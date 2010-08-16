@@ -73,7 +73,7 @@ class views_plugin_style_datamapfile extends views_plugin_style {
       $form['data_view'] = array(
         '#type' => 'select',
         '#default_value' => $this->options['data_view'],
-        '#title' => t('Style View'),
+        '#title' => t('Data View'),
         '#options' => $this->data_options(),
         '#description' => t('Data view (KML)')
       );

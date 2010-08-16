@@ -1,4 +1,10 @@
 <?php
+// $Id$
+
+/**
+ * @file
+ * StyleWriter utility functions
+ */
 
 /**
  * Blend two colors to make a ramp

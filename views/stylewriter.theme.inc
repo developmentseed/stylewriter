@@ -21,7 +21,8 @@ function template_preprocess_stylewriter_mapfile(&$vars) {
   }
   exit(theme('stylewriter_document', 
     $rows, 
-    $view->style_plugin->options['fields']['data_url']));
+    $view->style_plugin->options['fields']['data_url'],
+    'shape'));
 }
 
 function template_preprocess_stylewriter_datamapfile(&$vars) {

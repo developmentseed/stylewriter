@@ -170,7 +170,7 @@ class openlayers_layer_type_stylewriter extends openlayers_layer_type {
       'legend' => $this->get_legend($this->data['style_view']));
 
     if (is_array($this->data['base_url'])) {
-      for($i = 0; $i < count($this->data['base_url']); $i++) {
+      for ($i = 0; $i < count($this->data['base_url']); $i++) {
         $this->data['base_url'][$i] = 
           $this->data['base_url'][$i] . 
           stylewriter_safe64en($this->viewurlargs($this->data['style_view'])) . '/' .
