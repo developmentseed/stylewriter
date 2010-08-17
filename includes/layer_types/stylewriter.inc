@@ -23,11 +23,13 @@ class openlayers_layer_type_stylewriter extends openlayers_layer_type {
       'serverResolutions' => openlayers_get_resolutions('900913'),
       'maxExtent' => openlayers_get_extent('900913'),
       'projection' => array('900913'),
+      'sphericalMercator' => TRUE,
       'osm' => FALSE,
       'baselayer' => FALSE,
       'layer_handler' => 'stylewriter',
       'layer_type' => 'openlayers_layer_type_stylewriter',
       'type' => 'png',
+      'buffer' => 0,
       'minzoom' => '0',
     );
   }
@@ -44,7 +46,8 @@ class openlayers_layer_type_stylewriter extends openlayers_layer_type {
         if (in_array($data->display_plugin, array('mapfile', 'datamapfile'))) {
           // TODO: probably not best to count on no colon
           $options[$view->name . ':' . $display] = 
-            $view->title . '(' . $view->name . ' - ' . $display . ')';
+            (isset($view->title) ? $view->title : $view->name)
+            . ' (' . $view->name . ' - ' . $display . ')';
         }
       }
       $view->destroy();
@@ -159,15 +162,25 @@ class openlayers_layer_type_stylewriter extends openlayers_layer_type {
    */
   function render(&$map) {
     module_load_include('inc', 'stylewriter', 'stylewriter');
-    drupal_add_js(drupal_get_path('module',  'stylewriter') . 
-      '/includes/layer_types/stylewriter_xyz.js');
-    drupal_add_js(drupal_get_path('module',  'stylewriter') . 
-      '/includes/layer_types/stylewriter.js');
+
+    drupal_add_js(drupal_get_path('module', 'stylewriter') . 
+      '/includes/layer_types/js/stylewriter_xyz.js');
+
+    drupal_add_js(drupal_get_path('module', 'stylewriter') . 
+      '/includes/layer_types/js/stylewriter_point.js');
+
+    drupal_add_js(drupal_get_path('module', 'stylewriter') . 
+      '/includes/layer_types/js/stylewriter.js');
+
     drupal_add_css(drupal_get_path('module', 'stylewriter') . 
       '/stylewriter.css');
+
     $this->data['options'] = array(
       'legend' => $this->get_legend($this->data['style_view']));
+
+    $this->data['base_url'] = $this->data['base_url'] . '${mapfile}/${z}/${x}/${y}.png';
     $this->data['mapfile'] = $this->viewurlargs($this->data['style_view']);
+
     return $this->options;
   }
 }
