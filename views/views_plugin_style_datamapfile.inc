@@ -12,6 +12,7 @@ class views_plugin_style_datamapfile extends views_plugin_style {
     function option_definition() {
       $options = parent::option_definition();
       $options['data_view'] = '';
+      $options['metawriter_values'] = '';
       $options['rules'] = '';
       return $options;
     }
@@ -77,6 +78,15 @@ class views_plugin_style_datamapfile extends views_plugin_style {
         '#options' => $this->data_options(),
         '#description' => t('Data view (KML)')
       );
+
+      $form['metawriter_values'] = array(
+        '#type' => 'textarea',
+        '#default_value' => $this->options['metawriter_values'],
+        '#title' => t('Metawriter Values'),
+        '#description' => t('Specify values from the data view that should be
+          persisted through the TileLite server into later forms of GeoJSON.')
+      );
+
       $form['rules'] = array(
         '#type' => 'textarea',
         '#default_value' => $this->options['rules'],

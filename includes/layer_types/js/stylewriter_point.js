@@ -200,27 +200,22 @@ OpenLayers.Control.VirtualPoint = OpenLayers.Class(OpenLayers.Control, {
      *     inspecting the map or using a client-provided array
      */
     findLayers: function() {
-
         var candidates = this.layers || this.map.layers;
         var layers = [];
         var layer, url;
         for(var i=0, len=candidates.length; i<len; ++i) {
             layer = candidates[i];
-            if(layer instanceof OpenLayers.Layer.WMS &&
+            if(layer instanceof OpenLayers.Layer.StyleWriter &&
                (!this.queryVisible || layer.getVisibility())) {
                 url = layer.url instanceof Array ? layer.url[0] : layer.url;
                 // if the control was not configured with a url, set it
                 // to the first layer url
-                if(this.drillDown === false && !this.url) {
-                    this.url = url;
-                }
-                if(this.drillDown === true || this.urlMatches(url)) {
-                    layers.push(layer);
-                }
+               layers.push(layer);
             }
         }
         return layers;
     },
+
     /**
      * Method: request
      * Sends a GetFeatureInfo request to the WMS
