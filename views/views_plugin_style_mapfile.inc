@@ -12,11 +12,9 @@ class views_plugin_style_mapfile extends views_plugin_style {
      *
      * Set feed image for shared rendering later.
      */
-  /*
     function init(&$view, &$display, $options = NULL) {
       parent::init($view, $display, $options = NULL);
     }
-   */
 
     /**
      * Set default options
@@ -64,12 +62,7 @@ class views_plugin_style_mapfile extends views_plugin_style {
         // Data Source options
         $field_names[$field] = array('' => '--');
         foreach ($handlers as $field => $handler) {
-          if ($label = $handler->label()) {
-            $field_names[$field] = $label;
-          }
-          else {
-            $field_names[$field] = $handler->ui_name();
-          }
+          $field_names[$field] = ($label = $handler->label()) ? $label : $handler->ui_name();
         }
 
         $form['fields'] = array(
@@ -232,12 +225,9 @@ class views_plugin_style_mapfile extends views_plugin_style {
         //   2-3.00 => 2
         $rank = (floatval($point['value']) - $value_min) / $value_range; // 0 -> 1
         // Include high endpoint.
-        if ($rank == 1) {
-          $ramp_idx = count($color_ramp) - 1;
-        }
-        else {
-          $ramp_idx = floor($rank * $this->options['colors']['steps']);
-        }
+        $ramp_idx = ($rank == 1) ? 
+          count($color_ramp) - 1 : 
+          floor($rank * $this->options['colors']['steps']);
         $points[$i]['color'] = $color_ramp[$ramp_idx];
       }
       return $points;
@@ -289,12 +279,9 @@ class views_plugin_style_mapfile extends views_plugin_style {
       foreach ($values as $value) {
         $rank = ($value - $value_min) / $value_range; // 0 -> 1
         // Include high endpoint.
-        if ($rank == 1) {
-          $ramp_idx = count($dist) - 1;
-        }
-        else {
-          $ramp_idx = floor($rank * $this->options['colors']['steps']);
-        }
+        $ramp_idx = ($rank == 1) ? 
+          count($dist) - 1 : 
+          floor($rank * $this->options['colors']['steps']);
         $dist[$ramp_idx] = isset($dist[$ramp_idx]) ? $dist[$ramp_idx] + 1 : 1;
       }
 
@@ -310,7 +297,6 @@ class views_plugin_style_mapfile extends views_plugin_style {
         $this->options['colors']['color_min'], 
         $this->options['colors']['color_max'], 
         $this->options['colors']['steps']);
-
 
       $value_ramp = stylewriter_range(
         $value_min,
