@@ -14,7 +14,11 @@ class stylewriter_pointhover extends openlayers_behavior {
    */
   function options_form() {
     $form = parent::options_form();
-    $form['layer'] = $this->map['layers'];
+    $form['layer'] = array(
+      '#type' => 'select',
+      '#options' => $this->map['layers'],
+      '#default_value' => $this->options['layer']
+    );
     return $form;
   }
   
@@ -23,7 +27,7 @@ class stylewriter_pointhover extends openlayers_behavior {
    */
   function render(&$map) {
     drupal_add_js(drupal_get_path('module', 'stylewriter') 
-      .'/behaviors/stylewriter_pointhover.js');
+      .'/includes/behaviors/stylewriter_pointhover.js');
     return $this->options;
   }
 }
