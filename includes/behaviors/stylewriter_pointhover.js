@@ -256,9 +256,21 @@ OpenLayers.Control.GridHover = OpenLayers.Class(OpenLayers.Control, {
 
     readDone: function(data) {
       var g = data.features.split('|');
+      var x = [];
+      for (var i = 0; i < g.length; i++) {
+        a = g[i].split(':');
+        if (a.length == 1) {
+          x.push(false);
+        }
+        else {
+          for (j = 0; j < parseInt(a[0]); j++) {
+            x.push(a[1]);
+          }
+        }
+      }
       var grid = [];
       for (var i = 0; i < 64; i++) {
-        grid[i] = g.splice(0, 64);
+        grid[i] = x.splice(0, 64);
       }
       $(this.target).data('grid', grid);
       this.hoverRequest = null;
