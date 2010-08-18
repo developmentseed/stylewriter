@@ -36,9 +36,62 @@ class views_plugin_style_mapfile extends views_plugin_style {
           'opacity' => 0.5,
         ),
       );
+      $options['metawriter'] = array(
+        'default' => array(
+          'meta-writer' => 'meta1',
+          'meta-output' => '',
+        ),
+      );
       return $options;
     }
 
+    function data_options() {
+      $views = views_get_all_views();
+      $options = array();
+      foreach ($views as $view) {
+        foreach ($view->display as $display => $data) {
+          $view->set_display($display);
+          if ($data->display_plugin == 'feed') {
+            $options[$view->name . ':' . $display] = $view->title . '(' . $view->name . ' - ' . $display . ')';
+          }
+        }
+        $view->destroy();
+      }  
+      return $options;
+    } 
+
+
+    /**
+     * @param $view_display colon-separated view-display
+     *
+     * return a string representing the URL of a view that returns a Mapnik style
+     * with arguments inherited from the current view
+     */
+    function viewurlargs($view_display) {
+      global $base_url;
+      list($view_name, $display_name) = explode(':', $view_display);
+      if ($view = views_get_view($view_name)) {
+        $args = array();
+        // Retrieve args/filters from current view
+        // to pass on to our vector layer.
+        $current_view = views_get_current_view();
+        if (isset($current_view)) {
+          $args = $current_view->args;
+        }
+        $view->set_display($display_name);
+        return $base_url . '/' . $view->get_url($args);
+      }
+    }
+    
+
+    /**
+     * Accessor for URL
+     * @return string $url
+     */
+    function data_url() {
+      return $this->viewurlargs($this->options['fields']['data_view']);
+    }
+    
     /**
      * Provide a form for setting options.
      *
@@ -79,6 +132,13 @@ class views_plugin_style_mapfile extends views_plugin_style {
           '#weight' => -20,
         );
 
+        $form['metawriter'] = array(
+          '#type' => 'fieldset',
+          '#title' => 'MetaWriter',
+          '#description' => t(''),
+          '#weight' => 10,
+        );
+
         /*=== Stroke =======*/
         // TODO: use CTools dependencies to kill stroke options
         // if no stroke is selected
@@ -92,27 +152,33 @@ class views_plugin_style_mapfile extends views_plugin_style {
           '#default_value' => $this->options['colors']['stroke']['enable'],
         );
 
-        $form['colors']['stroke']['color'] = array(
+        $form['colors']['stroke']['line-color'] = array(
           '#type' => 'textfield',
           '#title' => t('Stroke color'),
           '#process' => array('views_process_dependency'),
-          '#default_value' => $this->options['colors']['stroke']['color'],
+          '#default_value' => $this->options['colors']['stroke']['line-color'],
         );
 
-        $form['colors']['stroke']['width'] = array(
+        $form['colors']['stroke']['line-width'] = array(
           '#type' => 'textfield',
           '#title' => t('Stroke width'),
           '#process' => array('views_process_dependency'),
-          '#default_value' => $this->options['colors']['stroke']['width'],
+          '#default_value' => $this->options['colors']['stroke']['line-width'],
         );
 
-        $form['colors']['stroke']['opacity'] = array(
+        $form['colors']['stroke']['line-opacity'] = array(
           '#type' => 'textfield',
           '#title' => t('Stroke opacity'),
-          '#default_value' => $this->options['colors']['stroke']['opacity'],
+          '#default_value' => $this->options['colors']['stroke']['line-opacity'],
         );
 
         /*=== Color Ramp ===*/
+        $form['colors']['choropleth'] = array(
+          '#type' => 'checkbox',
+          '#title' => t('Enable Choropleth'),
+          '#default_value' => $this->options['colors']['choropleth'],
+        );
+
         $form['colors']['color_min'] = array(
           '#type' => 'textfield',
           '#title' => t('Minimum color'),
@@ -136,6 +202,51 @@ class views_plugin_style_mapfile extends views_plugin_style {
           '#title' => t('Opacity'),
           '#default_value' => $this->options['colors']['opacity'],
         );
+
+
+        /*=== Scale Ramp ===*/
+        $form['scale']['enable'] = array(
+          '#type' => 'checkbox',
+          '#title' => t('Enable Scale'),
+          '#default_value' => $this->options['scale']['enable'],
+        );
+
+        $form['scale']['min_size'] = array(
+          '#type' => 'textfield',
+          '#title' => t('Minimum size'),
+          '#default_value' => $this->options['scale']['min_size'],
+        );
+
+        $form['scale']['max_size'] = array(
+          '#type' => 'textfield',
+          '#title' => t('Maximum size'),
+          '#default_value' => $this->options['scale']['max_size'],
+        );
+
+        $form['scale']['steps'] = array(
+          '#type' => 'textfield',
+          '#title' => t('Gradations'),
+          '#default_value' => $this->options['scale']['steps'],
+        );
+
+        /**
+         * Data options
+         */
+        $form['fields']['data_type'] = array(
+          '#type' => 'select',
+          '#title' => t('Data Type'),
+          '#options' => array(
+            'shape' => t('Remote Shapefile'),
+            'ogr' => t('GeoJSON View')),
+          '#default_value' => $this->options['fields']['data_type'],
+        );
+        $form['fields']['data_view'] = array(
+          '#type' => 'select',
+          '#default_value' => $this->options['data_view'],
+          '#title' => t('Data View'),
+          '#options' => $this->data_options(),
+          '#description' => t('Data view (GeoJSON)')
+        );
         $form['fields']['data_url'] = array(
           '#type' => 'textfield',
           '#default_value' => $this->options['fields']['data_url'],
@@ -148,7 +259,6 @@ class views_plugin_style_mapfile extends views_plugin_style {
           '#title' => t('Join Field Name'),
           '#default_value' => $this->options['fields']['join_field_name'],
         );
-
         $form['fields']['join_field'] = array(
           '#type' => 'select',
           '#title' => t('Join Field'),
@@ -161,6 +271,29 @@ class views_plugin_style_mapfile extends views_plugin_style {
           '#title' => t('Value'),
           '#options' => $field_names,
           '#default_value' => $this->options['fields']['value'],
+        );
+
+        /*=== MetaWriter =======*/
+        // TODO: use CTools dependencies to kill stroke options
+        // if no stroke is selected
+        $form['metawriter']['enable'] = array(
+          '#type' => 'checkbox',
+          '#title' => t('Include Metawriter'),
+          '#default_value' => $this->options['metawriter']['enable'],
+        );
+
+        $form['metawriter']['meta-output'] = array(
+          '#type' => 'textfield',
+          '#title' => t('Meta output'),
+          '#process' => array('views_process_dependency'),
+          '#default_value' => $this->options['metawriter']['meta-output'],
+        );
+        
+        $form['metawriter']['meta-writer'] = array(
+          '#type' => 'textfield',
+          '#title' => t('Meta writer'),
+          '#process' => array('views_process_dependency'),
+          '#default_value' => $this->options['metawriter']['meta-writer'],
         );
       }
     }
@@ -189,46 +322,97 @@ class views_plugin_style_mapfile extends views_plugin_style {
 
       $points = $values = array();
 
-      foreach ($renders as $id => $row) {
-        $point = array();
+      if ($this->options['colors']['choropleth']) {
 
-        foreach ($this->view->field as $key => $field) {
-          $point['join_field_name'] = $this->options['fields']['join_field_name'];
-          if ($key == $this->options['fields']['join_field']) {
-            $point['join_field_value'] = $row[$key];
+        foreach ($renders as $id => $row) {
+          $point = array();
+
+          foreach ($this->view->field as $key => $field) {
+            $point['join_field_name'] = $this->options['fields']['join_field_name'];
+            if ($key == $this->options['fields']['join_field']) {
+              $point['join_field_value'] = $row[$key];
+            }
+            // TODO temporary hack
+            // TODO getting bad invalid output here
+            if ($key == $this->options['fields']['value']) {
+              $point['value'] = $row[$key];
+              $values[] = floatval($row[$key]);
+            }
           }
-          // TODO temporary hack
-          // TODO getting bad invalid output here
-          if ($key == $this->options['fields']['value']) {
-            $point['value'] = $row[$key];
-            $values[] = floatval($row[$key]);
-          }
+          $points[] = $point;
         }
-        $points[] = $point;
+
+        $value_min = min($values);
+        $value_max = max($values);
+        $value_range = $value_max - $value_min;
+
+        $color_ramp = stylewriter_color_ramp(
+          $this->options['colors']['color_min'], 
+          $this->options['colors']['color_max'], 
+          $this->options['colors']['steps']);
+
+        foreach ($points as $i => $point) {
+          // Example: If there are 3 steps, $ramp_idx will be between 0 and 3,
+          // inclusive. Values are then floor()'d such that the following values
+          // map to corresponding color ramp keys:
+          //   0-0.99 => 0
+          //   1-1.99 => 1
+          //   2-3.00 => 2
+          $rank = (floatval($point['value']) - $value_min) / $value_range; // 0 -> 1
+          // Include high endpoint.
+          $ramp_idx = ($rank == 1) ? 
+            count($color_ramp) - 1 : 
+            floor($rank * $this->options['colors']['steps']);
+          $points[$i]['polygon'] = array(
+            'polygon-fill' => $color_ramp[$ramp_idx],
+            'polygon-opacity' => $this->options['colors']['opacity']);
+        }
       }
 
-      $value_min = min($values);
-      $value_max = max($values);
-      $value_range = $value_max - $value_min;
+      if ($this->options['scale']['enable']) {
+        foreach ($renders as $id => $row) {
+          $point = array();
 
-      $color_ramp = stylewriter_color_ramp(
-        $this->options['colors']['color_min'], 
-        $this->options['colors']['color_max'], 
-        $this->options['colors']['steps']);
+          foreach ($this->view->field as $key => $field) {
+            $point['join_field_name'] = $this->options['fields']['join_field_name'];
+            if ($key == $this->options['fields']['join_field']) {
+              $point['join_field_value'] = $row[$key];
+            }
+            // TODO temporary hack
+            // TODO getting bad invalid output here
+            if ($key == $this->options['fields']['value']) {
+              $point['value'] = $row[$key];
+              $values[] = floatval($row[$key]);
+            }
+          }
+          $points[] = $point;
+        }
 
-      foreach ($points as $i => $point) {
-        // Example: If there are 3 steps, $ramp_idx will be between 0 and 3,
-        // inclusive. Values are then floor()'d such that the following values
-        // map to corresponding color ramp keys:
-        //   0-0.99 => 0
-        //   1-1.99 => 1
-        //   2-3.00 => 2
-        $rank = (floatval($point['value']) - $value_min) / $value_range; // 0 -> 1
-        // Include high endpoint.
-        $ramp_idx = ($rank == 1) ? 
-          count($color_ramp) - 1 : 
-          floor($rank * $this->options['colors']['steps']);
-        $points[$i]['color'] = $color_ramp[$ramp_idx];
+        $value_min = min($values);
+        $value_max = max($values);
+        $value_range = $value_max - $value_min;
+
+        $color_ramp = stylewriter_color_ramp_grad(
+          $this->options['scale']['min_size'], 
+          $this->options['scale']['max_size'], 
+          $this->options['scale']['steps']);
+
+        foreach ($points as $i => $point) {
+          // Example: If there are 3 steps, $ramp_idx will be between 0 and 3,
+          // inclusive. Values are then floor()'d such that the following values
+          // map to corresponding color ramp keys:
+          //   0-0.99 => 0
+          //   1-1.99 => 1
+          //   2-3.00 => 2
+          $rank = (floatval($point['value']) - $value_min) / $value_range; // 0 -> 1
+          // Include high endpoint.
+          $ramp_idx = ($rank == 1) ? 
+            count($color_ramp) - 1 : 
+            floor($rank * $this->options['scale']['steps']);
+          $points[$i]['point'] = array(
+            'point-width' => $color_ramp[$ramp_idx],
+            'point-height' => $color_ramp[$ramp_idx]);
+        }
       }
       return $points;
     }
@@ -246,78 +430,83 @@ class views_plugin_style_mapfile extends views_plugin_style {
      *    )
      */
     function legend_data($rows) {
-      $renders = $formatted_renders = array();
-      $keys = array_keys($this->view->field);
+      // TODO: make disable-able
+      if ($this->options['colors']['choropleth']) {
+        $renders = $formatted_renders = array();
+        $keys = array_keys($this->view->field);
 
-      foreach ($rows as $count => $row) {
-        foreach ($keys as $id) {
-          $renders[$count][$id] = $row->{$this->view->field[$id]->field_alias};
-          $formatted_renders[$count][$id] = $this->view->field[$id]->theme($row);
-        }
-      }  
+        foreach ($rows as $count => $row) {
+          foreach ($keys as $id) {
+            $renders[$count][$id] = $row->{$this->view->field[$id]->field_alias};
+            $formatted_renders[$count][$id] = $this->view->field[$id]->theme($row);
+          }
+        }  
 
-      $points = $values = $formatted_values = array();
-      
-      foreach ($renders as $id => $row) {
-        foreach ($this->view->field as $key => $field) {
-          // TODO temporary hack
-          // TODO getting bad invalid output here
-          if ($key == $this->options['fields']['value']) {
-            $point['value'] = $row[$key];
-            $values[$id] = floatval($row[$key]);
-            $formatted_values[$id] = $formatted_renders[$id][$key];
+        $points = $values = $formatted_values = array();
+        
+        foreach ($renders as $id => $row) {
+          foreach ($this->view->field as $key => $field) {
+            // TODO temporary hack
+            // TODO getting bad invalid output here
+            if ($key == $this->options['fields']['value']) {
+              $point['value'] = $row[$key];
+              $values[$id] = floatval($row[$key]);
+              $formatted_values[$id] = $formatted_renders[$id][$key];
+            }
           }
         }
-      }
 
-      $value_min = min($values);
-      $value_max = max($values);
-      $value_range = $value_max - $value_min;
+        $value_min = min($values);
+        $value_max = max($values);
+        $value_range = $value_max - $value_min;
 
-      // Build distribution counts.
-      $dist = array_fill(0, $this->options['colors']['steps'], 0);
-      foreach ($values as $value) {
-        $rank = ($value - $value_min) / $value_range; // 0 -> 1
-        // Include high endpoint.
-        $ramp_idx = ($rank == 1) ? 
-          count($dist) - 1 : 
-          floor($rank * $this->options['colors']['steps']);
-        $dist[$ramp_idx] = isset($dist[$ramp_idx]) ? $dist[$ramp_idx] + 1 : 1;
-      }
+        // Build distribution counts.
+        $dist = array_fill(0, $this->options['colors']['steps'], 0);
+        foreach ($values as $value) {
+          $rank = ($value - $value_min) / $value_range; // 0 -> 1
+          // Include high endpoint.
+          $ramp_idx = ($rank == 1) ? 
+            count($dist) - 1 : 
+            floor($rank * $this->options['colors']['steps']);
+          $dist[$ramp_idx] = isset($dist[$ramp_idx]) ? $dist[$ramp_idx] + 1 : 1;
+        }
 
-      // Normalize distribution counts and format as usable CSS class strings.
-      $dist_min = min($dist);
-      $dist_max = max($dist);
-      $dist_range = $dist_max - $dist_min;
-      foreach ($dist as &$d) {
-        $d = str_replace('.', '', strval(round(($d - $dist_min) / $dist_range, 1)));
-      }
+        // Normalize distribution counts and format as usable CSS class strings.
+        $dist_min = min($dist);
+        $dist_max = max($dist);
+        $dist_range = $dist_max - $dist_min;
 
-      $color_ramp = stylewriter_color_ramp(
-        $this->options['colors']['color_min'], 
-        $this->options['colors']['color_max'], 
-        $this->options['colors']['steps']);
+        foreach ($dist as &$d) {
+          $d = str_replace('.', '', strval(round(($d - $dist_min) / $dist_range, 1)));
+        }
 
-      $value_ramp = stylewriter_range(
-        $value_min,
-        $value_max,
-        $this->options['colors']['steps']);
-      $value_ramp = array_map('strval', $value_ramp);
+        $color_ramp = stylewriter_color_ramp(
+          $this->options['colors']['color_min'], 
+          $this->options['colors']['color_max'], 
+          $this->options['colors']['steps']);
 
-      $legend = array(
-        'points' => array(),
-        'values' => array(
-          'min' => $formatted_values[array_search($value_min, $values)],
-          'max' => $formatted_values[array_search($value_max, $values)],
-        ),
-      );
-      for ($i = 0; $i < $this->options['colors']['steps']; $i++) {
-        $legend['points'][] = array(
-          'color' => $color_ramp[$i],
-          'dist' => $dist[$i],
+        $value_ramp = array_map('strval', 
+          stylewriter_range(
+            $value_min,
+            $value_max,
+            $this->options['colors']['steps']));
+
+        $legend = array(
+          'points' => array(),
+          'values' => array(
+            'min' => $formatted_values[array_search($value_min, $values)],
+            'max' => $formatted_values[array_search($value_max, $values)],
+          ),
         );
+
+        for ($i = 0; $i < $this->options['colors']['steps']; $i++) {
+          $legend['points'][] = array(
+            'color' => $color_ramp[$i],
+            'dist' => $dist[$i],
+          );
+        }
+        return $legend;
       }
-      return $legend;
     }
 
     function theme_legend($points, $values, $label) {

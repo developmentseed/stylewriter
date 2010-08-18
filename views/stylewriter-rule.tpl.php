@@ -6,18 +6,49 @@
  * @param $join_field_name
  * @param $join_field_value
  *
- * @param $color
- * @param $opacity
- *
+ * @param $polygon
  * @param $stroke
+ * @param $metawriter
+ * @param $scale
+ * TODO: standardize so that this is a straight
+ * conversion from an array
  */
 ?>
 #data [<?php echo $join_field_name; ?> = "<?php echo $join_field_value; ?>"] {
-    polygon-fill: <?php echo $color; ?>;
-    polygon-opacity: <?php echo $opacity; ?>;
+
+/* polygon */
+
+<?php if ($polygon): ?>
+  <?php foreach($polygon as $k => $v): ?>
+    <?php echo "$k: $v;"; ?>
+  <?php endforeach; ?>
+<?php endif; ?>
+
+/* stroke */
+
 <?php if ($stroke['enable'] == '1'): ?>
-    line-color: <?php echo         $stroke['color']; ?>;
-    line-width: <?php echo   $stroke['width']; ?>;
-    line-opacity: <?php echo $stroke['opacity']; ?>;
+  <?php unset($stroke['enable']); ?>
+  <?php foreach($stroke as $k => $v): ?>
+    <?php echo "$k: $v;"; ?>
+  <?php endforeach; ?>
+<?php endif; ?>
+
+/* metawriter */
+
+<?php if ($metawriter): ?>
+<?php unset($metawriter['enable']); ?>
+  <?php foreach($metawriter as $k => $v): ?>
+    <?php echo "$k: \"$v\";"; ?>
+  <?php endforeach; ?>
+<?php endif; ?>
+
+/* point */
+
+<?php if ($point): ?>
+<?php unset($point['enable']); ?>
+  <?php foreach($point as $k => $v): ?>
+    <?php echo "$k: $v;"; ?>
+  <?php endforeach; ?>
+  point-file: url('http://cascadenik-sampledata.s3.amazonaws.com/purple-point.png');
 <?php endif; ?>
 }

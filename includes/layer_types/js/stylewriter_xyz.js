@@ -135,7 +135,7 @@ OpenLayers.Layer.StyleWriter = OpenLayers.Class(OpenLayers.Layer.Grid, {
         var url = this.url;
         var s = '' + x + y + z;
 
-        z += (this.minzoom !== null) ? parseInt(this.minzoom) : 0;
+        z += ((this.minzoom !== null) ? parseInt(this.minzoom) : 0);
         url = (url instanceof Array) ? this.selectUrl(s, url) : url;
         
         var path = OpenLayers.String.format(url, 

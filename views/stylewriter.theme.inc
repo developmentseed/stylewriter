@@ -11,18 +11,43 @@ function template_preprocess_stylewriter_mapfile(&$vars) {
 
   $rows = '';
   foreach ($points as $point) {
+
     $rows .= theme('stylewriter_rule',
       $point['join_field_name'],
       $point['join_field_value'],
-      $point['color'],
-      $view->style_plugin->options['colors']['opacity'],
-      $view->style_plugin->options['colors']['stroke']
+      $point['polygon'],
+      $view->style_plugin->options['colors']['stroke'],
+      $view->style_plugin->options['metawriter'],
+      $point['point']
     );
   }
-  exit(theme('stylewriter_document', 
-    $rows, 
-    $view->style_plugin->options['fields']['data_url'],
-    'shape'));
+  if ($view->style_plugin->options['fields']['data_type'] == 'shape') {
+    exit(theme('stylewriter_document', 
+      $rows, 
+      $view->style_plugin->options['fields']['data_url'],
+      $view->style_plugin->options['fields']['data_type'],
+      // layer: OGRGeoJSON
+      array(
+        'file' => '[tile_dir]/[z]/[x]/[y].json',
+        'type' => 'json',
+        'name' => 'meta1',
+      )
+    ));
+  }
+  else {
+    exit(theme('stylewriter_document', 
+      $rows, 
+      $view->style_plugin->data_url(),
+      $view->style_plugin->options['fields']['data_type'],
+      // layer: OGRGeoJSON
+      array(
+        'file' => '[tile_dir]/[z]/[x]/[y].json',
+        'type' => 'json',
+        'name' => 'meta1',
+      ),
+      'OGRGeoJSON'
+    ));
+  }
 }
 
 function template_preprocess_stylewriter_datamapfile(&$vars) {
