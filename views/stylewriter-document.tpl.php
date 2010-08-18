@@ -15,6 +15,7 @@
   <?php if (isset($metawriter)): ?>
     <MetaWriter 
         name="<?php echo $metawriter['name']; ?>" 
+        only-nonempty="false"
         type="<?php echo $metawriter['type']; ?>" 
         file="<?php echo $metawriter['file']; ?>" />
   <?php endif; ?>

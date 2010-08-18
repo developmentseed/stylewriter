@@ -274,8 +274,6 @@ class views_plugin_style_mapfile extends views_plugin_style {
         );
 
         /*=== MetaWriter =======*/
-        // TODO: use CTools dependencies to kill stroke options
-        // if no stroke is selected
         $form['metawriter']['enable'] = array(
           '#type' => 'checkbox',
           '#title' => t('Include Metawriter'),

@@ -138,5 +138,35 @@ function stylewriter_openlayers_layer_types() {
         'parent' => 'openlayers_layer_type',
       ),
     ),
+    'openlayers_layer_type_stylewriter_interaction' => array(
+      'title' => t('Stylewriter Interaction'),
+      'description' => t('Stylewriter Dynamic Map Interaction'),
+      'type' => 'layer',
+      'path' => drupal_get_path('module', 'stylewriter') .'/includes/layer_types',
+      'file' => 'stylewriter_interaction.inc',
+      'layer_type' => array(
+        'class' => 'openlayers_layer_type_stylewriter_interaction',
+        'parent' => 'openlayers_layer_type',
+      ),
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_openlayers_behaviors().
+ *
+ * This is a ctools plugins hook.
+ */
+function stylewriter_openlayers_behaviors() {
+  return array(
+    'stylewriter_pointhover' => array(
+      'title' => t('StyleWriter PointHover'),
+      'behavior' => array(
+        'path' => drupal_get_path('module', 'stylewriter') .'/includes/behaviors',
+        'file' => 'stylewriter_pointhover.inc',
+        'class' => 'stylewriter_pointhover',
+        'parent' => 'openlayers_behavior',
+      ),
+    ),
   );
 }
