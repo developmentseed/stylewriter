@@ -143,7 +143,8 @@ OpenLayers.Layer.StyleWriter = OpenLayers.Class(OpenLayers.Layer.Grid, {
             'mapfile': this.encode_base64(this.mapfile), 
             'x': x, 
             'y': y, 
-            'z': z
+            'z': z,
+            'format': 'png',
           }
         );
 

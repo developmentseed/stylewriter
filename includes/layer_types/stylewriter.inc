@@ -164,6 +164,9 @@ class openlayers_layer_type_stylewriter extends openlayers_layer_type {
     module_load_include('inc', 'stylewriter', 'stylewriter');
 
     drupal_add_js(drupal_get_path('module', 'stylewriter') . 
+      '/includes/layer_types/js/stylewriter_geojson.js');
+
+    drupal_add_js(drupal_get_path('module', 'stylewriter') . 
       '/includes/layer_types/js/stylewriter_xyz.js');
 
     drupal_add_js(drupal_get_path('module', 'stylewriter') . 
@@ -178,7 +181,7 @@ class openlayers_layer_type_stylewriter extends openlayers_layer_type {
     $this->data['options'] = array(
       'legend' => $this->get_legend($this->data['style_view']));
 
-    $this->data['base_url'] = $this->data['base_url'] . '${mapfile}/${z}/${x}/${y}.png';
+    $this->data['base_url'] = $this->data['base_url'] . '${mapfile}/${z}/${x}/${y}.${format}';
     $this->data['mapfile'] = $this->viewurlargs($this->data['style_view']);
 
     return $this->options;
