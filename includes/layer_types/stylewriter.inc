@@ -141,6 +141,35 @@ class openlayers_layer_type_stylewriter extends openlayers_layer_type {
   }
 
   /**
+   * get legend data
+   * 
+   * @param string $view_display colon-separated view id
+   * @return string $themed_legend html for the final legend
+   */
+  function get_keymap($view_display) {
+    list($view_name, $display_name) = explode(':', $view_display);
+    if ($view = views_get_view($view_name)) {
+      $args = array();
+      // Retrieve args/filters from current view
+      // to pass on to our vector layer.
+      $current_view = views_get_current_view();
+      if (isset($current_view)) {
+        $args = $current_view->args;
+        if (isset($current_view->exposed_input)) {
+          $view->set_exposed_input($current_view->exposed_input);
+        }
+      }
+
+      $view->set_display($display_name);
+      $view->set_arguments($args);
+      $view->execute();
+      if ($view->style_plugin instanceof views_plugin_style_mapfile) {
+        return $view->style_plugin->keymap_data($view->result);
+      }
+    }
+  }
+
+  /**
    * @param $view_display colon-separated view-display
    *
    * return a string representing the URL of a view that returns a Mapnik style
@@ -179,7 +208,9 @@ class openlayers_layer_type_stylewriter extends openlayers_layer_type {
       '/stylewriter.css');
 
     $this->data['options'] = array(
-      'legend' => $this->get_legend($this->data['style_view']));
+      'legend' => $this->get_legend($this->data['style_view']),
+      'keymap' => $this->get_keymap($this->data['style_view'])
+    );
 
     $this->data['base_url'] = $this->data['base_url'] . '${mapfile}/${z}/${x}/${y}.${format}';
     $this->data['mapfile'] = $this->viewurlargs($this->data['style_view']);

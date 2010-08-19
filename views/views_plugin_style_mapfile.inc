@@ -417,6 +417,38 @@ class views_plugin_style_mapfile extends views_plugin_style {
 
 
     /**
+     * @param $rows the rows of a rendered view
+     * @return $points all of the rows in that view which formed
+     *  valid coordinates, organized into coordinates and attributes
+     */
+    function keymap_data($rows) {
+      $renders = array();
+      $keys = array_keys($this->view->field);
+      foreach ($rows as $count => $row) {
+        foreach ($keys as $id) {
+          $renders[$count][$id] = $row->{$this->view->field[$id]->field_alias};
+        }
+      }
+      $points = $values = array();
+      foreach ($renders as $id => $row) {
+        $point = array();
+        foreach ($this->view->field as $key => $field) {
+          // $point['join_field_name'] = $this->options['fields']['join_field_name'];
+          if ($key == $this->options['fields']['join_field']) {
+            // $point['join_field_value'] = $row[$key];
+            $join_field_value = $row[$key];
+          }
+          if ($key == $this->options['fields']['value']) {
+            $point['value'] = $row[$key];
+          }
+        }
+        $points[$join_field_value] = $point;
+      }
+      return $points;
+    }
+
+
+    /**
      * Return the data for a legend
      *
      * array(
