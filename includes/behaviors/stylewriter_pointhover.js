@@ -1,4 +1,4 @@
-// $Id: openlayers_behavior_zoomtolayer.js,v 1.1.2.7 2010/05/22 22:36:45 zzolo Exp $
+// $Id$
 
 /* Copyright (c) 2006-2008 MetaCarta, Inc., published under the Clear BSD
  * license.  See http://svn.openlayers.org/trunk/openlayers/license.txt for the
@@ -154,24 +154,31 @@ OpenLayers.Control.GridHover = OpenLayers.Class(OpenLayers.Control, {
 
         OpenLayers.Control.prototype.initialize.apply(this, [options]);
         
-        if(!this.format) {
-            this.format = new OpenLayers.Format.WMSGetFeatureInfo(
-                options.formatOptions
-            );
-        }
-        
         if(this.drillDown === true) {
             this.hover = false;
         }
 
         this.handler = new OpenLayers.Handler.Hover(
-               this, {
-                   'move': this.cancelHover,
-                   'pause': this.getInfoForHover
-               },
-               OpenLayers.Util.extend(this.handlerOptions.hover || {}, {
-                   'delay': 30
-               }));
+          this, {
+            /*
+              'move': this.cancelHover,
+              'pause': this.getInfoForHover
+              */
+          },
+          OpenLayers.Util.extend(this.handlerOptions.hover || {}, {
+              'delay': 30
+            }
+          )
+        );
+
+        options.layer.events.register(
+          'tileloaded', 
+          this, 
+          function(evt) {
+            $(evt.element).find('img').bind('mouseover', $.proxy(this.getInfoForHover, this));
+            $(evt.element).find('img').bind('mousemove', $.proxy(this.getInfoForHover, this));
+          }
+        );
     },
 
     /**
@@ -211,7 +218,6 @@ OpenLayers.Control.GridHover = OpenLayers.Class(OpenLayers.Control, {
      * evt - {<OpenLayers.Event>} 
      */
     getInfoForClick: function(evt) {
-        console.log(evt.target.src);
     },
    
     /**
@@ -225,31 +231,40 @@ OpenLayers.Control.GridHover = OpenLayers.Class(OpenLayers.Control, {
         this.target = evt.target;
         if ($(this.target).data('grid')) {
           grid = $(this.target).data('grid');
-          // console.log(evt);
           offset = [
                 Math.floor((evt.pageX - $(evt.target).offset().left) / 4),
                 Math.floor((evt.pageY - $(evt.target).offset().top) / 4)];
-          console.log(offset);
-          console.log($(evt.target).position().left);
           if(grid[offset[1]][offset[0]]) {
-            console.log(grid[offset[1]][offset[0]]);
+            key = grid[offset[1]][offset[0]];
+            if (key !== this.key) {
+              this.callbacks['out'](this.layer.options.keymap[this.key], this.layer);
+            }
+            this.key = key;
+            if (this.layer.options.keymap[key]) {
+              this.callbacks['over'](this.layer.options.keymap[this.key], this.layer);
+            }
+          }
+          else {
+            this.callbacks['out'](this.layer.options.keymap[this.key], this.layer);
           }
         }
         else {
-          if (this.hoverRequest === null) {
-            this.hoverRequest = $.ajax(
+          if (!this.target.req) {
+            this.target.req = true;
+            this.target.hoverRequest = $.ajax(
               {
-                'url': evt.target.src.replace('png', 'json'), 
+                'url': $(evt.target).attr('src').replace('png', 'grid.json'), 
                 context: this,
-                success: this.readDone,
+                success: $.proxy(this.readDone, this),
                 error: function() {
-                  console.log(this);
-                  this.hoverRequest = null;
+                  this.target.hoverRequest = null;
                 },
-                dataType: 'jsonp',
+                dataType: 'jsonp'
+                // jsonpCallback: "f" + $.map($(evt.target).attr('src').split('/'), parseInt).slice(-3).join('x')
               }
             );
-            this.events.triggerEvent("beforegetfeatureinfo", {xy: evt.xy});
+          }
+          else {
           }
         }
     },
@@ -257,13 +272,16 @@ OpenLayers.Control.GridHover = OpenLayers.Class(OpenLayers.Control, {
     readDone: function(data) {
       var g = data.features.split('|');
       var x = [];
+      // Quick RLE decompression, this could be faster
       for (var i = 0; i < g.length; i++) {
         a = g[i].split(':');
         if (a.length == 1) {
-          x.push(false);
+          for (j = 0; j < parseInt(a[0], 10); j++) {
+            x.push(false);
+          }
         }
         else {
-          for (j = 0; j < parseInt(a[0]); j++) {
+          for (j = 0; j < parseInt(a[0], 10); j++) {
             x.push(a[1]);
           }
         }
@@ -273,40 +291,7 @@ OpenLayers.Control.GridHover = OpenLayers.Class(OpenLayers.Control, {
         grid[i] = x.splice(0, 64);
       }
       $(this.target).data('grid', grid);
-      this.hoverRequest = null;
-    },
-
-    /**
-     * Method: cancelHover
-     * Cancel callback for the hover handler
-     */
-    cancelHover: function() {
-        if (this.hoverRequest) {
-            this.hoverRequest.abort();
-            this.hoverRequest = null;
-        }
-    },
-
-    /**
-     * Method: triggerGetFeatureInfo
-     * Trigger the getfeatureinfo event when all is done
-     *
-     * Parameters:
-     * request - {XMLHttpRequest} The request object
-     * xy - {<OpenLayers.Pixel>} The position on the map where the
-     *     mouse event occurred.
-     * features - {Array(<OpenLayers.Feature.Vector>)}
-     */
-    triggerGetFeatureInfo: function(request, xy, features) {
-        this.events.triggerEvent("getfeatureinfo", {
-            text: request.responseText,
-            features: features,
-            request: request,
-            xy: xy
-        });
-
-        // Reset the cursor.
-        OpenLayers.Element.removeClass(this.map.viewPortDiv, "olCursorWait");
+      this.target.hoverRequest = null;
     },
     CLASS_NAME: "OpenLayers.Control.GridHover"
 });
@@ -322,9 +307,66 @@ Drupal.behaviors.stylewriter_pointhover = function(context) {
     layer = map.getLayersBy('drupalID', 
       data.map.behaviors['stylewriter_pointhover'].layer)[0];
       h = new OpenLayers.Control.GridHover({
-        layer: layer
+        layer: layer,
+        callbacks: {
+          'over': Drupal.StyleWriterTooltips.select,
+          'out': Drupal.StyleWriterTooltips.unselect
+        }
       });
     map.addControl(h);
     h.activate();
   }
-}
+};
+
+Drupal.StyleWriterTooltips = {};
+
+Drupal.StyleWriterTooltips.click = function(feature) {
+  var html = '';
+  if (feature.attributes.name) {
+    html += feature.attributes.name;
+  }
+  if (feature.attributes.description) {
+    html += feature.attributes.description;
+  }
+  // @TODO: Make this a behavior option and allow interaction with other
+  // behaviors like the MN story popup.
+  var link;
+  if ($(html).is('a')) {
+    link = $(html);
+  }
+  else if ($(html).children('a').size() > 0) {
+    link = $(html).children('a')[0];
+  }
+  if (link) {
+    var href = $(link).attr('href');
+    if (Drupal.OpenLayersPermalink && Drupal.OpenLayersPermalink.addQuery) {
+      href = Drupal.OpenLayersPermalink.addQuery(href);
+    }
+    window.location = href;
+    return false;
+  }
+  return;
+};
+
+Drupal.StyleWriterTooltips.getToolTip = function(feature) {
+  var text = "<div class='openlayers-tooltip'>";
+  if (feature.name) {
+    text += "<div class='openlayers-tooltip-name'>" + feature.name + "</div>";
+  }
+  if (feature.description) {
+    text += "<div class='openlayers-tooltip-description'>" + feature.description + "</div>";
+  }
+  text += "</div>";
+  return $(text);
+};
+
+Drupal.StyleWriterTooltips.select = function(feature, layer) {
+  var tooltip = Drupal.StyleWriterTooltips.getToolTip(feature);
+  $(layer.map.div).css('cursor', 'pointer');
+  $(layer.map.div).append(tooltip);
+};
+
+Drupal.StyleWriterTooltips.unselect = function(feature) {
+  $(layer.map.div).css('cursor', 'default');
+  $(layer.map.div).children('div.openlayers-tooltip').fadeOut('fast', function() { $(this).remove(); });
+};

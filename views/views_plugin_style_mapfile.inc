@@ -438,8 +438,11 @@ class views_plugin_style_mapfile extends views_plugin_style {
             // $point['join_field_value'] = $row[$key];
             $join_field_value = $row[$key];
           }
+          if ($key == $this->options['fields']['join_field']) {
+            $point['name'] = $row[$key];
+          }
           if ($key == $this->options['fields']['value']) {
-            $point['value'] = $row[$key];
+            $point['description'] = $row[$key];
           }
         }
         $points[$join_field_value] = $point;
