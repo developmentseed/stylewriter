@@ -7,7 +7,7 @@ Drupal.openlayers.layer.stylewriter = function (title, map, options) {
   options.projection = 'EPSG:'+options.projection;
     if (options.maxExtent !== undefined) {
       options.maxExtent = new OpenLayers.Bounds.fromArray(options.maxExtent) || 
-      new OpenLayers.Bounds(-20037508.34, -20037508.34, 20037508.34, 20037508.34);
+      new OpenLayers.Bounds(-20037508, -20037508, 20037508, 20037508);
   }
 
   var style_url = options.base_url;

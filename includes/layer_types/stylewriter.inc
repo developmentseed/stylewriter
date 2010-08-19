@@ -159,7 +159,6 @@ class openlayers_layer_type_stylewriter extends openlayers_layer_type {
           $view->set_exposed_input($current_view->exposed_input);
         }
       }
-
       $view->set_display($display_name);
       $view->set_arguments($args);
       $view->execute();

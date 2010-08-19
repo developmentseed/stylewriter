@@ -60,7 +60,6 @@ class views_plugin_style_mapfile extends views_plugin_style {
       return $options;
     } 
 
-
     /**
      * @param $view_display colon-separated view-display
      *
@@ -82,7 +81,6 @@ class views_plugin_style_mapfile extends views_plugin_style {
         return $base_url . '/' . $view->get_url($args);
       }
     }
-    
 
     /**
      * Accessor for URL
@@ -232,6 +230,14 @@ class views_plugin_style_mapfile extends views_plugin_style {
         /**
          * Data options
          */
+        $form['fields']['data_strategy'] = array(
+          '#type' => 'select',
+          '#title' => t('Data Strategy'),
+          '#options' => array(
+            'grid' => t('Polygon Grid'),
+            'points' => t('GeoJSON points')),
+          '#default_value' => $this->options['fields']['data_strategy'],
+        );
         $form['fields']['data_type'] = array(
           '#type' => 'select',
           '#title' => t('Data Type'),
@@ -449,7 +455,6 @@ class views_plugin_style_mapfile extends views_plugin_style {
       }
       return $points;
     }
-
 
     /**
      * Return the data for a legend

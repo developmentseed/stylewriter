@@ -41,7 +41,6 @@ function stylewriter_menu() {
     'file' => 'includes/stylewriter.admin.inc',
     'type' => MENU_LOCAL_TASK
   );
-
   return $items;
 }
 
