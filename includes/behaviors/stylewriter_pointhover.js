@@ -117,6 +117,7 @@ OpenLayers.Control.GridHover = OpenLayers.Class(OpenLayers.Control, {
      */
     hoverRequest: null,
     
+    archive: {},
     /**
      * Constant: EVENT_TYPES
      *
@@ -160,24 +161,13 @@ OpenLayers.Control.GridHover = OpenLayers.Class(OpenLayers.Control, {
 
         this.handler = new OpenLayers.Handler.Hover(
           this, {
-            /*
               'move': this.cancelHover,
               'pause': this.getInfoForHover
-              */
           },
           OpenLayers.Util.extend(this.handlerOptions.hover || {}, {
               'delay': 30
             }
           )
-        );
-
-        options.layer.events.register(
-          'tileloaded', 
-          this, 
-          function(evt) {
-            $(evt.element).find('img').bind('mouseover', $.proxy(this.getInfoForHover, this));
-            $(evt.element).find('img').bind('mousemove', $.proxy(this.getInfoForHover, this));
-          }
         );
     },
 
@@ -226,17 +216,25 @@ OpenLayers.Control.GridHover = OpenLayers.Class(OpenLayers.Control, {
      *
      * Parameters:
      * evt - {Object}
+     *
+     * This can be called, at max, once every 250 ms
      */
     getInfoForHover: function(evt) {
         this.target = evt.target;
-        if ($(this.target).data('grid')) {
-          grid = $(this.target).data('grid');
+        if (this.archive[$(this.target).attr('src')]) {
+          // console.log('offsetting');
+          grid = this.archive[$(this.target).attr('src')]
           offset = [
                 Math.floor((evt.pageX - $(evt.target).offset().left) / 4),
                 Math.floor((evt.pageY - $(evt.target).offset().top) / 4)];
+          if (grid === true) { // is downloading
+            console.log('downloading');
+            return;
+          }
           if(grid[offset[1]][offset[0]]) {
             key = grid[offset[1]][offset[0]];
             if (key !== this.key) {
+              console.log('called out');
               this.callbacks['out'](this.layer.options.keymap[this.key], this.layer);
             }
             this.key = key;
@@ -249,22 +247,24 @@ OpenLayers.Control.GridHover = OpenLayers.Class(OpenLayers.Control, {
           }
         }
         else {
-          if (!this.target.req) {
+          this.callbacks['out']({}, this.layer);
+          if (!this.archive[$(evt.target).attr('src')]) {
             this.target.req = true;
-            this.target.hoverRequest = $.ajax(
-              {
-                'url': $(evt.target).attr('src').replace('png', 'grid.json'), 
-                context: this,
-                success: $.proxy(this.readDone, this),
-                error: function() {
-                  this.target.hoverRequest = null;
-                },
-                dataType: 'jsonp'
-                // jsonpCallback: "f" + $.map($(evt.target).attr('src').split('/'), parseInt).slice(-3).join('x')
-              }
-            );
-          }
-          else {
+            try {
+              this.archive[$(evt.target).attr('src')] = true;
+              this.target.hoverRequest = $.ajax(
+                {
+                  'url': $(evt.target).attr('src').replace('png', 'grid.json'), 
+                  context: this,
+                  success: $.proxy(this.readDone, this),
+                  error: function() {},
+                  dataType: 'jsonp',
+                  jsonpCallback: "f" + $.map($(evt.target).attr('src').split('/'), parseInt).slice(-3).join('x')
+                }
+              );
+            } catch(err) {
+              this.archive[$(evt.target).attr('src')] = false;
+            }
           }
         }
     },
@@ -290,8 +290,7 @@ OpenLayers.Control.GridHover = OpenLayers.Class(OpenLayers.Control, {
       for (var i = 0; i < 64; i++) {
         grid[i] = x.splice(0, 64);
       }
-      $(this.target).data('grid', grid);
-      this.target.hoverRequest = null;
+      this.archive[$(this.target).attr('src')] = grid;
     },
     CLASS_NAME: "OpenLayers.Control.GridHover"
 });
@@ -306,13 +305,13 @@ Drupal.behaviors.stylewriter_pointhover = function(context) {
     map = data.openlayers;
     layer = map.getLayersBy('drupalID', 
       data.map.behaviors['stylewriter_pointhover'].layer)[0];
-      h = new OpenLayers.Control.GridHover({
-        layer: layer,
-        callbacks: {
-          'over': Drupal.StyleWriterTooltips.select,
-          'out': Drupal.StyleWriterTooltips.unselect
-        }
-      });
+    h = new OpenLayers.Control.GridHover({
+      layer: layer,
+      callbacks: {
+        'over': Drupal.StyleWriterTooltips.select,
+        'out': Drupal.StyleWriterTooltips.unselect
+      }
+    });
     map.addControl(h);
     h.activate();
   }
