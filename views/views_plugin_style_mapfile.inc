@@ -147,6 +147,7 @@ class views_plugin_style_mapfile extends views_plugin_style {
         $form['colors']['stroke']['enable'] = array(
           '#type' => 'checkbox',
           '#title' => t('Include stroke'),
+          '#id' => 'stroke-enable',
           '#default_value' => $this->options['colors']['stroke']['enable'],
         );
 
@@ -154,6 +155,7 @@ class views_plugin_style_mapfile extends views_plugin_style {
           '#type' => 'textfield',
           '#title' => t('Stroke color'),
           '#process' => array('views_process_dependency'),
+          '#dependency' => array('stroke-enable' => array('1')),
           '#default_value' => $this->options['colors']['stroke']['line-color'],
         );
 
@@ -161,12 +163,15 @@ class views_plugin_style_mapfile extends views_plugin_style {
           '#type' => 'textfield',
           '#title' => t('Stroke width'),
           '#process' => array('views_process_dependency'),
+          '#dependency' => array('stroke-enable' => array('1')),
           '#default_value' => $this->options['colors']['stroke']['line-width'],
         );
 
         $form['colors']['stroke']['line-opacity'] = array(
           '#type' => 'textfield',
           '#title' => t('Stroke opacity'),
+          '#process' => array('views_process_dependency'),
+          '#dependency' => array('stroke-enable' => array('1')),
           '#default_value' => $this->options['colors']['stroke']['line-opacity'],
         );
 
@@ -174,58 +179,42 @@ class views_plugin_style_mapfile extends views_plugin_style {
         $form['colors']['choropleth'] = array(
           '#type' => 'checkbox',
           '#title' => t('Enable Choropleth'),
+          '#id' => 'choropleth-enable',
           '#default_value' => $this->options['colors']['choropleth'],
         );
 
         $form['colors']['color_min'] = array(
           '#type' => 'textfield',
           '#title' => t('Minimum color'),
+          '#process' => array('views_process_dependency'),
+          '#dependency' => array('choropleth-enable' => array('1')),
           '#default_value' => $this->options['colors']['color_min'],
         );
 
         $form['colors']['color_max'] = array(
           '#type' => 'textfield',
           '#title' => t('Maximum color'),
+          '#process' => array('views_process_dependency'),
+          '#dependency' => array('choropleth-enable' => array('1')),
           '#default_value' => $this->options['colors']['color_max'],
         );
 
         $form['colors']['steps'] = array(
           '#type' => 'textfield',
           '#title' => t('Gradations'),
+          '#process' => array('views_process_dependency'),
+          '#dependency' => array('choropleth-enable' => array('1')),
           '#default_value' => $this->options['colors']['steps'],
         );
 
         $form['colors']['opacity'] = array(
           '#type' => 'textfield',
           '#title' => t('Opacity'),
+          '#process' => array('views_process_dependency'),
+          '#dependency' => array('choropleth-enable' => array('1')),
           '#default_value' => $this->options['colors']['opacity'],
         );
 
-
-        /*=== Scale Ramp ===*/
-        $form['scale']['enable'] = array(
-          '#type' => 'checkbox',
-          '#title' => t('Enable Scale'),
-          '#default_value' => $this->options['scale']['enable'],
-        );
-
-        $form['scale']['min_size'] = array(
-          '#type' => 'textfield',
-          '#title' => t('Minimum size'),
-          '#default_value' => $this->options['scale']['min_size'],
-        );
-
-        $form['scale']['max_size'] = array(
-          '#type' => 'textfield',
-          '#title' => t('Maximum size'),
-          '#default_value' => $this->options['scale']['max_size'],
-        );
-
-        $form['scale']['steps'] = array(
-          '#type' => 'textfield',
-          '#title' => t('Gradations'),
-          '#default_value' => $this->options['scale']['steps'],
-        );
 
         /**
          * Data options
@@ -241,6 +230,7 @@ class views_plugin_style_mapfile extends views_plugin_style {
         $form['fields']['data_type'] = array(
           '#type' => 'select',
           '#title' => t('Data Type'),
+          '#id' => 'data-type-select',
           '#options' => array(
             'shape' => t('Remote Shapefile'),
             'ogr' => t('GeoJSON View')),
@@ -250,6 +240,8 @@ class views_plugin_style_mapfile extends views_plugin_style {
           '#type' => 'select',
           '#default_value' => $this->options['data_view'],
           '#title' => t('Data View'),
+          '#process' => array('views_process_dependency'),
+          '#dependency' => array('data-type-select' => array('ogr')),
           '#options' => $this->data_options(),
           '#description' => t('Data view (GeoJSON)')
         );
@@ -257,6 +249,8 @@ class views_plugin_style_mapfile extends views_plugin_style {
           '#type' => 'textfield',
           '#default_value' => $this->options['fields']['data_url'],
           '#title' => t('Data URL'),
+          '#process' => array('views_process_dependency'),
+          '#dependency' => array('data-type-select' => array('shape')),
           '#description' => t('URL to the zipped shapefile or other 
             vector data source')
         );
@@ -279,10 +273,43 @@ class views_plugin_style_mapfile extends views_plugin_style {
           '#default_value' => $this->options['fields']['value'],
         );
 
+        /*=== Scale Ramp ===*/
+        $form['scale']['enable'] = array(
+          '#type' => 'checkbox',
+          '#title' => t('Enable Scale'),
+          '#id' => 'scale-enable',
+          '#default_value' => $this->options['scale']['enable'],
+        );
+
+        $form['scale']['min_size'] = array(
+          '#type' => 'textfield',
+          '#title' => t('Minimum size'),
+          '#process' => array('views_process_dependency'),
+          '#dependency' => array('scale-enable' => array(1)),
+          '#default_value' => $this->options['scale']['min_size'],
+        );
+
+        $form['scale']['max_size'] = array(
+          '#type' => 'textfield',
+          '#title' => t('Maximum size'),
+          '#process' => array('views_process_dependency'),
+          '#dependency' => array('scale-enable' => array(1)),
+          '#default_value' => $this->options['scale']['max_size'],
+        );
+
+        $form['scale']['steps'] = array(
+          '#type' => 'textfield',
+          '#title' => t('Gradations'),
+          '#process' => array('views_process_dependency'),
+          '#dependency' => array('scale-enable' => array(1)),
+          '#default_value' => $this->options['scale']['steps'],
+        );
+
         /*=== MetaWriter =======*/
         $form['metawriter']['enable'] = array(
           '#type' => 'checkbox',
           '#title' => t('Include Metawriter'),
+          '#id' => 'metawriter-enable',
           '#default_value' => $this->options['metawriter']['enable'],
         );
 
@@ -290,12 +317,15 @@ class views_plugin_style_mapfile extends views_plugin_style {
           '#type' => 'textfield',
           '#title' => t('Meta output'),
           '#process' => array('views_process_dependency'),
+          '#dependency' => array('metawriter-enable' => array(1)),
           '#default_value' => $this->options['metawriter']['meta-output'],
         );
         
         $form['metawriter']['meta-writer'] = array(
           '#type' => 'textfield',
           '#title' => t('Meta writer'),
+          '#process' => array('views_process_dependency'),
+          '#dependency' => array('metawriter-enable' => array(1)),
           '#process' => array('views_process_dependency'),
           '#default_value' => $this->options['metawriter']['meta-writer'],
         );
@@ -327,17 +357,13 @@ class views_plugin_style_mapfile extends views_plugin_style {
       $points = $values = array();
 
       if ($this->options['colors']['choropleth']) {
-
         foreach ($renders as $id => $row) {
           $point = array();
-
           foreach ($this->view->field as $key => $field) {
             $point['join_field_name'] = $this->options['fields']['join_field_name'];
             if ($key == $this->options['fields']['join_field']) {
               $point['join_field_value'] = $row[$key];
             }
-            // TODO temporary hack
-            // TODO getting bad invalid output here
             if ($key == $this->options['fields']['value']) {
               $point['value'] = $row[$key];
               $values[] = floatval($row[$key]);
@@ -356,12 +382,6 @@ class views_plugin_style_mapfile extends views_plugin_style {
           $this->options['colors']['steps']);
 
         foreach ($points as $i => $point) {
-          // Example: If there are 3 steps, $ramp_idx will be between 0 and 3,
-          // inclusive. Values are then floor()'d such that the following values
-          // map to corresponding color ramp keys:
-          //   0-0.99 => 0
-          //   1-1.99 => 1
-          //   2-3.00 => 2
           $rank = (floatval($point['value']) - $value_min) / $value_range; // 0 -> 1
           // Include high endpoint.
           $ramp_idx = ($rank == 1) ? 
@@ -376,7 +396,6 @@ class views_plugin_style_mapfile extends views_plugin_style {
       if ($this->options['scale']['enable']) {
         foreach ($renders as $id => $row) {
           $point = array();
-
           foreach ($this->view->field as $key => $field) {
             $point['join_field_name'] = $this->options['fields']['join_field_name'];
             if ($key == $this->options['fields']['join_field']) {
@@ -402,12 +421,6 @@ class views_plugin_style_mapfile extends views_plugin_style {
           $this->options['scale']['steps']);
 
         foreach ($points as $i => $point) {
-          // Example: If there are 3 steps, $ramp_idx will be between 0 and 3,
-          // inclusive. Values are then floor()'d such that the following values
-          // map to corresponding color ramp keys:
-          //   0-0.99 => 0
-          //   1-1.99 => 1
-          //   2-3.00 => 2
           $rank = (floatval($point['value']) - $value_min) / $value_range; // 0 -> 1
           // Include high endpoint.
           $ramp_idx = ($rank == 1) ? 
@@ -554,6 +567,10 @@ class views_plugin_style_mapfile extends views_plugin_style {
       }
       $first = current($points);
       $last = end($points);
-      return theme('stylewriter_legend', $swatches, $values['min'], $values['max'], $label);
+      return theme('stylewriter_legend', 
+        $swatches, 
+        $values['min'], 
+        $values['max'], 
+        $label);
     }
 }
