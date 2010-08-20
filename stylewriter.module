@@ -75,12 +75,12 @@ function stylewriter_theme() {
   return array(
     'stylewriter_rule' => array(
       'arguments' => array(
-        'join_field_name' => '',
-        'join_field_value' => '',
+        'filter' => '',
         'polygon' => array(),
         'stroke' => array(),
         'metawriter' => array(),
         'point' => array(),
+        'marker' => array(),
       ),
       'file' => 'stylewriter.theme.inc',
       'template' => 'stylewriter-rule',

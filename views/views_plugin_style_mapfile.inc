@@ -38,8 +38,8 @@ class views_plugin_style_mapfile extends views_plugin_style {
       );
       $options['metawriter'] = array(
         'default' => array(
-          'meta-writer' => 'meta1',
-          'meta-output' => '',
+          'marker-meta-writer' => 'meta1',
+          'marker-meta-output' => '',
         ),
       );
       return $options;
@@ -79,6 +79,22 @@ class views_plugin_style_mapfile extends views_plugin_style {
         }
         $view->set_display($display_name);
         return $base_url . '/' . $view->get_url($args);
+      }
+    }
+
+    function viewdata($view_display) {
+      global $base_url;
+      list($view_name, $display_name) = explode(':', $view_display);
+      if ($view = views_get_view($view_name)) {
+        $args = array();
+        // Retrieve args/filters from current view
+        // to pass on to our vector layer.
+        $current_view = views_get_current_view();
+        if (isset($current_view)) {
+          $args = $current_view->args;
+        }
+        $view->set_display($display_name);
+        return $view->execute();
       }
     }
 
@@ -354,15 +370,15 @@ class views_plugin_style_mapfile extends views_plugin_style {
         }
       }
 
-      $points = $values = array();
 
       if ($this->options['colors']['choropleth']) {
+        $points = $values = array();
         foreach ($renders as $id => $row) {
           $point = array();
           foreach ($this->view->field as $key => $field) {
             $point['join_field_name'] = $this->options['fields']['join_field_name'];
             if ($key == $this->options['fields']['join_field']) {
-              $point['join_field_value'] = $row[$key];
+              $point['filter'] = $point['join_field_name'] . ' = "' . $join_field_value . '"';
             }
             if ($key == $this->options['fields']['value']) {
               $point['value'] = $row[$key];
@@ -392,43 +408,38 @@ class views_plugin_style_mapfile extends views_plugin_style {
             'polygon-opacity' => $this->options['colors']['opacity']);
         }
       }
-
-      if ($this->options['scale']['enable']) {
+      elseif ($this->options['scale']['enable']) {
+        $points = $values = array();
         foreach ($renders as $id => $row) {
-          $point = array();
           foreach ($this->view->field as $key => $field) {
-            $point['join_field_name'] = $this->options['fields']['join_field_name'];
-            if ($key == $this->options['fields']['join_field']) {
-              $point['join_field_value'] = $row[$key];
-            }
-            // TODO temporary hack
-            // TODO getting bad invalid output here
             if ($key == $this->options['fields']['value']) {
-              $point['value'] = $row[$key];
               $values[] = floatval($row[$key]);
             }
           }
-          $points[] = $point;
         }
 
         $value_min = min($values);
         $value_max = max($values);
         $value_range = $value_max - $value_min;
 
-        $color_ramp = stylewriter_color_ramp_grad(
+        $value_ramp = stylewriter_color_ramp_grad(
+          $value_min, 
+          $value_max, 
+          $this->options['scale']['steps']);
+
+        $scale_ramp = stylewriter_color_ramp_grad(
           $this->options['scale']['min_size'], 
           $this->options['scale']['max_size'], 
           $this->options['scale']['steps']);
 
-        foreach ($points as $i => $point) {
-          $rank = (floatval($point['value']) - $value_min) / $value_range; // 0 -> 1
-          // Include high endpoint.
-          $ramp_idx = ($rank == 1) ? 
-            count($color_ramp) - 1 : 
-            floor($rank * $this->options['scale']['steps']);
-          $points[$i]['point'] = array(
-            'point-width' => $color_ramp[$ramp_idx],
-            'point-height' => $color_ramp[$ramp_idx]);
+        for ($i = 0; $i < ($this->options['scale']['steps'] - 1); $i++) {
+          $points[$i]['marker'] = array(
+            'marker-width' =>  $scale_ramp[$i],
+            'marker-height' => $scale_ramp[$i]);
+          $points[$i]['filter'] = $this->options['fields']['value'] .
+            '<' . $value_ramp[$i] .
+            '][' . $this->options['fields']['value'].
+            '>' . $value_ramp[$i + 1] . '';
         }
       }
       return $points;
@@ -464,6 +475,7 @@ class views_plugin_style_mapfile extends views_plugin_style {
             $point['description'] = $row[$key];
           }
         }
+        $point['filter'] = $point['join_field_name'] . ' = "' . $join_field_value . '"';
         $points[$join_field_value] = $point;
       }
       return $points;

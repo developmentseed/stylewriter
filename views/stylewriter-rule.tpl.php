@@ -14,7 +14,7 @@
  * conversion from an array
  */
 ?>
-#data [<?php echo $join_field_name; ?> = "<?php echo $join_field_value; ?>"] {
+#data[<?php echo $filter; ?>]{
 
 /* polygon */
 
@@ -35,12 +35,12 @@
 
 /* metawriter */
 
-<?php if ($metawriter): ?>
+<?php /* if ($metawriter): ?>
 <?php unset($metawriter['enable']); ?>
   <?php foreach($metawriter as $k => $v): ?>
     <?php echo "$k: \"$v\";"; ?>
   <?php endforeach; ?>
-<?php endif; ?>
+<?php endif; */ ?>
 
 /* point */
 
@@ -50,5 +50,13 @@
     <?php echo "$k: $v;"; ?>
   <?php endforeach; ?>
   point-file: url('http://cascadenik-sampledata.s3.amazonaws.com/purple-point.png');
+<?php endif; ?>
+
+/* marker */
+<?php if ($marker): ?>
+<?php unset($marker['enable']); ?>
+  <?php foreach($marker as $k => $v): ?>
+    <?php echo "$k: $v;"; ?>
+  <?php endforeach; ?>
 <?php endif; ?>
 }

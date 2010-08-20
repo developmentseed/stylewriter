@@ -13,12 +13,12 @@ function template_preprocess_stylewriter_mapfile(&$vars) {
   foreach ($points as $point) {
 
     $rows .= theme('stylewriter_rule',
-      $point['join_field_name'],
-      $point['join_field_value'],
+      $point['filter'],
       $point['polygon'],
       $view->style_plugin->options['colors']['stroke'],
       $view->style_plugin->options['metawriter'],
-      $point['point']
+      $point['point'],
+      $point['marker']
     );
   }
   if ($view->style_plugin->options['fields']['data_type'] == 'shape') {
