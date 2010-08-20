@@ -65,6 +65,7 @@ class openlayers_layer_type_stylewriter extends openlayers_layer_type {
       'base_url' => array(
         '#type' => 'textfield',
         '#title' => t('Base URL'),
+        '#required' => TRUE,
         '#description' => t('The base URL of the tile server.'),
         '#default_value' => $this->data['base_url']
       ),
@@ -76,6 +77,7 @@ class openlayers_layer_type_stylewriter extends openlayers_layer_type {
         '#type' => 'select',
         '#default_value' => $this->data['style_view'],
         '#title' => t('Style View'),
+        '#required' => TRUE,
         '#options' => $this->stylewriter_options(),
         '#description' => t('View with Stylewriter display plugin and style 
           plugin that provides style files')

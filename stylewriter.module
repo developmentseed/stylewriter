@@ -137,6 +137,7 @@ function stylewriter_openlayers_layer_types() {
         'parent' => 'openlayers_layer_type',
       ),
     ),
+    /*
     'openlayers_layer_type_stylewriter_interaction' => array(
       'title' => t('Stylewriter Interaction'),
       'description' => t('Stylewriter Dynamic Map Interaction'),
@@ -148,6 +149,7 @@ function stylewriter_openlayers_layer_types() {
         'parent' => 'openlayers_layer_type',
       ),
     ),
+     */
   );
 }
 
