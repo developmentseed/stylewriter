@@ -321,6 +321,13 @@ class views_plugin_style_mapfile extends views_plugin_style {
           '#default_value' => $this->options['scale']['steps'],
         );
 
+        $form['postfix'] = array(
+          '#type' => 'textarea',
+          '#title' => t('Postfix content'),
+          '#process' => array('views_process_dependency'),
+          '#default_value' => $this->options['postfix'],
+        );
+
         /*=== MetaWriter =======*/
         $form['metawriter']['enable'] = array(
           '#type' => 'checkbox',
@@ -348,6 +355,11 @@ class views_plugin_style_mapfile extends views_plugin_style {
       }
     }
 
+    /**
+     * field_names
+     *
+     * @return array of field names on this view
+     */
     function field_names() {
       return array_keys($this->view->field);
     }
@@ -360,6 +372,21 @@ class views_plugin_style_mapfile extends views_plugin_style {
     function map_rows($rows) {
       // Fields must be rendered in order as of Views 2.3, 
       // so we will pre-render everything.
+     
+      $handlers = $this->display->handler->get_handlers('field');
+      $fields = array();
+      foreach ($handlers as $field_id => $handler) {
+        $fields[$field_id] = $handler->definition;
+        $fields[$field_id]['field_alias'] = $handler->field_alias;
+      }
+
+      $rendered_record = $rendered_records = array();
+      foreach ($rows as $records) {
+        foreach ($handlers as $hid => $handler) {
+          $rendered_record[$handler->field_alias] = $handler->advanced_render($records);
+        }
+        $rendered_records[] = $rendered_record;
+      }
       
       $renders = array();
       $keys = array_keys($this->view->field);
@@ -410,7 +437,7 @@ class views_plugin_style_mapfile extends views_plugin_style {
       }
       elseif ($this->options['scale']['enable']) {
         $points = $values = array();
-        foreach ($renders as $id => $row) {
+        foreach ($rendered_records as $id => $row) {
           foreach ($this->view->field as $key => $field) {
             if ($key == $this->options['fields']['value']) {
               $values[] = floatval($row[$key]);
@@ -434,12 +461,12 @@ class views_plugin_style_mapfile extends views_plugin_style {
 
         for ($i = 0; $i < ($this->options['scale']['steps'] - 1); $i++) {
           $points[$i]['marker'] = array(
-            'marker-width' =>  $scale_ramp[$i],
-            'marker-height' => $scale_ramp[$i]);
-          $points[$i]['filter'] = $this->options['fields']['value'] .
-            '<' . $value_ramp[$i] .
-            '][' . $this->options['fields']['value'].
-            '>' . $value_ramp[$i + 1] . '';
+            'marker-width' =>  intval($scale_ramp[$i]),
+            'marker-height' => intval($scale_ramp[$i]));
+          $points[$i]['filter'] = $this->options['fields']['value'] . '_rendered' .
+            '>' . $value_ramp[$i] .
+            '][' . $this->options['fields']['value'] . '_rendered' .
+            '<' . $value_ramp[$i + 1] . '';
         }
       }
       return $points;
@@ -572,6 +599,15 @@ class views_plugin_style_mapfile extends views_plugin_style {
       }
     }
 
+    /**
+     * This will return a legend for maps that are styled via 
+     * stylewriter
+     *
+     * @param points
+     * @param values
+     * @param $label
+     * @return $themed_html Themed HTML
+     */
     function theme_legend($points, $values, $label) {
       $swatches = '';
       foreach ($points as $point) {

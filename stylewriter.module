@@ -81,6 +81,7 @@ function stylewriter_theme() {
         'metawriter' => array(),
         'point' => array(),
         'marker' => array(),
+        'postfix' => array(),
       ),
       'file' => 'stylewriter.theme.inc',
       'template' => 'stylewriter-rule',

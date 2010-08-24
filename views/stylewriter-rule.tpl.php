@@ -59,4 +59,8 @@
     <?php echo "$k: $v;"; ?>
   <?php endforeach; ?>
 <?php endif; ?>
+
+/* postfix */
+<?php echo $postfix; ?>
+
 }

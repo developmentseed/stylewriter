@@ -134,10 +134,10 @@ class openlayers_layer_type_stylewriter extends openlayers_layer_type {
       $view->execute();
       if ($view->style_plugin instanceof views_plugin_style_mapfile) {
         $legend_data = $view->style_plugin->legend_data($view->result);
-        return $view->style_plugin->theme_legend(
+        return ($legend_data['points']) ? $view->style_plugin->theme_legend(
           $legend_data['points'], 
           $legend_data['values'], 
-          $view->get_title());
+          $view->get_title()) : '';
       }
     }
   }

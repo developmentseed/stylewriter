@@ -18,7 +18,8 @@ function template_preprocess_stylewriter_mapfile(&$vars) {
       $view->style_plugin->options['colors']['stroke'],
       $view->style_plugin->options['metawriter'],
       $point['point'],
-      $point['marker']
+      $point['marker'],
+      $view->style_plugin->options['postfix']
     );
   }
   if ($view->style_plugin->options['fields']['data_type'] == 'shape') {

@@ -224,19 +224,19 @@ OpenLayers.Control.GridHover = OpenLayers.Class(OpenLayers.Control, {
         if (this.archive[$(this.target).attr('src')]) {
           // console.log('offsetting');
           grid = this.archive[$(this.target).attr('src')]
-          offset = [
-                Math.floor((evt.pageX - $(evt.target).offset().left) / 4),
-                Math.floor((evt.pageY - $(evt.target).offset().top) / 4)];
           if (grid === true) { // is downloading
             console.log('downloading');
             return;
           }
+          offset = [
+                Math.floor((evt.pageX - $(evt.target).offset().left) / 4),
+                Math.floor((evt.pageY - $(evt.target).offset().top) / 4)];
           if(grid[offset[1]][offset[0]]) {
             key = grid[offset[1]][offset[0]];
             if (key !== this.key) {
-              console.log('called out');
               this.callbacks['out'](this.layer.options.keymap[this.key], this.layer);
             }
+            // save this key so that we know whether the next access is to this
             this.key = key;
             if (this.layer.options.keymap[key]) {
               this.callbacks['over'](this.layer.options.keymap[this.key], this.layer);
@@ -275,13 +275,14 @@ OpenLayers.Control.GridHover = OpenLayers.Class(OpenLayers.Control, {
       // Quick RLE decompression, this could be faster
       for (var i = 0; i < g.length; i++) {
         a = g[i].split(':');
+        l = parseInt(a[0], 10);
         if (a.length == 1) {
-          for (j = 0; j < parseInt(a[0], 10); j++) {
+          for (j = 0; j < l; j++) {
             x.push(false);
           }
         }
         else {
-          for (j = 0; j < parseInt(a[0], 10); j++) {
+          for (j = 0; j < l; j++) {
             x.push(a[1]);
           }
         }

@@ -6,6 +6,12 @@
  */
 
 
+/**
+ * TODO: this function is not functional with 
+ * TileLive v2
+ * @param $url the full URL of a json resource
+ * @param $params params that are used in POSTFIELDS
+ */
 function stylewriter_get_json_url($url, $params) {
   // Copied from http_request.inc in Feeds
   // TODO: work without curl
@@ -28,6 +34,12 @@ function stylewriter_get_json_url($url, $params) {
   return json_decode($result->data);
 }
 
+/**
+ * TODO: this function is not functional with 
+ * TileLive v2
+ *
+ * This runs in a form submission callback
+ */
 function stylewriter_cache_clear(&$form, &$form_state) {
   $data_facets = $form_state['values']['cache']['wbapi_cache_data_facets'];
   $mapfile_facts = $form_state['values']['cache']['wbapi_cache_mapfile_facets'];
