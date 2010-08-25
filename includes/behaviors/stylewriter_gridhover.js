@@ -19,6 +19,26 @@
  */
 OpenLayers.Control.GridHover = OpenLayers.Class(OpenLayers.Control, {
 
+    encode_base64: function(data) {
+      var out = "", c1, c2, c3, e1, e2, e3, e4;
+      var tab = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+      for (var i = 0; i < data.length; ) {
+         c1 = data.charCodeAt(i++);
+         c2 = data.charCodeAt(i++);
+         c3 = data.charCodeAt(i++);
+         e1 = c1 >> 2;
+         e2 = ((c1 & 3) << 4) + (c2 >> 4);
+         e3 = ((c2 & 15) << 2) + (c3 >> 6);
+         e4 = c3 & 63;
+         if (isNaN(c2))
+           e3 = e4 = 64;
+         else if (isNaN(c3))
+           e4 = 64;
+         out += tab.charAt(e1) + tab.charAt(e2) + tab.charAt(e3) + tab.charAt(e4);
+      }
+      return out;
+    },
+
    /**
      * APIProperty: hover
      * {Boolean} Send GetFeatureInfo requests when mouse stops moving.
@@ -109,10 +129,6 @@ OpenLayers.Control.GridHover = OpenLayers.Class(OpenLayers.Control, {
         options.handlerOptions = options.handlerOptions || {};
 
         OpenLayers.Control.prototype.initialize.apply(this, [options]);
-        
-        if(this.drillDown === true) {
-            this.hover = false;
-        }
 
         this.handler = new OpenLayers.Handler.Hover(
           this, {
@@ -214,7 +230,7 @@ OpenLayers.Control.GridHover = OpenLayers.Class(OpenLayers.Control, {
                   success: $.proxy(this.readDone, this),
                   error: function() {},
                   dataType: 'jsonp',
-                  jsonpCallback: "f" + $.map($(evt.target).attr('src').split('/'), parseInt).slice(-3).join('x')
+                  jsonpCallback: "f" +this.encode_base64($.map($(evt.target).attr('src')))
                 }
               );
             } catch(err) {

@@ -1,4 +1,5 @@
 <?php
+// $Id$
 
 class stylewriter_pointhover extends openlayers_behavior {
   /**

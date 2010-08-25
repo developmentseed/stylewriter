@@ -17,6 +17,26 @@
  *  - <OpenLayers.Control>
  */
 OpenLayers.Control.PointHover = OpenLayers.Class(OpenLayers.Control, {
+    encode_base64: function(data) {
+      var out = "", c1, c2, c3, e1, e2, e3, e4;
+      // modified for function names
+      var tab = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789___";
+      for (var i = 0; i < data.length; ) {
+         c1 = data.charCodeAt(i++);
+         c2 = data.charCodeAt(i++);
+         c3 = data.charCodeAt(i++);
+         e1 = c1 >> 2;
+         e2 = ((c1 & 3) << 4) + (c2 >> 4);
+         e3 = ((c2 & 15) << 2) + (c3 >> 6);
+         e4 = c3 & 63;
+         if (isNaN(c2))
+           e3 = e4 = 64;
+         else if (isNaN(c3))
+           e4 = 64;
+         out += tab.charAt(e1) + tab.charAt(e2) + tab.charAt(e3) + tab.charAt(e4);
+      }
+      return out;
+    },
 
    /**
      * APIProperty: hover
@@ -25,6 +45,21 @@ OpenLayers.Control.PointHover = OpenLayers.Class(OpenLayers.Control, {
      */
     hover: false,
 
+    /**
+     * APIProperty: drillDown
+     * {Boolean} Drill down over all WMS layers in the map. When
+     *     using drillDown mode, hover is not possible, and an infoFormat that
+     *     returns parseable features is required. Default is false.
+     */
+    drillDown: false,
+
+    /**
+     * APIProperty: maxFeatures
+     * {Integer} Maximum number of features to return from a WMS query. This
+     *     sets the feature_count parameter on WMS GetFeatureInfo
+     *     requests.
+     */
+    maxFeatures: 10,
 
     /** APIProperty: clickCallback
      *  {String} The click callback to register in the
@@ -32,6 +67,14 @@ OpenLayers.Control.PointHover = OpenLayers.Class(OpenLayers.Control, {
      *      option is set to false. Default is "click".
      */
     clickCallback: "click",
+    
+    /**
+     * Property: layers
+     * {Array(<OpenLayers.Layer.WMS>)} The layers to query for feature info.
+     *     If omitted, all map WMS layers with a url that matches this <url> or
+     *     <layerUrls> will be considered.
+     */
+    layers: null,
 
     /**
      * Property: queryVisible
@@ -39,13 +82,27 @@ OpenLayers.Control.PointHover = OpenLayers.Class(OpenLayers.Control, {
      *     layers to query.  Default is false.
      */
     queryVisible: false,
+
+    /**
+     * Property: url
+     * {String} The URL of the WMS service to use.  If not provided, the url
+     *     of the first eligible layer will be used.
+     */
+    url: null,
     
     /**
      * Property: format
      * {<OpenLayers.Format>} A format for parsing GetFeatureInfo responses.
-     *     Default is <OpenLayers.Format.GeoJSON>.
+     *     Default is <OpenLayers.Format.WMSGetFeatureInfo>.
      */
     format: null,
+    
+    /**
+     * Property: formatOptions
+     * {Object} Optional properties to set on the format (if one is not provided
+     *     in the <format> property.
+     */
+    formatOptions: null,
 
     /**
      * APIProperty: handlerOptions
@@ -72,21 +129,47 @@ OpenLayers.Control.PointHover = OpenLayers.Class(OpenLayers.Control, {
      */
     hoverRequest: null,
     
-    /**
-     * Keyed index of tile feature information
-     */
     archive: {},
+    /**
+     * Constant: EVENT_TYPES
+     *
+     * Supported event types (in addition to those from <OpenLayers.Control>):
+     * beforegetfeatureinfo - Triggered before the request is sent.
+     *      The event object has an *xy* property with the position of the 
+     *      mouse click or hover event that triggers the request.
+     * getfeatureinfo - Triggered when a GetFeatureInfo response is received.
+     *      The event object has a *text* property with the body of the
+     *      response (String), a *features* property with an array of the
+     *      parsed features, an *xy* property with the position of the mouse
+     *      click or hover event that triggered the request, and a *request*
+     *      property with the request itself. If drillDown is set to true and
+     *      multiple requests were issued to collect feature info from all
+     *      layers, *text* and *request* will only contain the response body
+     *      and request object of the last request.
+     */
+    EVENT_TYPES: ["beforegetfeatureinfo", "getfeatureinfo"],
 
     /**
+     * Constructor: <OpenLayers.Control.WMSGetFeatureInfo>
+     *
      * Parameters:
      * options - {Object} 
      */
     initialize: function(options) {
+        // concatenate events specific to vector with those from the base
+        // this.EVENT_TYPES =
+        //     OpenLayers.Control.WMSGetFeatureInfo.prototype.EVENT_TYPES.concat(
+        //     OpenLayers.Control.prototype.EVENT_TYPES
+        // );
+
         options = options || {};
         options.handlerOptions = options.handlerOptions || {};
 
         OpenLayers.Control.prototype.initialize.apply(this, [options]);
         
+        if(this.drillDown === true) {
+            this.hover = false;
+        }
         this.format = new OpenLayers.Format.GeoJSON();
 
         this.handler = new OpenLayers.Handler.Hover(
@@ -154,6 +237,7 @@ OpenLayers.Control.PointHover = OpenLayers.Class(OpenLayers.Control, {
         if (this.archive[$(this.target).attr('src')]) {
           grid = this.archive[$(this.target).attr('src')]
           if (grid === true || grid == undefined) { // is downloading
+            // console.log('downloading');
             return;
           }
           lonLat = this.map.getLonLatFromPixel(evt.xy);
@@ -161,11 +245,13 @@ OpenLayers.Control.PointHover = OpenLayers.Class(OpenLayers.Control, {
           here = new OpenLayers.Geometry.Point(lonLat.lon, lonLat.lat);
           for(var i = 0; i < grid.length; i++) {
             if(grid[i].geometry.containsPoint(here)) {
-              console.log('HIT');
+              this.callbacks['over'](grid[i].attributes, this.layer);
+              return;
             }
           }
+          this.callbacks['out']();
+          /*
           if(true) {
-            /*
             key = grid[offset[1]][offset[0]];
             if (key !== this.key) {
               this.callbacks['out'](this.layer.options.keymap[this.key], this.layer);
@@ -175,14 +261,15 @@ OpenLayers.Control.PointHover = OpenLayers.Class(OpenLayers.Control, {
             if (this.layer.options.keymap[key]) {
               this.callbacks['over'](this.layer.options.keymap[this.key], this.layer);
             }
-            */
           }
           else {
             this.callbacks['out'](this.layer.options.keymap[this.key], this.layer);
           }
+          */
         }
         else {
           this.callbacks['out']({}, this.layer);
+          // console.log('dling');
           if (!this.archive[$(evt.target).attr('src')]) {
             this.target.req = true;
             try {
@@ -194,7 +281,7 @@ OpenLayers.Control.PointHover = OpenLayers.Class(OpenLayers.Control, {
                   success: $.proxy(this.readDone, this),
                   error: function() {},
                   dataType: 'jsonp',
-                  jsonpCallback: "f" + $.map($(evt.target).attr('src').split('/'), parseInt).slice(-3).join('x')
+                  jsonpCallback: "f" +this.encode_base64($(evt.target).attr('src'))
                 }
               );
             } catch(err) {
@@ -205,6 +292,9 @@ OpenLayers.Control.PointHover = OpenLayers.Class(OpenLayers.Control, {
     },
 
     readDone: function(data) {
+      var l = new OpenLayers.Layer.Vector('new vec');
+      l.addFeatures(this.format.read(data));
+      this.layer.map.addLayer(l);
       this.archive[$(this.target).attr('src')] = this.format.read(data);
     },
     CLASS_NAME: "OpenLayers.Control.PointHover"
@@ -212,7 +302,7 @@ OpenLayers.Control.PointHover = OpenLayers.Class(OpenLayers.Control, {
 
 
 /**
- * OpenLayers Point Hover Behavior
+ * OpenLayers Zoom to Layer Behavior
  */
 Drupal.behaviors.stylewriter_pointhover = function(context) {
   var layers, data = $(context).data('openlayers');
@@ -242,6 +332,8 @@ Drupal.StyleWriterTooltips.click = function(feature) {
   if (feature.attributes.description) {
     html += feature.attributes.description;
   }
+  // @TODO: Make this a behavior option and allow interaction with other
+  // behaviors like the MN story popup.
   var link;
   if ($(html).is('a')) {
     link = $(html);
