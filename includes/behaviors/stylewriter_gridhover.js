@@ -13,10 +13,11 @@
  */
 
 /**
+ * Class: OpenLayers.Control.GridHover
  * Inherits from:
  *  - <OpenLayers.Control>
  */
-OpenLayers.Control.PointHover = OpenLayers.Class(OpenLayers.Control, {
+OpenLayers.Control.GridHover = OpenLayers.Class(OpenLayers.Control, {
 
    /**
      * APIProperty: hover
@@ -24,7 +25,6 @@ OpenLayers.Control.PointHover = OpenLayers.Class(OpenLayers.Control, {
      *     Default is false.
      */
     hover: false,
-
 
     /** APIProperty: clickCallback
      *  {String} The click callback to register in the
@@ -39,11 +39,11 @@ OpenLayers.Control.PointHover = OpenLayers.Class(OpenLayers.Control, {
      *     layers to query.  Default is false.
      */
     queryVisible: false,
-    
+
     /**
      * Property: format
      * {<OpenLayers.Format>} A format for parsing GetFeatureInfo responses.
-     *     Default is <OpenLayers.Format.GeoJSON>.
+     *     Default is <OpenLayers.Format.WMSGetFeatureInfo>.
      */
     format: null,
 
@@ -72,22 +72,47 @@ OpenLayers.Control.PointHover = OpenLayers.Class(OpenLayers.Control, {
      */
     hoverRequest: null,
     
-    /**
-     * Keyed index of tile feature information
-     */
     archive: {},
+    /**
+     * Constant: EVENT_TYPES
+     *
+     * Supported event types (in addition to those from <OpenLayers.Control>):
+     * beforegetfeatureinfo - Triggered before the request is sent.
+     *      The event object has an *xy* property with the position of the 
+     *      mouse click or hover event that triggers the request.
+     * getfeatureinfo - Triggered when a GetFeatureInfo response is received.
+     *      The event object has a *text* property with the body of the
+     *      response (String), a *features* property with an array of the
+     *      parsed features, an *xy* property with the position of the mouse
+     *      click or hover event that triggered the request, and a *request*
+     *      property with the request itself. If drillDown is set to true and
+     *      multiple requests were issued to collect feature info from all
+     *      layers, *text* and *request* will only contain the response body
+     *      and request object of the last request.
+     */
+    EVENT_TYPES: ["beforegetfeatureinfo", "getfeatureinfo"],
 
     /**
+     * Constructor: <OpenLayers.Control.GridHover>
+     *
      * Parameters:
      * options - {Object} 
      */
     initialize: function(options) {
+        // concatenate events specific to vector with those from the base
+        // this.EVENT_TYPES =
+        //     OpenLayers.Control.WMSGetFeatureInfo.prototype.EVENT_TYPES.concat(
+        //     OpenLayers.Control.prototype.EVENT_TYPES
+        // );
+
         options = options || {};
         options.handlerOptions = options.handlerOptions || {};
 
         OpenLayers.Control.prototype.initialize.apply(this, [options]);
         
-        this.format = new OpenLayers.Format.GeoJSON();
+        if(this.drillDown === true) {
+            this.hover = false;
+        }
 
         this.handler = new OpenLayers.Handler.Hover(
           this, {
@@ -152,20 +177,16 @@ OpenLayers.Control.PointHover = OpenLayers.Class(OpenLayers.Control, {
     getInfoForHover: function(evt) {
         this.target = evt.target;
         if (this.archive[$(this.target).attr('src')]) {
+          // console.log('offsetting');
           grid = this.archive[$(this.target).attr('src')]
-          if (grid === true || grid == undefined) { // is downloading
+          if (grid === true) { // is downloading
+            console.log('downloading');
             return;
           }
-          lonLat = this.map.getLonLatFromPixel(evt.xy);
-          lonLat.transform(new OpenLayers.Projection('EPSG:900913'), new OpenLayers.Projection('EPSG:4326'));
-          here = new OpenLayers.Geometry.Point(lonLat.lon, lonLat.lat);
-          for(var i = 0; i < grid.length; i++) {
-            if(grid[i].geometry.containsPoint(here)) {
-              console.log('HIT');
-            }
-          }
-          if(true) {
-            /*
+          offset = [
+                Math.floor((evt.pageX - $(evt.target).offset().left) / 4),
+                Math.floor((evt.pageY - $(evt.target).offset().top) / 4)];
+          if(grid[offset[1]][offset[0]]) {
             key = grid[offset[1]][offset[0]];
             if (key !== this.key) {
               this.callbacks['out'](this.layer.options.keymap[this.key], this.layer);
@@ -175,7 +196,6 @@ OpenLayers.Control.PointHover = OpenLayers.Class(OpenLayers.Control, {
             if (this.layer.options.keymap[key]) {
               this.callbacks['over'](this.layer.options.keymap[this.key], this.layer);
             }
-            */
           }
           else {
             this.callbacks['out'](this.layer.options.keymap[this.key], this.layer);
@@ -189,7 +209,7 @@ OpenLayers.Control.PointHover = OpenLayers.Class(OpenLayers.Control, {
               this.archive[$(evt.target).attr('src')] = true;
               this.target.hoverRequest = $.ajax(
                 {
-                  'url': $(evt.target).attr('src').replace('png', 'json'), 
+                  'url': $(evt.target).attr('src').replace('png', 'grid.json'), 
                   context: this,
                   success: $.proxy(this.readDone, this),
                   error: function() {},
@@ -205,22 +225,39 @@ OpenLayers.Control.PointHover = OpenLayers.Class(OpenLayers.Control, {
     },
 
     readDone: function(data) {
-      this.archive[$(this.target).attr('src')] = this.format.read(data);
+      var g = data.features.split('|');
+      var x = [];
+      // Quick RLE decompression, this could be faster
+      for (var i = 0; i < g.length; i++) {
+        a = g[i].split(':');
+        l = parseInt(a[0], 10);
+        if (a.length == 1) {
+          for (j = 0; j < l; j++) {
+            x.push(false);
+          }
+        }
+        else {
+          for (j = 0; j < l; j++) {
+            x.push(a[1]);
+          }
+        }
+      }
+      var grid = [];
+      for (var i = 0; i < 64; i++) {
+        grid[i] = x.splice(0, 64);
+      }
+      this.archive[$(this.target).attr('src')] = grid;
     },
-    CLASS_NAME: "OpenLayers.Control.PointHover"
+    CLASS_NAME: "OpenLayers.Control.GridHover"
 });
 
-
-/**
- * OpenLayers Point Hover Behavior
- */
-Drupal.behaviors.stylewriter_pointhover = function(context) {
+Drupal.behaviors.stylewriter_gridhover = function(context) {
   var layers, data = $(context).data('openlayers');
-  if (data && data.map.behaviors['stylewriter_pointhover']) {
+  if (data && data.map.behaviors['stylewriter_gridhover']) {
     map = data.openlayers;
     layer = map.getLayersBy('drupalID', 
-      data.map.behaviors['stylewriter_pointhover'].layer)[0];
-    h = new OpenLayers.Control.PointHover({
+      data.map.behaviors['stylewriter_gridhover'].layer)[0];
+    h = new OpenLayers.Control.GridHover({
       layer: layer,
       callbacks: {
         'over': Drupal.StyleWriterTooltips.select,
