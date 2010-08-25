@@ -13,18 +13,10 @@
  */
 
 /**
- * Class: OpenLayers.Control.WMSGetFeatureInfo
- * The WMSGetFeatureInfo control uses a WMS query to get information about a point on the map.  The
- * information may be in a display-friendly format such as HTML, or a machine-friendly format such 
- * as GML, depending on the server's capabilities and the client's configuration.  This control 
- * handles click or hover events, attempts to parse the results using an OpenLayers.Format, and 
- * fires a 'getfeatureinfo' event with the click position, the raw body of the response, and an 
- * array of features if it successfully read the response.
- *
  * Inherits from:
  *  - <OpenLayers.Control>
  */
-OpenLayers.Control.GridHover = OpenLayers.Class(OpenLayers.Control, {
+OpenLayers.Control.PointHover = OpenLayers.Class(OpenLayers.Control, {
 
    /**
      * APIProperty: hover
@@ -158,6 +150,7 @@ OpenLayers.Control.GridHover = OpenLayers.Class(OpenLayers.Control, {
         if(this.drillDown === true) {
             this.hover = false;
         }
+        this.format = new OpenLayers.Format.GeoJSON();
 
         this.handler = new OpenLayers.Handler.Hover(
           this, {
@@ -224,14 +217,21 @@ OpenLayers.Control.GridHover = OpenLayers.Class(OpenLayers.Control, {
         if (this.archive[$(this.target).attr('src')]) {
           // console.log('offsetting');
           grid = this.archive[$(this.target).attr('src')]
-          if (grid === true) { // is downloading
+          if (grid === true || grid == undefined) { // is downloading
             console.log('downloading');
             return;
           }
           offset = [
                 Math.floor((evt.pageX - $(evt.target).offset().left) / 4),
                 Math.floor((evt.pageY - $(evt.target).offset().top) / 4)];
-          if(grid[offset[1]][offset[0]]) {
+          lonLat = this.map.getLonLatFromPixel(evt.xy);
+          for(var i = 0; i < grid.length; i++) {
+            if(grid[i].geometry.intersects(new OpenLayers.Geometry.Point(lonLat.x, lonLat.y))) {
+              console.log(grid[i]);
+            }
+          }
+          if(true) {
+            /*
             key = grid[offset[1]][offset[0]];
             if (key !== this.key) {
               this.callbacks['out'](this.layer.options.keymap[this.key], this.layer);
@@ -241,6 +241,7 @@ OpenLayers.Control.GridHover = OpenLayers.Class(OpenLayers.Control, {
             if (this.layer.options.keymap[key]) {
               this.callbacks['over'](this.layer.options.keymap[this.key], this.layer);
             }
+            */
           }
           else {
             this.callbacks['out'](this.layer.options.keymap[this.key], this.layer);
@@ -248,13 +249,14 @@ OpenLayers.Control.GridHover = OpenLayers.Class(OpenLayers.Control, {
         }
         else {
           this.callbacks['out']({}, this.layer);
+          console.log('dling');
           if (!this.archive[$(evt.target).attr('src')]) {
             this.target.req = true;
             try {
               this.archive[$(evt.target).attr('src')] = true;
               this.target.hoverRequest = $.ajax(
                 {
-                  'url': $(evt.target).attr('src').replace('png', 'grid.json'), 
+                  'url': $(evt.target).attr('src').replace('png', 'json'), 
                   context: this,
                   success: $.proxy(this.readDone, this),
                   error: function() {},
@@ -270,30 +272,9 @@ OpenLayers.Control.GridHover = OpenLayers.Class(OpenLayers.Control, {
     },
 
     readDone: function(data) {
-      var g = data.features.split('|');
-      var x = [];
-      // Quick RLE decompression, this could be faster
-      for (var i = 0; i < g.length; i++) {
-        a = g[i].split(':');
-        l = parseInt(a[0], 10);
-        if (a.length == 1) {
-          for (j = 0; j < l; j++) {
-            x.push(false);
-          }
-        }
-        else {
-          for (j = 0; j < l; j++) {
-            x.push(a[1]);
-          }
-        }
-      }
-      var grid = [];
-      for (var i = 0; i < 64; i++) {
-        grid[i] = x.splice(0, 64);
-      }
-      this.archive[$(this.target).attr('src')] = grid;
+      this.archive[$(this.target).attr('src')] = this.format.read(data);
     },
-    CLASS_NAME: "OpenLayers.Control.GridHover"
+    CLASS_NAME: "OpenLayers.Control.PointHover"
 });
 
 
@@ -306,7 +287,7 @@ Drupal.behaviors.stylewriter_pointhover = function(context) {
     map = data.openlayers;
     layer = map.getLayersBy('drupalID', 
       data.map.behaviors['stylewriter_pointhover'].layer)[0];
-    h = new OpenLayers.Control.GridHover({
+    h = new OpenLayers.Control.PointHover({
       layer: layer,
       callbacks: {
         'over': Drupal.StyleWriterTooltips.select,

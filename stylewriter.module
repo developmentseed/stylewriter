@@ -161,6 +161,15 @@ function stylewriter_openlayers_layer_types() {
  */
 function stylewriter_openlayers_behaviors() {
   return array(
+    'stylewriter_gridhover' => array(
+      'title' => t('StyleWriter GridHover'),
+      'behavior' => array(
+        'path' => drupal_get_path('module', 'stylewriter') .'/includes/behaviors',
+        'file' =>  'stylewriter_gridhover.inc',
+        'class' => 'stylewriter_gridhover',
+        'parent' => 'openlayers_behavior',
+      ),
+    ),
     'stylewriter_pointhover' => array(
       'title' => t('StyleWriter PointHover'),
       'behavior' => array(

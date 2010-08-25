@@ -58,6 +58,10 @@
   <?php foreach($marker as $k => $v): ?>
     <?php echo "$k: $v;"; ?>
   <?php endforeach; ?>
+  <?php if ($metawriter['enable']): ?>
+    marker-meta-writer: "meta1";
+    marker-meta-output: "<?php echo ($metawriter['meta-output']); ?>";
+  <?php endif; ?>
 <?php endif; ?>
 
 /* postfix */
