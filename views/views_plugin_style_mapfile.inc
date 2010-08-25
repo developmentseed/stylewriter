@@ -405,13 +405,14 @@ class views_plugin_style_mapfile extends views_plugin_style {
           foreach ($this->view->field as $key => $field) {
             $point['join_field_name'] = $this->options['fields']['join_field_name'];
             if ($key == $this->options['fields']['join_field']) {
-              $point['filter'] = $point['join_field_name'] . ' = "' . $join_field_value . '"';
+              $join_field_value = $row[$key];
             }
             if ($key == $this->options['fields']['value']) {
               $point['value'] = $row[$key];
               $values[] = floatval($row[$key]);
             }
           }
+          $point['filter'] = $point['join_field_name'] . ' = "' . $join_field_value . '"';
           $points[] = $point;
         }
 
@@ -490,9 +491,7 @@ class views_plugin_style_mapfile extends views_plugin_style {
       foreach ($renders as $id => $row) {
         $point = array();
         foreach ($this->view->field as $key => $field) {
-          // $point['join_field_name'] = $this->options['fields']['join_field_name'];
           if ($key == $this->options['fields']['join_field']) {
-            // $point['join_field_value'] = $row[$key];
             $join_field_value = $row[$key];
           }
           if ($key == $this->options['fields']['join_field']) {
