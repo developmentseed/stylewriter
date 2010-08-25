@@ -65,6 +65,6 @@
 <?php endif; ?>
 
 /* postfix */
-<?php echo $postfix; ?>
+<?php if($postfix) { echo $postfix; } ?>
 
 }
