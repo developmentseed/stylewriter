@@ -218,10 +218,8 @@ OpenLayers.Control.GridHover = OpenLayers.Class(OpenLayers.Control, {
     getInfoForHover: function(evt) {
         this.target = evt.target;
         if (this.archive[$(this.target).attr('src')]) {
-          // console.log('offsetting');
           grid = this.archive[$(this.target).attr('src')]
           if (grid === true) { // is downloading
-            console.log('downloading');
             return;
           }
           offset = [
@@ -246,7 +244,7 @@ OpenLayers.Control.GridHover = OpenLayers.Class(OpenLayers.Control, {
           this.callbacks['out']({}, this.layer);
           if (!this.archive[$(evt.target).attr('src')]) {
             this.target.req = true;
-            // try {
+            try {
               this.archive[$(evt.target).attr('src')] = true;
               this.target.hoverRequest = $.ajax(
                 {
@@ -258,16 +256,14 @@ OpenLayers.Control.GridHover = OpenLayers.Class(OpenLayers.Control, {
                   jsonpCallback: "f" + this.encode_base64_fsafe($(evt.target).attr('src'))
                 }
               );
-            // } catch(err) {
-            //   console.log(err);
-            //   this.archive[$(evt.target).attr('src')] = false;
-            // }
+            } catch(err) {
+              this.archive[$(evt.target).attr('src')] = false;
+            }
           }
         }
     },
 
     readDone: function(data) {
-      console.log('read done');
       var g = data.features.split('|');
       var x = [];
       // Quick RLE decompression, this could be faster
