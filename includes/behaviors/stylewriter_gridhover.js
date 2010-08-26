@@ -40,6 +40,30 @@ OpenLayers.Control.GridHover = OpenLayers.Class(OpenLayers.Control, {
       return out;
     },
 
+    /**
+     * A variation of base64 that's function-safe. This could be improved;
+     * in this case it doesn't have to be decodable, just onto
+     */
+    encode_base64_fsafe: function(data) {
+      var out = "", c1, c2, c3, e1, e2, e3, e4;
+      var tab = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789___";
+      for (var i = 0; i < data.length; ) {
+         c1 = data.charCodeAt(i++);
+         c2 = data.charCodeAt(i++);
+         c3 = data.charCodeAt(i++);
+         e1 = c1 >> 2;
+         e2 = ((c1 & 3) << 4) + (c2 >> 4);
+         e3 = ((c2 & 15) << 2) + (c3 >> 6);
+         e4 = c3 & 63;
+         if (isNaN(c2))
+           e3 = e4 = 64;
+         else if (isNaN(c3))
+           e4 = 64;
+         out += tab.charAt(e1) + tab.charAt(e2) + tab.charAt(e3) + tab.charAt(e4);
+      }
+      return out;
+    },
+
    /**
      * APIProperty: hover
      * {Boolean} Send GetFeatureInfo requests when mouse stops moving.
@@ -222,26 +246,28 @@ OpenLayers.Control.GridHover = OpenLayers.Class(OpenLayers.Control, {
           this.callbacks['out']({}, this.layer);
           if (!this.archive[$(evt.target).attr('src')]) {
             this.target.req = true;
-            try {
+            // try {
               this.archive[$(evt.target).attr('src')] = true;
               this.target.hoverRequest = $.ajax(
                 {
-                  'url': $(evt.target).attr('src').replace('png', 'grid.json'), 
+                  'url': $(evt.target).attr('src').replace('png', this.encode_base64(this.join_field) + '.grid.json'), 
                   context: this,
                   success: $.proxy(this.readDone, this),
                   error: function() {},
                   dataType: 'jsonp',
-                  jsonpCallback: "f" +this.encode_base64($.map($(evt.target).attr('src')))
+                  jsonpCallback: "f" + this.encode_base64_fsafe($(evt.target).attr('src'))
                 }
               );
-            } catch(err) {
-              this.archive[$(evt.target).attr('src')] = false;
-            }
+            // } catch(err) {
+            //   console.log(err);
+            //   this.archive[$(evt.target).attr('src')] = false;
+            // }
           }
         }
     },
 
     readDone: function(data) {
+      console.log('read done');
       var g = data.features.split('|');
       var x = [];
       // Quick RLE decompression, this could be faster
@@ -267,24 +293,6 @@ OpenLayers.Control.GridHover = OpenLayers.Class(OpenLayers.Control, {
     },
     CLASS_NAME: "OpenLayers.Control.GridHover"
 });
-
-Drupal.behaviors.stylewriter_gridhover = function(context) {
-  var layers, data = $(context).data('openlayers');
-  if (data && data.map.behaviors['stylewriter_gridhover']) {
-    map = data.openlayers;
-    layer = map.getLayersBy('drupalID', 
-      data.map.behaviors['stylewriter_gridhover'].layer)[0];
-    h = new OpenLayers.Control.GridHover({
-      layer: layer,
-      callbacks: {
-        'over': Drupal.StyleWriterTooltips.select,
-        'out': Drupal.StyleWriterTooltips.unselect
-      }
-    });
-    map.addControl(h);
-    h.activate();
-  }
-};
 
 Drupal.StyleWriterTooltips = {};
 
@@ -335,4 +343,26 @@ Drupal.StyleWriterTooltips.select = function(feature, layer) {
 Drupal.StyleWriterTooltips.unselect = function(feature) {
   $(layer.map.div).css('cursor', 'default');
   $(layer.map.div).children('div.openlayers-tooltip').fadeOut('fast', function() { $(this).remove(); });
+};
+
+/**
+ * Drupal behavior driver
+ */
+Drupal.behaviors.stylewriter_gridhover = function(context) {
+  var layers, data = $(context).data('openlayers');
+  if (data && data.map.behaviors['stylewriter_gridhover']) {
+    map = data.openlayers;
+    layer = map.getLayersBy('drupalID', 
+      data.map.behaviors.stylewriter_gridhover.layer)[0];
+    h = new OpenLayers.Control.GridHover({
+      layer: layer,
+      join_field: data.map.behaviors.stylewriter_gridhover.join_field,
+      callbacks: {
+        'over': Drupal.StyleWriterTooltips.select,
+        'out': Drupal.StyleWriterTooltips.unselect
+      }
+    });
+    map.addControl(h);
+    h.activate();
+  }
 };

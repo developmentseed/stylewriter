@@ -170,6 +170,23 @@ class openlayers_layer_type_stylewriter extends openlayers_layer_type {
   }
 
   /**
+   * get join field name
+   * 
+   * @param string $view_display colon-separated view id
+   * @return string $field_name join field name
+   */
+  function get_joinfield() {
+    list($view_name, $display_name) = explode(':', $this->data['style_view']);
+    if ($view = views_get_view($view_name)) {
+      $view->set_display($display_name);
+      $view->execute();
+      if ($view->style_plugin instanceof views_plugin_style_mapfile) {
+        return $view->style_plugin->options['fields']['join_field_name'];
+      }
+    }
+  }
+
+  /**
    * @param $view_display colon-separated view-display
    *
    * return a string representing the URL of a view that returns a Mapnik style

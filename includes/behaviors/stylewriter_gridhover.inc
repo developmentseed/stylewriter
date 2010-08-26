@@ -31,6 +31,9 @@ class stylewriter_gridhover extends openlayers_behavior {
    * Render.
    */
   function render(&$map) {
+    $layer = openlayers_layer_load($this->options['layer']);
+    $this->options['join_field'] = $layer->get_joinfield();
+
     drupal_add_js(drupal_get_path('module', 'stylewriter') 
       .'/includes/behaviors/stylewriter_gridhover.js');
     return $this->options;
