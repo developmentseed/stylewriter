@@ -1,6 +1,10 @@
 <?php
 // $Id$
 
+/**
+ * @file
+ * StyleWriter PointHover behavior
+ */
 class stylewriter_pointhover extends openlayers_behavior {
   /**
    * Override of options_init().

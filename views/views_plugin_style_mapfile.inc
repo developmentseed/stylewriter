@@ -52,7 +52,8 @@ class views_plugin_style_mapfile extends views_plugin_style {
         foreach ($view->display as $display => $data) {
           $view->set_display($display);
           if ($data->display_plugin == 'feed') {
-            $options[$view->name . ':' . $display] = $view->title . '(' . $view->name . ' - ' . $display . ')';
+            $options[$view->name . ':' . $display] = $view->title . 
+              '(' . $view->name . ' - ' . $display . ')';
           }
         }
         $view->destroy();
@@ -129,7 +130,8 @@ class views_plugin_style_mapfile extends views_plugin_style {
         // Data Source options
         $field_names[$field] = array('' => '--');
         foreach ($handlers as $field => $handler) {
-          $field_names[$field] = ($label = $handler->label()) ? $label : $handler->ui_name();
+          $field_names[$field] = ($label = $handler->label()) ? 
+            $label : $handler->ui_name();
         }
 
         $form['fields'] = array(
@@ -138,14 +140,12 @@ class views_plugin_style_mapfile extends views_plugin_style {
           '#description' => t(''),
           '#weight' => -10,
         );
-
         $form['colors'] = array(
           '#type' => 'fieldset',
           '#title' => 'Colors',
           '#description' => t(''),
           '#weight' => -20,
         );
-
         $form['metawriter'] = array(
           '#type' => 'fieldset',
           '#title' => 'MetaWriter',
@@ -166,7 +166,6 @@ class views_plugin_style_mapfile extends views_plugin_style {
           '#id' => 'stroke-enable',
           '#default_value' => $this->options['colors']['stroke']['enable'],
         );
-
         $form['colors']['stroke']['line-color'] = array(
           '#type' => 'textfield',
           '#title' => t('Stroke color'),
@@ -174,7 +173,6 @@ class views_plugin_style_mapfile extends views_plugin_style {
           '#dependency' => array('stroke-enable' => array('1')),
           '#default_value' => $this->options['colors']['stroke']['line-color'],
         );
-
         $form['colors']['stroke']['line-width'] = array(
           '#type' => 'textfield',
           '#title' => t('Stroke width'),
@@ -182,7 +180,6 @@ class views_plugin_style_mapfile extends views_plugin_style {
           '#dependency' => array('stroke-enable' => array('1')),
           '#default_value' => $this->options['colors']['stroke']['line-width'],
         );
-
         $form['colors']['stroke']['line-opacity'] = array(
           '#type' => 'textfield',
           '#title' => t('Stroke opacity'),
@@ -198,7 +195,6 @@ class views_plugin_style_mapfile extends views_plugin_style {
           '#id' => 'choropleth-enable',
           '#default_value' => $this->options['colors']['choropleth'],
         );
-
         $form['colors']['color_min'] = array(
           '#type' => 'textfield',
           '#title' => t('Minimum color'),
@@ -206,7 +202,6 @@ class views_plugin_style_mapfile extends views_plugin_style {
           '#dependency' => array('choropleth-enable' => array('1')),
           '#default_value' => $this->options['colors']['color_min'],
         );
-
         $form['colors']['color_max'] = array(
           '#type' => 'textfield',
           '#title' => t('Maximum color'),
@@ -214,7 +209,6 @@ class views_plugin_style_mapfile extends views_plugin_style {
           '#dependency' => array('choropleth-enable' => array('1')),
           '#default_value' => $this->options['colors']['color_max'],
         );
-
         $form['colors']['steps'] = array(
           '#type' => 'textfield',
           '#title' => t('Gradations'),
@@ -222,7 +216,6 @@ class views_plugin_style_mapfile extends views_plugin_style {
           '#dependency' => array('choropleth-enable' => array('1')),
           '#default_value' => $this->options['colors']['steps'],
         );
-
         $form['colors']['opacity'] = array(
           '#type' => 'textfield',
           '#title' => t('Opacity'),
@@ -230,7 +223,6 @@ class views_plugin_style_mapfile extends views_plugin_style {
           '#dependency' => array('choropleth-enable' => array('1')),
           '#default_value' => $this->options['colors']['opacity'],
         );
-
 
         /**
          * Data options
@@ -296,7 +288,6 @@ class views_plugin_style_mapfile extends views_plugin_style {
           '#id' => 'scale-enable',
           '#default_value' => $this->options['scale']['enable'],
         );
-
         $form['scale']['min_size'] = array(
           '#type' => 'textfield',
           '#title' => t('Minimum size'),
@@ -304,7 +295,6 @@ class views_plugin_style_mapfile extends views_plugin_style {
           '#dependency' => array('scale-enable' => array(1)),
           '#default_value' => $this->options['scale']['min_size'],
         );
-
         $form['scale']['max_size'] = array(
           '#type' => 'textfield',
           '#title' => t('Maximum size'),
@@ -312,7 +302,6 @@ class views_plugin_style_mapfile extends views_plugin_style {
           '#dependency' => array('scale-enable' => array(1)),
           '#default_value' => $this->options['scale']['max_size'],
         );
-
         $form['scale']['steps'] = array(
           '#type' => 'textfield',
           '#title' => t('Gradations'),
@@ -335,7 +324,6 @@ class views_plugin_style_mapfile extends views_plugin_style {
           '#id' => 'metawriter-enable',
           '#default_value' => $this->options['metawriter']['enable'],
         );
-
         $form['metawriter']['meta-output'] = array(
           '#type' => 'textfield',
           '#title' => t('Meta output'),
@@ -343,7 +331,6 @@ class views_plugin_style_mapfile extends views_plugin_style {
           '#dependency' => array('metawriter-enable' => array(1)),
           '#default_value' => $this->options['metawriter']['meta-output'],
         );
-        
         $form['metawriter']['meta-writer'] = array(
           '#type' => 'textfield',
           '#title' => t('Meta writer'),

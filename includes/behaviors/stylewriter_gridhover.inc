@@ -1,6 +1,10 @@
 <?php
 // $Id$
 
+/**
+ * @file
+ * StyleWriter GridHover behavior
+ */
 class stylewriter_gridhover extends openlayers_behavior {
   /**
    * Override of options_init().
