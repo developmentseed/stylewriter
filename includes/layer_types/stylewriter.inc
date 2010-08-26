@@ -44,7 +44,6 @@ class openlayers_layer_type_stylewriter extends openlayers_layer_type {
       foreach ($view->display as $display => $data) {
         $view->set_display($display);
         if (in_array($data->display_plugin, array('mapfile', 'datamapfile'))) {
-          // TODO: probably not best to count on no colon
           $options[$view->name . ':' . $display] = 
             (isset($view->title) ? $view->title : $view->name)
             . ' (' . $view->name . ' - ' . $display . ')';
@@ -195,9 +194,6 @@ class openlayers_layer_type_stylewriter extends openlayers_layer_type {
 
     drupal_add_js(drupal_get_path('module', 'stylewriter') . 
       '/includes/layer_types/js/stylewriter_xyz.js');
-
-    drupal_add_js(drupal_get_path('module', 'stylewriter') . 
-      '/includes/layer_types/js/stylewriter_point.js');
 
     drupal_add_js(drupal_get_path('module', 'stylewriter') . 
       '/includes/layer_types/js/stylewriter.js');

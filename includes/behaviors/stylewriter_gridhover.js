@@ -19,6 +19,7 @@
  */
 OpenLayers.Control.GridHover = OpenLayers.Class(OpenLayers.Control, {
 
+    // TODO: unify in a javascript file instead of scattering
     encode_base64: function(data) {
       var out = "", c1, c2, c3, e1, e2, e3, e4;
       var tab = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";

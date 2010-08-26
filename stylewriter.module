@@ -9,42 +9,6 @@
 module_load_include('inc', 'stylewriter', 'stylewriter');
 
 /**
- * Implementation of hook_menu()
- */
-function stylewriter_menu() {
-  $items = array();
-
-  // Core OpenLayers settings pages.
-  $items['admin/settings/stylewriter'] = array(
-    'title' => 'StyleWriter',
-    'description' => 'StyleWriter server and cache management.',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('stylewriter_settings'),
-    'access arguments' => array('administer stylewriter'),
-    'file' => 'includes/stylewriter.admin.inc',
-    'type' => MENU_NORMAL_ITEM
-  );
-
-  $items['admin/settings/stylewriter/settings'] = array(
-    'title' => 'Settings',
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-    'weight' => -20,
-  );
-
-  // Core OpenLayers settings pages.
-  $items['admin/settings/stylewriter/cache'] = array(
-    'title' => 'Cache',
-    'description' => 'StyleWriter server and cache management.',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('stylewriter_cache_form'),
-    'access arguments' => array('administer stylewriter'),
-    'file' => 'includes/stylewriter.admin.inc',
-    'type' => MENU_LOCAL_TASK
-  );
-  return $items;
-}
-
-/**
  * Implementation of hook_views_api().
  */
 function stylewriter_views_api() {
@@ -65,7 +29,6 @@ function stylewriter_ctools_plugin_api($module, $api) {
     }
   }
 }
-
 
 /**
  * Implementation of hook_theme().
@@ -138,19 +101,6 @@ function stylewriter_openlayers_layer_types() {
         'parent' => 'openlayers_layer_type',
       ),
     ),
-    /*
-    'openlayers_layer_type_stylewriter_interaction' => array(
-      'title' => t('Stylewriter Interaction'),
-      'description' => t('Stylewriter Dynamic Map Interaction'),
-      'type' => 'layer',
-      'path' => drupal_get_path('module', 'stylewriter') .'/includes/layer_types',
-      'file' => 'stylewriter_interaction.inc',
-      'layer_type' => array(
-        'class' => 'openlayers_layer_type_stylewriter_interaction',
-        'parent' => 'openlayers_layer_type',
-      ),
-    ),
-     */
   );
 }
 
