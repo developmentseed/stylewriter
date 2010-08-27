@@ -223,6 +223,37 @@ OpenLayers.Control.GridHover = OpenLayers.Class(OpenLayers.Control, {
         );
     },
     
+
+    getGridCell: function(evt) {
+      grid = this.archive[$(this.target).attr('src')];
+
+      if (grid === true) { // is downloading
+        return;
+      }
+
+      offset = [
+        Math.floor((evt.pageX - $(evt.target).offset().left) / 4),
+        Math.floor((evt.pageY - $(evt.target).offset().top) / 4)];
+
+      return grid[offset[1]][offset[0]];
+    },
+   
+    reqTile: function(evt) {
+      this.archive[$(evt.target).attr('src')] = true;
+      this.target.hoverRequest = $.ajax(
+        {
+          'url': $(evt.target).attr('src').replace(
+            'png', 
+            this.encode_base64(this.join_field) + '.grid.json'), 
+          context: this,
+          success: $.proxy(this.readDone, this),
+          error: function() {},
+          dataType: 'jsonp',
+          jsonpCallback: "f" + this.encode_base64_fsafe($(evt.target).attr('src'))
+        }
+      );
+    },
+
     /**
      * Method: getInfoForClick 
      * Called on click
@@ -231,9 +262,25 @@ OpenLayers.Control.GridHover = OpenLayers.Class(OpenLayers.Control, {
      * evt - {<OpenLayers.Event>} 
      */
     getInfoForClick: function(evt) {
-      console.log(evt);
+      this.target = evt.target;
+      if (this.archive[$(this.target).attr('src')]) {
+        key = this.getGridCell(evt);
+        key && this.callbacks['click'](this.layer.options.keymap[this.key], this.layer);
+      }
+      else {
+        if (!this.archive[$(evt.target).attr('src')]) {
+          this.target.req = true;
+          try {
+            // TODO: recall getInfoForClick
+            this.target.hoverRequest = this.reqTile(evt);
+          } catch(err) {
+            this.archive[$(evt.target).attr('src')] = false;
+          }
+        }
+      }
     },
-   
+
+
     /**
      * Method: getInfoForHover
      * Pause callback for the hover handler
@@ -246,23 +293,14 @@ OpenLayers.Control.GridHover = OpenLayers.Class(OpenLayers.Control, {
     getInfoForHover: function(evt) {
         this.target = evt.target;
         if (this.archive[$(this.target).attr('src')]) {
-          grid = this.archive[$(this.target).attr('src')]
-          if (grid === true) { // is downloading
-            return;
-          }
-          offset = [
-                Math.floor((evt.pageX - $(evt.target).offset().left) / 4),
-                Math.floor((evt.pageY - $(evt.target).offset().top) / 4)];
-          if(grid[offset[1]][offset[0]]) {
-            key = grid[offset[1]][offset[0]];
+          key = this.getGridCell(evt);
+          if(key) {
             if (key !== this.key) {
               this.callbacks['out'](this.layer.options.keymap[this.key], this.layer);
             }
-            // save this key so that we know whether the next access is to this
             this.key = key;
-            if (this.layer.options.keymap[key]) {
+            this.layer.options.keymap[key] &&
               this.callbacks['over'](this.layer.options.keymap[this.key], this.layer);
-            }
           }
           else {
             this.callbacks['out'](this.layer.options.keymap[this.key], this.layer);
@@ -273,17 +311,7 @@ OpenLayers.Control.GridHover = OpenLayers.Class(OpenLayers.Control, {
           if (!this.archive[$(evt.target).attr('src')]) {
             this.target.req = true;
             try {
-              this.archive[$(evt.target).attr('src')] = true;
-              this.target.hoverRequest = $.ajax(
-                {
-                  'url': $(evt.target).attr('src').replace('png', this.encode_base64(this.join_field) + '.grid.json'), 
-                  context: this,
-                  success: $.proxy(this.readDone, this),
-                  error: function() {},
-                  dataType: 'jsonp',
-                  jsonpCallback: "f" + this.encode_base64_fsafe($(evt.target).attr('src'))
-                }
-              );
+              this.target.hoverRequest = this.reqTile(evt);
             } catch(err) {
               this.archive[$(evt.target).attr('src')] = false;
             }
@@ -321,12 +349,13 @@ OpenLayers.Control.GridHover = OpenLayers.Class(OpenLayers.Control, {
 Drupal.StyleWriterTooltips = {};
 
 Drupal.StyleWriterTooltips.click = function(feature) {
+  console.log(feature);
   var html = '';
-  if (feature.attributes.name) {
-    html += feature.attributes.name;
+  if (feature.name) {
+    html += feature.name;
   }
-  if (feature.attributes.description) {
-    html += feature.attributes.description;
+  if (feature.description) {
+    html += feature.description;
   }
   var link;
   if ($(html).is('a')) {
@@ -383,7 +412,8 @@ Drupal.behaviors.stylewriter_gridhover = function(context) {
       join_field: data.map.behaviors.stylewriter_gridhover.join_field,
       callbacks: {
         'over': Drupal.StyleWriterTooltips.select,
-        'out': Drupal.StyleWriterTooltips.unselect
+        'out': Drupal.StyleWriterTooltips.unselect,
+        'click': Drupal.StyleWriterTooltips.click
       }
     });
     map.addControl(h);
