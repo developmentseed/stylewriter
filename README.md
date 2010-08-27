@@ -1,33 +1,31 @@
 # StyleWriter v2
 
-**Currently the 'master' branch of this repository is used for developing version 2 of StyleWriter, compatible with version 2 of TileLiteLive. Use the 'v1' branch for compatibility with version 1.**
-
-### Changes from v1
-
-* The location of the data file is now owned by the view style plugin, rather
-  than the layer.
-
 Here's a quick guide to StyleWriter!
 
-StyleWriter is tailored to choropleth maps. It collaborates with a verson of 
-[TileLite][tilelite] called [TileLive][tlv] that is available on GitHub.
-It requires the [OpenLayers module][olmod], and also works with the 
+StyleWriter is tailored to choropleth and scaled-point maps, although it can
+help with the rendering of any single-datasource TileLive-rendered maps.
+It collaborates with a verson of [TileLite][tilelite] called 
+[TileLive][tlv] that is available on GitHub. It requires the 
+[OpenLayers module][olmod], and also works with the 
 [openlayers_plus][olp] module to provide legends and allow quick swapping if 
 you have both a point and a choropleth map displaying the same information.
 
+## Requirements
+
+* A new version of jQuery (either by jquery_update or hacking)
+* OpenLayers module
+* A working TileLive server with Mapnik 2
+
 ## Included Functionality
 
-* It provides a Display Plugin and Style Plugin to views that create mapfiles 
+* A Display Plugin and Style Plugin to views that create mapfiles 
   and legends for choropleth layers on maps
-* It provides utility functions to blend colors into each other to form the 
+* Utility functions to blend colors into each other to form the 
   basis for choropleth maps
-* It provides a layer type that implements the requirements of the TileLite 
+* A layer type that implements the requirements of the TileLite 
   branch used
-* It provides a Drush command to run a Python script, tilelite-seed.py, that 
-  seeds - populates the caches - of mapfile / data combinations on a 
-  given server
-* It provides an administration interface that allows you to view the 
-  currently-cached data / mapfile combinations and clear those caches on command
+* Behaviors that enable interaction with grid-based (polygon) and
+  GeoJSON/metawriter (point) maps
 
 ## Why This Is Necessary
 
@@ -73,46 +71,6 @@ different.
 4. If the view is properly configured, it will be available when creating 
    a new StyleWriter layer.
 
-## Using StyleWriter with Drush
-
-StyleWriter includes a [Drush][d] command called 'stylewriter-cache-all.' 
-Running
-
-    $ drush stylewriter-cache-all
-
-Causes StyleWriter to prepopulate _tile_ caches by calling a Python script 
-called `tileseed.py`, which must be provided by the user. This script 
-is included in the branch of TileLite and is dependent on [TileStache][ts]. 
-However, if two hooks aren't implemented in any other modules, no caches will 
-be populated - since maps are dependent on a data and mapfile URL argument, 
-without either, maps cannot be rendered or cached. The two hooks called are 
-
-    /**
-     * must return an array of fully-formed URLs pointing to 
-     * mapfiles
-     */
-    hook_stylewriter_mapfile_possible_facets()
-
-    /**
-     * must return an array of fully-formed URLs pointing to 
-     * data files
-     */
-    hook_stylewriter_data_possible_facets()
-
-A simple implementation of the data hook could be
-
-    /**
-     * Implementation of hook_stylewriter_data_possible_facets()
-     */
-    function wbboxes_stylewriter_data_possible_facets() {
-      return array(
-        'http://demo.com/shapefile_zipped.zip'
-      );
-    }
-
-In order to implement the mapfile hook, one must generate URLs - often views 
-URLs with specific URL-arguments.
-
 ## Using StyleWriter with OpenLayers
 
 StyleWriter provides a layer type for OpenLayers. Although technically, one 
@@ -139,7 +97,7 @@ for instance, a point and choropleth representation of the same data.
 ## Creating Mapfiles
 
 The StyleWriter module contains a unique Views display / style combination 
-that, primarily writes [Mapnik][m] XML files. Given a data setup that provides 
+that, primarily writes [Mapnik][m] map files. Given a data setup that provides 
 one field that is made up of integers or float values, StyleWriter is able to 
 calculate equal-spaced groups of values and assign them colors. The styles 
 that StyleWriter writes are _not_ rule-based - they are not dependent on the 
@@ -163,34 +121,28 @@ to be managed by Drupal and updated more often. Adding more columns, therefore,
 is trivial in this implementation, whereas with the semantic model it would 
 require extensive cooperation of Drupal and the datasource.
 
-Although [Cascadenik][c] support is planned, the current implementation isn't 
-viable for this project.
+## Interaction
 
-## Assumptions and customizations
+The StyleWriter module provides tools for two types of interactivity: broadly
+for polygon-based maps and point-based maps. Both of these techniques require
+TileLive to be run with its internal `tile_cache` setting on, since they 
+take advantage of Mapnik's metawriter support and aggressively cache their 
+results.
 
-There are defaults built into this module - the default rule template - 
-contained in `views/stylewriter-rule.tpl.php` sets the `fill-opacity` of polygons 
-to 0.5 and doesn't add a stroke of any kind to the rendered polygons. Also,
-it is a current assumption of the module that the data file contains shapes, 
-rather than points or lines, as the default rule doesn't contain anything 
-but PolygonSymbolizer. Also, this module doesn't aim to create maps in projects 
-other than EPSG:900913, the Spherical Mercator Google-style projection, or to 
-create maps with backgrounds other than 'transparent'.
+In order to use point-based interaction, enable the Point Interaction behavior.
+In order to use polygon-based interaction, enable the 
+Polygon Interaction behavior.
 
-One can currently override these assumptions by including a custom 
-`stylewriter-rule.tpl.php` in a theme, but this is a global override - there is 
-no real, current functionality for having different 'rule styles' per different 
-kinds of maps. One can also override the default document style (the fact that 
-maps have a transparent background) by adding a `stylewriter-document.tpl.php` 
-file to a theme.
+The Polygon Interaction behavior writes a Javascript 'mapping table' to the 
+page source, so it can increase the size of pages if thousands of polygons 
+are present. The Point Interaction behavior loads full point data dynamically, 
+so it is better suited for thousands of features.
 
 ## Data
 
-Originally the TileLite branch included support for both GeoJSON and Shapefiles.
-Currently it only supports Shapefiles, because the performance of abstracted 
-vector data sources in Mapnik - datasources supported by OGR - is not 
-comparable to the native Shapefile driver. In the future, support for more
-datasources will be included.
+The StyleWriter module supports GeoJSON and shapefiles as datasources. If 
+data is not dynamic or contains complex datatype like polygons, it is best 
+to use shapefiles rather than GeoJSON.
 
 ## Drawbacks
 
@@ -199,6 +151,18 @@ is strict. Unlike CSS, if the map file created has a field that doesn't exist
 in the data, the map cannot be rendered. Thus it is necessary to be aware 
 of the specific data that the data file contains when creating mapfiles, either 
 freeform or with this module.
+
+
+## Troubleshooting
+
+* **Map interactivity doesn't work**: jQuery must be updated and the TileLive server
+  must be running Mapnik 2.
+
+### Changes from v1
+
+* The location of the data file is now owned by the view style plugin, rather
+  than the layer.
+* The StyleWriter module now contains interactivity plugins
 
 [olmod]: http://drupal.org/project/openlayers
 [tilelite]: http://bitbucket.org/tmcw/tilelite
