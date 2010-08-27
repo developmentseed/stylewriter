@@ -138,6 +138,15 @@ page source, so it can increase the size of pages if thousands of polygons
 are present. The Point Interaction behavior loads full point data dynamically, 
 so it is better suited for thousands of features.
 
+# GeoJSON
+
+Currently this module is tuned to with GeoJSON output from OpenLayers, which 
+is [available on Drupal.org as a patch](http://drupal.org/node/889190) currently.
+
+With this setup, it is possible to create scaled points based on data in 
+Drupal - outputting style data as Cascadenik style rules.
+
+
 ## Data
 
 The StyleWriter module supports GeoJSON and shapefiles as datasources. If 
@@ -151,7 +160,6 @@ is strict. Unlike CSS, if the map file created has a field that doesn't exist
 in the data, the map cannot be rendered. Thus it is necessary to be aware 
 of the specific data that the data file contains when creating mapfiles, either 
 freeform or with this module.
-
 
 ## Troubleshooting
 
