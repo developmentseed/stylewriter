@@ -296,11 +296,11 @@ OpenLayers.Control.GridHover = OpenLayers.Class(OpenLayers.Control, {
           key = this.getGridCell(evt);
           if(key) {
             if (key !== this.key) {
+              this.key = key;
               this.callbacks['out'](this.layer.options.keymap[this.key], this.layer);
+              this.layer.options.keymap[key] &&
+                this.callbacks['over'](this.layer.options.keymap[this.key], this.layer);
             }
-            this.key = key;
-            this.layer.options.keymap[key] &&
-              this.callbacks['over'](this.layer.options.keymap[this.key], this.layer);
           }
           else {
             this.callbacks['out'](this.layer.options.keymap[this.key], this.layer);
@@ -349,7 +349,6 @@ OpenLayers.Control.GridHover = OpenLayers.Class(OpenLayers.Control, {
 Drupal.StyleWriterTooltips = {};
 
 Drupal.StyleWriterTooltips.click = function(feature) {
-  console.log(feature);
   var html = '';
   if (feature.name) {
     html += feature.name;

@@ -273,6 +273,14 @@ class views_plugin_style_mapfile extends views_plugin_style {
           '#options' => $field_names,
           '#default_value' => $this->options['fields']['join_field'],
         );
+        $form['fields']['name_field'] = array(
+          '#type' => 'select',
+          '#title' => t('Name Field'),
+          '#description' => t('Human-readable and linked name field'),
+          '#options' => $field_names,
+          '#default_value' => $this->options['fields']['name_field'],
+        );
+
 
         $form['fields']['value'] = array(
           '#type' => 'select',
@@ -467,21 +475,22 @@ class views_plugin_style_mapfile extends views_plugin_style {
      *  valid coordinates, organized into coordinates and attributes
      */
     function keymap_data($rows) {
-      $renders = array();
+      $renders = $formatted_renders = array();
       $keys = array_keys($this->view->field);
       foreach ($rows as $count => $row) {
         foreach ($keys as $id) {
           $renders[$count][$id] = $row->{$this->view->field[$id]->field_alias};
+          $formatted_renders[$count][$id] = $this->view->field[$id]->theme($row);
         }
       }
       $points = $values = array();
-      foreach ($renders as $id => $row) {
+      foreach ($formatted_renders as $id => $row) {
         $point = array();
         foreach ($this->view->field as $key => $field) {
           if ($key == $this->options['fields']['join_field']) {
             $join_field_value = $row[$key];
           }
-          if ($key == $this->options['fields']['join_field']) {
+          if ($key == $this->options['fields']['name_field']) {
             $point['name'] = $row[$key];
           }
           if ($key == $this->options['fields']['value']) {
