@@ -120,7 +120,7 @@ OpenLayers.Control.PointHover = OpenLayers.Class(OpenLayers.Control, {
      * Property: handler
      * {Object} Reference to the <OpenLayers.Handler> for this control
      */
-    handler: null,
+    handlers: null,
     
     /**
      * Property: hoverRequest
@@ -172,16 +172,35 @@ OpenLayers.Control.PointHover = OpenLayers.Class(OpenLayers.Control, {
         }
         this.format = new OpenLayers.Format.GeoJSON();
 
-        this.handler = new OpenLayers.Handler.Hover(
-          this, {
-              'move': this.cancelHover,
-              'pause': this.getInfoForHover
-          },
-          OpenLayers.Util.extend(this.handlerOptions.hover || {}, {
-              'delay': 30
+        this.handlers = {
+          hover: new OpenLayers.Handler.Hover(
+            this, {
+                'move': this.cancelHover,
+                'pause': this.getInfoForHover
+            },
+            OpenLayers.Util.extend(this.handlerOptions.hover || {}, {
+                'delay': 30
+              }
+            )
+          ),
+          click: new OpenLayers.Handler.Click(
+            this, {
+                'click': this.getInfoForClick
             }
-          )
-        );
+          )};
+    },
+
+    /** 
+     * Method: setMap
+     * Set the map property for the control. 
+     * 
+     * Parameters:
+     * map - {<OpenLayers.Map>} 
+     */
+    setMap: function(map) {
+        this.handlers.hover.setMap(map);
+        this.handlers.click.setMap(map);
+        OpenLayers.Control.prototype.setMap.apply(this, arguments);
     },
 
     /**
@@ -191,9 +210,10 @@ OpenLayers.Control.PointHover = OpenLayers.Class(OpenLayers.Control, {
      * Returns:
      * {Boolean} The control was effectively activated.
      */
-    activate: function () {
+    activate: function() {
         if (!this.active) {
-            this.handler.activate();
+            this.handlers.hover.activate();
+            this.handlers.click.activate();
         }
         return OpenLayers.Control.prototype.activate.apply(
             this, arguments
@@ -221,6 +241,53 @@ OpenLayers.Control.PointHover = OpenLayers.Class(OpenLayers.Control, {
      * evt - {<OpenLayers.Event>} 
      */
     getInfoForClick: function(evt) {
+      this.target = evt.target;
+      if (this.archive[$(this.target).attr('src')]) {
+        grid = this.archive[$(this.target).attr('src')]
+        if (grid === true || grid == undefined) { // is downloading
+          return;
+        }
+        point = this.getPoint(evt, grid);
+        point && this.callbacks['click'](point, this.layer);
+        // this.callbacks['out']();
+      }
+      else {
+        // this.callbacks['out']({}, this.layer);
+        if (!this.archive[$(evt.target).attr('src')]) {
+          this.target.req = true;
+          try {
+            this.archive[$(evt.target).attr('src')] = true;
+            this.target.hoverRequest = this.reqTile(evt);
+          } catch(err) {
+            this.archive[$(evt.target).attr('src')] = false;
+          }
+        }
+      }
+    },
+
+    reqTile: function(evt) {
+      return $.ajax(
+        {
+          'url': $(evt.target).attr('src').replace('png', 'json'), 
+          context: this,
+          success: $.proxy(this.readDone, this),
+          error: function() {},
+          dataType: 'jsonp',
+          jsonpCallback: "f" +this.encode_base64($(evt.target).attr('src'))
+        }
+      );
+    },
+
+    getPoint: function(evt, grid) {
+      lonLat = this.map.getLonLatFromPixel(evt.xy);
+      lonLat.transform(new OpenLayers.Projection('EPSG:900913'), new OpenLayers.Projection('EPSG:4326'));
+      here = new OpenLayers.Geometry.Point(lonLat.lon, lonLat.lat);
+      for(var i = 0; i < grid.length; i++) {
+        if(grid[i].geometry.containsPoint(here)) {
+          // this.callbacks['over'](grid[i].attributes, this.layer);
+          return grid[i].attributes;
+        }
+      }
     },
    
     /**
@@ -237,53 +304,19 @@ OpenLayers.Control.PointHover = OpenLayers.Class(OpenLayers.Control, {
         if (this.archive[$(this.target).attr('src')]) {
           grid = this.archive[$(this.target).attr('src')]
           if (grid === true || grid == undefined) { // is downloading
-            // console.log('downloading');
             return;
           }
-          lonLat = this.map.getLonLatFromPixel(evt.xy);
-          lonLat.transform(new OpenLayers.Projection('EPSG:900913'), new OpenLayers.Projection('EPSG:4326'));
-          here = new OpenLayers.Geometry.Point(lonLat.lon, lonLat.lat);
-          for(var i = 0; i < grid.length; i++) {
-            if(grid[i].geometry.containsPoint(here)) {
-              this.callbacks['over'](grid[i].attributes, this.layer);
-              return;
-            }
-          }
-          this.callbacks['out']();
-          /*
-          if(true) {
-            key = grid[offset[1]][offset[0]];
-            if (key !== this.key) {
-              this.callbacks['out'](this.layer.options.keymap[this.key], this.layer);
-            }
-            // save this key so that we know whether the next access is to this
-            this.key = key;
-            if (this.layer.options.keymap[key]) {
-              this.callbacks['over'](this.layer.options.keymap[this.key], this.layer);
-            }
-          }
-          else {
-            this.callbacks['out'](this.layer.options.keymap[this.key], this.layer);
-          }
-          */
+          point = this.getPoint(evt, grid);
+          point ? this.callbacks['over'](point, this.layer) :
+            this.callbacks['out']();
         }
         else {
           this.callbacks['out']({}, this.layer);
-          // console.log('dling');
           if (!this.archive[$(evt.target).attr('src')]) {
             this.target.req = true;
             try {
               this.archive[$(evt.target).attr('src')] = true;
-              this.target.hoverRequest = $.ajax(
-                {
-                  'url': $(evt.target).attr('src').replace('png', 'json'), 
-                  context: this,
-                  success: $.proxy(this.readDone, this),
-                  error: function() {},
-                  dataType: 'jsonp',
-                  jsonpCallback: "f" +this.encode_base64($(evt.target).attr('src'))
-                }
-              );
+              this.target.hoverRequest = this.reqTile(evt);
             } catch(err) {
               this.archive[$(evt.target).attr('src')] = false;
             }
@@ -300,37 +333,15 @@ OpenLayers.Control.PointHover = OpenLayers.Class(OpenLayers.Control, {
     CLASS_NAME: "OpenLayers.Control.PointHover"
 });
 
-
-/**
- * OpenLayers Zoom to Layer Behavior
- */
-Drupal.behaviors.stylewriter_pointhover = function(context) {
-  var layers, data = $(context).data('openlayers');
-  if (data && data.map.behaviors['stylewriter_pointhover']) {
-    map = data.openlayers;
-    layer = map.getLayersBy('drupalID', 
-      data.map.behaviors['stylewriter_pointhover'].layer)[0];
-    h = new OpenLayers.Control.PointHover({
-      layer: layer,
-      callbacks: {
-        'over': Drupal.StyleWriterTooltips.select,
-        'out': Drupal.StyleWriterTooltips.unselect
-      }
-    });
-    map.addControl(h);
-    h.activate();
-  }
-};
-
 Drupal.StyleWriterTooltips = {};
 
 Drupal.StyleWriterTooltips.click = function(feature) {
   var html = '';
-  if (feature.attributes.name) {
-    html += feature.attributes.name;
+  if (feature.name) {
+    html += feature.name;
   }
-  if (feature.attributes.description) {
-    html += feature.attributes.description;
+  if (feature.description) {
+    html += feature.description;
   }
   // @TODO: Make this a behavior option and allow interaction with other
   // behaviors like the MN story popup.
@@ -373,4 +384,26 @@ Drupal.StyleWriterTooltips.select = function(feature, layer) {
 Drupal.StyleWriterTooltips.unselect = function(feature) {
   $(layer.map.div).css('cursor', 'default');
   $(layer.map.div).children('div.openlayers-tooltip').fadeOut('fast', function() { $(this).remove(); });
+};
+
+/**
+ * OpenLayers Zoom to Layer Behavior
+ */
+Drupal.behaviors.stylewriter_pointhover = function(context) {
+  var layers, data = $(context).data('openlayers');
+  if (data && data.map.behaviors['stylewriter_pointhover']) {
+    map = data.openlayers;
+    layer = map.getLayersBy('drupalID', 
+      data.map.behaviors['stylewriter_pointhover'].layer)[0];
+    h = new OpenLayers.Control.PointHover({
+      layer: layer,
+      callbacks: {
+        'over': Drupal.StyleWriterTooltips.select,
+        'out': Drupal.StyleWriterTooltips.unselect,
+        'click': Drupal.StyleWriterTooltips.click
+      }
+    });
+    map.addControl(h);
+    h.activate();
+  }
 };
