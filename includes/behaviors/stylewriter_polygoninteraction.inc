@@ -3,9 +3,9 @@
 
 /**
  * @file
- * StyleWriter GridHover behavior
+ * StyleWriter Polygon Interaction behavior
  */
-class stylewriter_gridhover extends openlayers_behavior {
+class stylewriter_polygoninteraction extends openlayers_behavior {
   /**
    * Override of options_init().
    */
@@ -35,7 +35,7 @@ class stylewriter_gridhover extends openlayers_behavior {
     $this->options['join_field'] = $layer->get_joinfield();
 
     drupal_add_js(drupal_get_path('module', 'stylewriter') 
-      .'/includes/behaviors/stylewriter_gridhover.js');
+      .'/includes/behaviors/stylewriter_polygoninteraction.js');
     return $this->options;
   }
 }

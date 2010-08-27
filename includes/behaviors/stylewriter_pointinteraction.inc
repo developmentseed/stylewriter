@@ -3,9 +3,9 @@
 
 /**
  * @file
- * StyleWriter PointHover behavior
+ * StyleWriter Point Interaction behavior
  */
-class stylewriter_pointhover extends openlayers_behavior {
+class stylewriter_pointinteraction extends openlayers_behavior {
   /**
    * Override of options_init().
    */
@@ -32,7 +32,7 @@ class stylewriter_pointhover extends openlayers_behavior {
    */
   function render(&$map) {
     drupal_add_js(drupal_get_path('module', 'stylewriter') 
-      .'/includes/behaviors/stylewriter_pointhover.js');
+      .'/includes/behaviors/stylewriter_pointinteraction.js');
     return $this->options;
   }
 }
