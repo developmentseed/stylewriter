@@ -108,7 +108,7 @@ OpenLayers.Control.GridHover = OpenLayers.Class(OpenLayers.Control, {
      * Property: handler
      * {Object} Reference to the <OpenLayers.Handler> for this control
      */
-    handler: null,
+    handlers: null,
     
     /**
      * Property: hoverRequest
@@ -155,16 +155,42 @@ OpenLayers.Control.GridHover = OpenLayers.Class(OpenLayers.Control, {
 
         OpenLayers.Control.prototype.initialize.apply(this, [options]);
 
-        this.handler = new OpenLayers.Handler.Hover(
-          this, {
-              'move': this.cancelHover,
-              'pause': this.getInfoForHover
-          },
-          OpenLayers.Util.extend(this.handlerOptions.hover || {}, {
-              'delay': 30
+        this.handlers = {
+          hover: new OpenLayers.Handler.Hover(
+            this, {
+                'move': this.cancelHover,
+                'pause': this.getInfoForHover
+            },
+            OpenLayers.Util.extend(this.handlerOptions.hover || {}, {
+                'delay': 30
+              }
+            )
+          ),
+          click: new OpenLayers.Handler.Click(
+            this, {
+                'click': this.getInfoForClick
             }
+            /*
+            OpenLayers.Util.extend(this.handlerOptions.hover || {}, {
+                'delay': 30
+              }
+            )
+            */
           )
-        );
+        };
+    },
+
+    /** 
+     * Method: setMap
+     * Set the map property for the control. 
+     * 
+     * Parameters:
+     * map - {<OpenLayers.Map>} 
+     */
+    setMap: function(map) {
+        this.handlers.hover.setMap(map);
+        this.handlers.click.setMap(map);
+        OpenLayers.Control.prototype.setMap.apply(this, arguments);
     },
 
     /**
@@ -176,7 +202,8 @@ OpenLayers.Control.GridHover = OpenLayers.Class(OpenLayers.Control, {
      */
     activate: function () {
         if (!this.active) {
-            this.handler.activate();
+            this.handlers.hover.activate();
+            this.handlers.click.activate();
         }
         return OpenLayers.Control.prototype.activate.apply(
             this, arguments
@@ -204,6 +231,7 @@ OpenLayers.Control.GridHover = OpenLayers.Class(OpenLayers.Control, {
      * evt - {<OpenLayers.Event>} 
      */
     getInfoForClick: function(evt) {
+      console.log(evt);
     },
    
     /**
