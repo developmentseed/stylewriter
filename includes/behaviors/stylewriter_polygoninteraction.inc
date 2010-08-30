@@ -35,6 +35,8 @@ class stylewriter_polygoninteraction extends openlayers_behavior {
     $this->options['join_field'] = $layer->get_joinfield();
 
     drupal_add_js(drupal_get_path('module', 'stylewriter') 
+      .'/includes/behaviors/stylewriter_tooltip.js');
+    drupal_add_js(drupal_get_path('module', 'stylewriter') 
       .'/includes/behaviors/stylewriter_openlayers_polygoninteraction.js');
     drupal_add_js(drupal_get_path('module', 'stylewriter') 
       .'/includes/behaviors/stylewriter_polygoninteraction.js');

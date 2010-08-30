@@ -32,6 +32,8 @@ class stylewriter_pointinteraction extends openlayers_behavior {
    */
   function render(&$map) {
     drupal_add_js(drupal_get_path('module', 'stylewriter') 
+      .'/includes/behaviors/stylewriter_tooltip.js');
+    drupal_add_js(drupal_get_path('module', 'stylewriter') 
       .'/includes/behaviors/stylewriter_openlayers_pointinteraction.js');
     drupal_add_js(drupal_get_path('module', 'stylewriter') 
       .'/includes/behaviors/stylewriter_pointinteraction.js');
