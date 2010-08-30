@@ -140,7 +140,7 @@ OpenLayers.Layer.StyleWriter = OpenLayers.Class(OpenLayers.Layer.Grid, {
         
         var path = OpenLayers.String.format(url, 
           {
-            'mapfile': this.encode_base64(this.mapfile), 
+            'mapfile': this.urlsafe_encode_base64(this.mapfile), 
             'x': x, 
             'y': y, 
             'z': z,
