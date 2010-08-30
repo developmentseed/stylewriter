@@ -25,7 +25,9 @@ function stylewriter_color_ramp($a, $b, $steps) {
   $s_grad = stylewriter_color_ramp_grad($a_pts[1], $b_pts[1], $steps);
   $l_grad = stylewriter_color_ramp_grad($a_pts[2], $b_pts[2], $steps);
 
-  return stylewriter_color_ramp_merge($h_grad, $s_grad, $l_grad);
+  $merged = array_map(null, $h_grad, $s_grad, $l_grad);
+
+  return stylewriter_color_ramp_merge($merged);
 }
 
 /**
@@ -43,9 +45,7 @@ function stylewriter_range($a, $b, $parts) {
   // If $a > $b we must flip at the end to preserve direction.
   $reverse = FALSE;
   if ($a > $b) {
-    $c = $a;
-    $a = $b;
-    $b = $c;
+    list($a, $b) = array($b, $a);
     $reverse = TRUE;
   }
 
@@ -68,58 +68,30 @@ function stylewriter_range($a, $b, $parts) {
  * @return array
  */
 function stylewriter_color_ramp_grad($a, $b, $steps) {
-  if ($a == $b) {
-    return array_fill(0, $steps, $a);
-  }
-  else {
-    return stylewriter_range($a, $b, $steps);
-  }
+  return ($a == $b) ? 
+    array_fill(0, $steps, $a) : 
+    stylewriter_range($a, $b, $steps);
+}
+
+function _stylewriter_color_pack($c) {
+  return _color_pack($c, TRUE);
 }
 
 /**
  * Merge three arrays representing h, s, l into an array of rgb values
- * @param $h_grad
- * @param $s_grad
- * @param $l_grad
+ * @param $ramps merged groups of color ramps
  *
  * @return array
  */
-function stylewriter_color_ramp_merge($h_grad, $s_grad, $l_grad) {
-  if (count($h_grad) == count($s_grad) && count($s_grad) == count($l_grad)) {
-    $colors = array();
-    for ($i = 0; $i < count($h_grad); $i++) {
-      $colors[] = _color_pack(_color_hsl2rgb(array($h_grad[$i], $s_grad[$i], $l_grad[$i])), TRUE);
-    }
-    return $colors;
-  }
-  else {
-    throw new Exception('HSL components must have equal length');
-  }
-}
-
-/**
- * URL-safe base64 encode
- * Compatible with Python's base64.urlsafe_b64decode
- * @param $text base64-decoded text
- */
-function stylewriter_safe64en($text) {
-  return strtr( 
-    chunk_split(
-      strtr(
-        base64_encode($text), '+/', '-_'), 
-      255),
-      '\n', '/'
-    );
-}
-
-/**
- * URL-safe base64 decode 
- * Compatible with Python's base64.urlsafe_b64encode
- * @param $text base64-encoded text
- */
-function stylewriter_safe64de($text) {
-  return base64_decode(
-    strtr(
-      str_replace('/', '', $text), '-_', '+/')
-    );
+function stylewriter_color_ramp_merge($ramps) {
+  return array_map(
+    '_stylewriter_color_pack',
+    array_map(
+      '_color_hsl2rgb', 
+        array_map(
+          '_color_hsl2rgb', 
+          $ramps
+      )
+    )
+  );
 }
