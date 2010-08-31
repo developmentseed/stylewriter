@@ -86,12 +86,9 @@ function _stylewriter_color_pack($c) {
 function stylewriter_color_ramp_merge($ramps) {
   return array_map(
     '_stylewriter_color_pack',
-    array_map(
-      '_color_hsl2rgb', 
-        array_map(
-          '_color_hsl2rgb', 
-          $ramps
-      )
+      array_map(
+        '_color_hsl2rgb', 
+        $ramps
     )
   );
 }
