@@ -280,6 +280,15 @@ class views_plugin_style_mapfile extends views_plugin_style {
           '#options' => $field_names,
           '#default_value' => $this->options['fields']['name_field'],
         );
+        $form['fields']['join_field_type'] = array(
+          '#type' => 'select',
+          '#title' => t('Join Field Type'),
+          '#options' => array(
+            'int' => t('Integer / Number'),
+            'string' => t('String')
+          ),
+          '#default_value' => $this->options['fields']['join_field_type'],
+        );
 
 
         $form['fields']['value'] = array(
@@ -407,7 +416,14 @@ class views_plugin_style_mapfile extends views_plugin_style {
               $values[] = floatval($row[$key]);
             }
           }
-          $point['filter'] = $point['join_field_name'] . ' = "' . $join_field_value . '"';
+          switch ($this->options['fields']['join_field_type']) {
+            case 'int':
+              $point['filter'] = $point['join_field_name'] . ' = ' . $join_field_value;
+              break;
+            case 'string':
+              $point['filter'] = $point['join_field_name'] . ' = "' . $join_field_value . '"';
+              break;
+          }
           $points[] = $point;
         }
 
