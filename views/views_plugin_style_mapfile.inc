@@ -184,9 +184,7 @@ class views_plugin_style_mapfile extends views_plugin_style {
           '#default_value' => $this->options['colors']['choropleth']['opacity'],
         );
 
-        /**
-         * Data options
-         */
+        /* -- Data Options -- */
         $form['fields']['data_strategy'] = array(
           '#type' => 'select',
           '#title' => t('Data Strategy'),
@@ -345,6 +343,10 @@ class views_plugin_style_mapfile extends views_plugin_style {
       }
     }
 
+    /**
+     * Execute a view and return its data
+     * @param $view_display colon-separated name of a view and display
+     */
     function viewdata($view_display) {
       global $base_url;
       list($view_name, $display_name) = explode(':', $view_display);
@@ -383,26 +385,16 @@ class views_plugin_style_mapfile extends views_plugin_style {
      *  valid coordinates, organized into coordinates and attributes
      */
     function map_rows($rows) {
-      // Fields must be rendered in order as of Views 2.3, 
-      // so we will pre-render everything.
-     
       $handlers = $this->display->handler->get_handlers('field');
-      $fields = array();
-      foreach ($handlers as $field_id => $handler) {
-        $fields[$field_id] = $handler->definition;
-        $fields[$field_id]['field_alias'] = $handler->field_alias;
-      }
+      $keys = array_keys($this->view->field);
+      $fields = $renders = $rendered_record = $rendered_records = array();
 
-      $rendered_record = $rendered_records = array();
       foreach ($rows as $records) {
         foreach ($handlers as $hid => $handler) {
           $rendered_record[$handler->field_alias] = $handler->advanced_render($records);
         }
         $rendered_records[] = $rendered_record;
       }
-      
-      $renders = array();
-      $keys = array_keys($this->view->field);
 
       foreach ($rows as $count => $row) {
         foreach ($keys as $id) {
