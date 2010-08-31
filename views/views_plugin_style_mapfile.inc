@@ -45,6 +45,9 @@ class views_plugin_style_mapfile extends views_plugin_style {
       return $options;
     }
 
+    /**
+     * Form helper: get all views that can be used by
+     */
     function data_options() {
       $views = views_get_all_views();
       $options = array();
@@ -60,52 +63,6 @@ class views_plugin_style_mapfile extends views_plugin_style {
       }  
       return $options;
     } 
-
-    /**
-     * @param $view_display colon-separated view-display
-     *
-     * return a string representing the URL of a view that returns a Mapnik style
-     * with arguments inherited from the current view
-     */
-    function viewurlargs($view_display) {
-      global $base_url;
-      list($view_name, $display_name) = explode(':', $view_display);
-      if ($view = views_get_view($view_name)) {
-        $args = array();
-        // Retrieve args/filters from current view
-        // to pass on to our vector layer.
-        $current_view = views_get_current_view();
-        if (isset($current_view)) {
-          $args = $current_view->args;
-        }
-        $view->set_display($display_name);
-        return $base_url . '/' . $view->get_url($args);
-      }
-    }
-
-    function viewdata($view_display) {
-      global $base_url;
-      list($view_name, $display_name) = explode(':', $view_display);
-      if ($view = views_get_view($view_name)) {
-        $args = array();
-        // Retrieve args/filters from current view
-        // to pass on to our vector layer.
-        $current_view = views_get_current_view();
-        if (isset($current_view)) {
-          $args = $current_view->args;
-        }
-        $view->set_display($display_name);
-        return $view->execute();
-      }
-    }
-
-    /**
-     * Accessor for URL
-     * @return string $url
-     */
-    function data_url() {
-      return $this->viewurlargs($this->options['fields']['data_view']);
-    }
     
     /**
      * Provide a form for setting options.
@@ -190,38 +147,41 @@ class views_plugin_style_mapfile extends views_plugin_style {
 
         /*=== Color Ramp ===*/
         $form['colors']['choropleth'] = array(
+          '#type' => 'fieldset'
+        );
+        $form['colors']['choropleth']['enable'] = array(
           '#type' => 'checkbox',
           '#title' => t('Enable Choropleth'),
           '#id' => 'choropleth-enable',
-          '#default_value' => $this->options['colors']['choropleth'],
+          '#default_value' => $this->options['colors']['choropleth']['enable'],
         );
-        $form['colors']['color_min'] = array(
+        $form['colors']['choropleth']['color_min'] = array(
           '#type' => 'textfield',
           '#title' => t('Minimum color'),
           '#process' => array('views_process_dependency'),
           '#dependency' => array('choropleth-enable' => array('1')),
-          '#default_value' => $this->options['colors']['color_min'],
+          '#default_value' => $this->options['colors']['choropleth']['color_min'],
         );
-        $form['colors']['color_max'] = array(
+        $form['colors']['choropleth']['color_max'] = array(
           '#type' => 'textfield',
           '#title' => t('Maximum color'),
           '#process' => array('views_process_dependency'),
           '#dependency' => array('choropleth-enable' => array('1')),
-          '#default_value' => $this->options['colors']['color_max'],
+          '#default_value' => $this->options['colors']['choropleth']['color_max'],
         );
-        $form['colors']['steps'] = array(
+        $form['colors']['choropleth']['steps'] = array(
           '#type' => 'textfield',
           '#title' => t('Gradations'),
           '#process' => array('views_process_dependency'),
           '#dependency' => array('choropleth-enable' => array('1')),
-          '#default_value' => $this->options['colors']['steps'],
+          '#default_value' => $this->options['colors']['choropleth']['steps'],
         );
-        $form['colors']['opacity'] = array(
+        $form['colors']['choropleth']['opacity'] = array(
           '#type' => 'textfield',
           '#title' => t('Opacity'),
           '#process' => array('views_process_dependency'),
           '#dependency' => array('choropleth-enable' => array('1')),
-          '#default_value' => $this->options['colors']['opacity'],
+          '#default_value' => $this->options['colors']['choropleth']['opacity'],
         );
 
         /**
@@ -244,24 +204,24 @@ class views_plugin_style_mapfile extends views_plugin_style {
             'ogr' => t('GeoJSON View')),
           '#default_value' => $this->options['fields']['data_type'],
         );
-        $form['fields']['data_view'] = array(
-          '#type' => 'select',
-          '#default_value' => $this->options['data_view'],
-          '#title' => t('Data View'),
-          '#process' => array('views_process_dependency'),
-          '#dependency' => array('data-type-select' => array('ogr')),
-          '#options' => $this->data_options(),
-          '#description' => t('Data view (GeoJSON)')
-        );
-        $form['fields']['data_url'] = array(
-          '#type' => 'textfield',
-          '#default_value' => $this->options['fields']['data_url'],
-          '#title' => t('Data URL'),
-          '#process' => array('views_process_dependency'),
-          '#dependency' => array('data-type-select' => array('shape')),
-          '#description' => t('URL to the zipped shapefile or other 
-            vector data source')
-        );
+          $form['fields']['data_view'] = array(
+            '#type' => 'select',
+            '#default_value' => $this->options['data_view'],
+            '#title' => t('Data View'),
+            '#process' => array('views_process_dependency'),
+            '#dependency' => array('data-type-select' => array('ogr')),
+            '#options' => $this->data_options(),
+            '#description' => t('Data view (GeoJSON)')
+          );
+          $form['fields']['data_url'] = array(
+            '#type' => 'textfield',
+            '#default_value' => $this->options['fields']['data_url'],
+            '#title' => t('Data URL'),
+            '#process' => array('views_process_dependency'),
+            '#dependency' => array('data-type-select' => array('shape')),
+            '#description' => t('URL to the zipped shapefile or other 
+              vector data source')
+          );
         $form['fields']['join_field_name'] = array(
           '#type' => 'textfield',
           '#title' => t('Join Field Name'),
@@ -289,8 +249,6 @@ class views_plugin_style_mapfile extends views_plugin_style {
           ),
           '#default_value' => $this->options['fields']['join_field_type'],
         );
-
-
         $form['fields']['value'] = array(
           '#type' => 'select',
           '#title' => t('Value'),
@@ -299,33 +257,36 @@ class views_plugin_style_mapfile extends views_plugin_style {
         );
 
         /*=== Scale Ramp ===*/
+        $form['scale'] = array(
+          '#type' => 'fieldset'
+        );
         $form['scale']['enable'] = array(
           '#type' => 'checkbox',
-          '#title' => t('Enable Scale'),
+          '#title' => t('Enable Scaled Markers'),
           '#id' => 'scale-enable',
           '#default_value' => $this->options['scale']['enable'],
         );
-        $form['scale']['min_size'] = array(
-          '#type' => 'textfield',
-          '#title' => t('Minimum size'),
-          '#process' => array('views_process_dependency'),
-          '#dependency' => array('scale-enable' => array(1)),
-          '#default_value' => $this->options['scale']['min_size'],
-        );
-        $form['scale']['max_size'] = array(
-          '#type' => 'textfield',
-          '#title' => t('Maximum size'),
-          '#process' => array('views_process_dependency'),
-          '#dependency' => array('scale-enable' => array(1)),
-          '#default_value' => $this->options['scale']['max_size'],
-        );
-        $form['scale']['steps'] = array(
-          '#type' => 'textfield',
-          '#title' => t('Gradations'),
-          '#process' => array('views_process_dependency'),
-          '#dependency' => array('scale-enable' => array(1)),
-          '#default_value' => $this->options['scale']['steps'],
-        );
+          $form['scale']['min_size'] = array(
+            '#type' => 'textfield',
+            '#title' => t('Minimum size'),
+            '#process' => array('views_process_dependency'),
+            '#dependency' => array('scale-enable' => array(1)),
+            '#default_value' => $this->options['scale']['min_size'],
+          );
+          $form['scale']['max_size'] = array(
+            '#type' => 'textfield',
+            '#title' => t('Maximum size'),
+            '#process' => array('views_process_dependency'),
+            '#dependency' => array('scale-enable' => array(1)),
+            '#default_value' => $this->options['scale']['max_size'],
+          );
+          $form['scale']['steps'] = array(
+            '#type' => 'textfield',
+            '#title' => t('Gradations'),
+            '#process' => array('views_process_dependency'),
+            '#dependency' => array('scale-enable' => array(1)),
+            '#default_value' => $this->options['scale']['steps'],
+          );
 
         $form['postfix'] = array(
           '#type' => 'textarea',
@@ -335,33 +296,81 @@ class views_plugin_style_mapfile extends views_plugin_style {
         );
 
         /*=== MetaWriter =======*/
+        $form['metawriter'] = array(
+          '#type' => 'fieldset'
+        );
         $form['metawriter']['enable'] = array(
           '#type' => 'checkbox',
           '#title' => t('Include Metawriter'),
           '#id' => 'metawriter-enable',
           '#default_value' => $this->options['metawriter']['enable'],
         );
-        $form['metawriter']['meta-output'] = array(
-          '#type' => 'textfield',
-          '#title' => t('Meta output'),
-          '#process' => array('views_process_dependency'),
-          '#dependency' => array('metawriter-enable' => array(1)),
-          '#default_value' => $this->options['metawriter']['meta-output'],
-        );
-        $form['metawriter']['meta-writer'] = array(
-          '#type' => 'textfield',
-          '#title' => t('Meta writer'),
-          '#process' => array('views_process_dependency'),
-          '#dependency' => array('metawriter-enable' => array(1)),
-          '#process' => array('views_process_dependency'),
-          '#default_value' => $this->options['metawriter']['meta-writer'],
-        );
+          $form['metawriter']['meta-output'] = array(
+            '#type' => 'textfield',
+            '#title' => t('Meta output'),
+            '#process' => array('views_process_dependency'),
+            '#dependency' => array('metawriter-enable' => array(1)),
+            '#default_value' => $this->options['metawriter']['meta-output'],
+          );
+          $form['metawriter']['meta-writer'] = array(
+            '#type' => 'textfield',
+            '#title' => t('Meta writer'),
+            '#process' => array('views_process_dependency'),
+            '#dependency' => array('metawriter-enable' => array(1)),
+            '#process' => array('views_process_dependency'),
+            '#default_value' => $this->options['metawriter']['meta-writer'],
+          );
       }
     }
 
     /**
-     * field_names
+     * @param $view_display colon-separated view-display
      *
+     * return a string representing the URL of a view that returns a Mapnik style
+     * with arguments inherited from the current view
+     */
+    function viewurlargs($view_display) {
+      global $base_url;
+      list($view_name, $display_name) = explode(':', $view_display);
+      if ($view = views_get_view($view_name)) {
+        $args = array();
+        // Retrieve args/filters from current view
+        // to pass on to our vector layer.
+        $current_view = views_get_current_view();
+        if (isset($current_view)) {
+          $args = $current_view->args;
+        }
+        $view->set_display($display_name);
+        return $base_url . '/' . $view->get_url($args);
+      }
+    }
+
+    function viewdata($view_display) {
+      global $base_url;
+      list($view_name, $display_name) = explode(':', $view_display);
+      if ($view = views_get_view($view_name)) {
+        $args = array();
+        // Retrieve args/filters from current view
+        // to pass on to our vector layer.
+        $current_view = views_get_current_view();
+        if (isset($current_view)) {
+          $args = $current_view->args;
+        }
+        $view->set_display($display_name);
+        return $view->execute();
+      }
+    }
+
+    /**
+     * Accessor for URL
+     * @return string $url
+     */
+    function data_url() {
+      return $this->viewurlargs($this->options['fields']['data_view']);
+    }
+
+    /**
+     * field_names
      * @return array of field names on this view
      */
     function field_names() {
@@ -432,19 +441,19 @@ class views_plugin_style_mapfile extends views_plugin_style {
         $value_range = $value_max - $value_min;
 
         $color_ramp = stylewriter_color_ramp(
-          $this->options['colors']['color_min'], 
-          $this->options['colors']['color_max'], 
-          $this->options['colors']['steps']);
+          $this->options['colors']['choropleth']['color_min'], 
+          $this->options['colors']['choropleth']['color_max'], 
+          $this->options['colors']['choropleth']['steps']);
 
         foreach ($points as $i => $point) {
           $rank = (floatval($point['value']) - $value_min) / $value_range; // 0 -> 1
           // Include high endpoint.
           $ramp_idx = ($rank == 1) ? 
             count($color_ramp) - 1 : 
-            floor($rank * $this->options['colors']['steps']);
+            floor($rank * $this->options['colors']['choropleth']['steps']);
           $points[$i]['polygon'] = array(
             'polygon-fill' => $color_ramp[$ramp_idx],
-            'polygon-opacity' => $this->options['colors']['opacity']);
+            'polygon-opacity' => $this->options['colors']['choropleth']['opacity']);
         }
       }
       elseif ($this->options['scale']['enable']) {
@@ -503,17 +512,18 @@ class views_plugin_style_mapfile extends views_plugin_style {
       foreach ($formatted_renders as $id => $row) {
         $point = array();
         foreach ($this->view->field as $key => $field) {
-          if ($key == $this->options['fields']['join_field']) {
-            $join_field_value = $row[$key];
-          }
-          if ($key == $this->options['fields']['name_field']) {
-            $point['name'] = $row[$key];
-          }
-          if ($key == $this->options['fields']['value']) {
-            $point['description'] = $row[$key];
+          switch($key) {
+            case $this->options['fields']['join_field']:
+              $join_field_value = $row[$key];
+              break;
+            case $this->options['fields']['name_field']:
+              $point['name'] = $row[$key];
+              break;
+            case $this->options['fields']['value']:
+              $point['description'] = $row[$key];
+              break;
           }
         }
-        $point['filter'] = $point['join_field_name'] . ' = "' . $join_field_value . '"';
         $points[$join_field_value] = $point;
       }
       return $points;
@@ -582,9 +592,9 @@ class views_plugin_style_mapfile extends views_plugin_style {
         }
 
         $color_ramp = stylewriter_color_ramp(
-          $this->options['colors']['color_min'], 
-          $this->options['colors']['color_max'], 
-          $this->options['colors']['steps']);
+          $this->options['colors']['choropleth']['color_min'], 
+          $this->options['colors']['choropleth']['color_max'], 
+          $this->options['colors']['choropleth']['steps']);
 
         $value_ramp = array_map('strval', 
           stylewriter_range(
