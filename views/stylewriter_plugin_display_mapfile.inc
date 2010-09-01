@@ -17,7 +17,7 @@ class stylewriter_plugin_display_mapfile extends views_plugin_display_feed {
   }
 
   function preview() {
-    return '<pre>' . check_plain($this->view->render()) . '</pre>';
+    return '<pre>This views type does not support previewing.</pre>';
   }
 
   function render() {
