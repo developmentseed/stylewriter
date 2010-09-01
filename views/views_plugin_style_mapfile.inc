@@ -30,10 +30,12 @@ class views_plugin_style_mapfile extends views_plugin_style {
       );
       $options['colors'] = array(
         'default' => array(
-          'color_min' => '',
-          'color_max' => '',
-          'steps' => '',
-          'opacity' => 0.5,
+          'choropleth' => array(
+            'color_min' => '',
+            'color_max' => '',
+            'steps' => '',
+            'opacity' => 0.5,
+          )
         ),
       );
       $options['metawriter'] = array(
@@ -111,8 +113,6 @@ class views_plugin_style_mapfile extends views_plugin_style {
         );
 
         /*=== Stroke =======*/
-        // TODO: use CTools dependencies to kill stroke options
-        // if no stroke is selected
         $form['colors']['stroke'] = array(
           '#type' => 'fieldset'
         );
@@ -564,7 +564,7 @@ class views_plugin_style_mapfile extends views_plugin_style {
         $value_range = $value_max - $value_min;
 
         // Build distribution counts.
-        $dist = array_fill(0, $this->options['colors']['steps'], 0);
+        $dist = array_fill(0, $this->options['colors']['choropleth']['steps'], 0);
         foreach ($values as $value) {
           $rank = ($value - $value_min) / $value_range; // 0 -> 1
           // Include high endpoint.
