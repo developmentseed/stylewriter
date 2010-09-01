@@ -570,7 +570,7 @@ class views_plugin_style_mapfile extends views_plugin_style {
           // Include high endpoint.
           $ramp_idx = ($rank == 1) ? 
             count($dist) - 1 : 
-            floor($rank * $this->options['colors']['steps']);
+            floor($rank * $this->options['colors']['choropleth']['steps']);
           $dist[$ramp_idx] = isset($dist[$ramp_idx]) ? $dist[$ramp_idx] + 1 : 1;
         }
 
@@ -592,7 +592,7 @@ class views_plugin_style_mapfile extends views_plugin_style {
           stylewriter_range(
             $value_min,
             $value_max,
-            $this->options['colors']['steps']));
+            $this->options['colors']['choropleth']['steps']));
 
         $legend = array(
           'points' => array(),
@@ -602,7 +602,7 @@ class views_plugin_style_mapfile extends views_plugin_style {
           ),
         );
 
-        for ($i = 0; $i < $this->options['colors']['steps']; $i++) {
+        for ($i = 0; $i < $this->options['colors']['choropleth']['steps']; $i++) {
           $legend['points'][] = array(
             'color' => $color_ramp[$i],
             'dist' => $dist[$i],
