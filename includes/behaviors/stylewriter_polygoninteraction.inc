@@ -26,6 +26,12 @@ class stylewriter_polygoninteraction extends openlayers_behavior {
     );
     return $form;
   }
+
+  function js_dependency() {
+    return array(
+      'OpenLayers.Handler.Hover',
+      'OpenLayers.Handler.Click');
+  }
   
   /**
    * Render.
