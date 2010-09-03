@@ -8,6 +8,11 @@
   padding:5px;
   }
 
+.stylewriter-label {
+  float:left;
+  clear:both;
+  }
+
 .stylewriter-value {
   padding:0px 5px;
   float:left;

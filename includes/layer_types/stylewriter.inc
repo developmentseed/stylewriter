@@ -114,7 +114,7 @@ class openlayers_layer_type_stylewriter extends openlayers_layer_type {
    * @param string $view_display colon-separated view id
    * @return string $themed_legend html for the final legend
    */
-  function get_legend($view_display) {
+  function get_legend($view_display, $layer_name) {
     list($view_name, $display_name) = explode(':', $view_display);
     if ($view = views_get_view($view_name)) {
       $args = array();
@@ -136,7 +136,7 @@ class openlayers_layer_type_stylewriter extends openlayers_layer_type {
         return ($legend_data['points']) ? $view->style_plugin->theme_legend(
           $legend_data['points'], 
           $legend_data['values'], 
-          $view->get_title()) : '';
+          $layer_name) : '';
       }
     }
   }
@@ -219,7 +219,7 @@ class openlayers_layer_type_stylewriter extends openlayers_layer_type {
       '/stylewriter.css');
 
     $this->data['options'] = array(
-      'legend' => $this->get_legend($this->data['style_view']),
+      'legend' => $this->get_legend($this->data['style_view'], $this->title),
       'keymap' => $this->get_keymap($this->data['style_view'])
     );
 
