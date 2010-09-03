@@ -534,7 +534,7 @@ class views_plugin_style_mapfile extends views_plugin_style {
      */
     function legend_data($rows) {
       // TODO: make disable-able
-      if ($this->options['colors']['choropleth']) {
+      if ($this->options['colors']['choropleth']['enable']) {
         $renders = $formatted_renders = array();
         $keys = array_keys($this->view->field);
 
