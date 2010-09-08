@@ -18,7 +18,7 @@
 
 /* polygon */
 
-<?php if ($polygon): ?>
+<?php if ($polygon['enable']): ?>
   <?php foreach($polygon as $k => $v): ?>
     <?php echo "$k: $v;"; ?>
   <?php endforeach; ?>

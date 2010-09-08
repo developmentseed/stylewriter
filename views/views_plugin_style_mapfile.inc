@@ -403,7 +403,7 @@ class views_plugin_style_mapfile extends views_plugin_style {
       }
 
 
-      if ($this->options['colors']['choropleth']) {
+      if ($this->options['colors']['choropleth']['enable']) {
         $points = $values = array();
         foreach ($renders as $id => $row) {
           $point = array();
@@ -450,7 +450,9 @@ class views_plugin_style_mapfile extends views_plugin_style {
       }
       elseif ($this->options['scale']['enable']) {
         $points = $values = array();
-        foreach ($rendered_records as $id => $row) {
+
+        foreach ($renders as $id => $row) {
+          $point = array();
           foreach ($this->view->field as $key => $field) {
             if ($key == $this->options['fields']['value']) {
               $values[] = floatval($row[$key]);
@@ -476,9 +478,9 @@ class views_plugin_style_mapfile extends views_plugin_style {
           $points[$i]['marker'] = array(
             'marker-width' =>  intval($scale_ramp[$i]),
             'marker-height' => intval($scale_ramp[$i]));
-          $points[$i]['filter'] = $this->options['fields']['value'] . '_rendered' .
+          $points[$i]['filter'] = $this->options['fields']['value'] .
             '>' . $value_ramp[$i] .
-            '][' . $this->options['fields']['value'] . '_rendered' .
+            '][' . $this->options['fields']['value'] .
             '<' . $value_ramp[$i + 1] . '';
         }
       }
