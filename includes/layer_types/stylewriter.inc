@@ -161,7 +161,7 @@ class openlayers_layer_type_stylewriter extends openlayers_layer_type {
         }
       }
       $view->set_display($display_name);
-      $view->set_arguments($args);
+      // $view->set_arguments($args);
       $view->execute();
       if ($view->style_plugin instanceof views_plugin_style_mapfile) {
         return $view->style_plugin->keymap_data($view->result);
@@ -218,10 +218,10 @@ class openlayers_layer_type_stylewriter extends openlayers_layer_type {
     drupal_add_css(drupal_get_path('module', 'stylewriter') . 
       '/stylewriter.css');
 
-    $this->data['options'] = array(
+    $this->data['options'] = array_merge(array(
       'legend' => $this->get_legend($this->data['style_view'], $this->title),
       'keymap' => $this->get_keymap($this->data['style_view'])
-    );
+    ), isset($this->data['options']) ? $this->data['options'] : array());
 
     $this->data['base_url'] = $this->data['base_url'] . '${mapfile}/${z}/${x}/${y}.${format}';
     $this->data['mapfile'] = $this->viewurlargs($this->data['style_view']);
