@@ -479,9 +479,9 @@ class views_plugin_style_mapfile extends views_plugin_style {
             'marker-width' =>  intval($scale_ramp[$i]),
             'marker-height' => intval($scale_ramp[$i]));
           $points[$i]['filter'] = $this->options['fields']['value'] .
-            '>' . $value_ramp[$i] .
+            '>=' . $value_ramp[$i] .
             '][' . $this->options['fields']['value'] .
-            '<' . $value_ramp[$i + 1] . '';
+            '<=' . $value_ramp[$i + 1] . '';
         }
       }
       return $points;
