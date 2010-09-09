@@ -478,10 +478,19 @@ class views_plugin_style_mapfile extends views_plugin_style {
           $points[$i]['marker'] = array(
             'marker-width' =>  intval($scale_ramp[$i]),
             'marker-height' => intval($scale_ramp[$i]));
-          $points[$i]['filter'] = $this->options['fields']['value'] .
-            '>=' . $value_ramp[$i] .
-            '][' . $this->options['fields']['value'] .
-            '<=' . $value_ramp[$i + 1] . '';
+          if ($i == 0) {
+            $points[$i]['filter'] = $this->options['fields']['value'] .
+              '<=' . $value_ramp[$i + 1] . '';
+          }
+          elseif ($i == ($this->options['scale']['steps'] - 2)) {
+            $points[$i]['filter'] = $this->options['fields']['value'] .
+              '>=' . $value_ramp[$i];
+          } else {
+            $points[$i]['filter'] = $this->options['fields']['value'] .
+              '>=' . $value_ramp[$i] .
+              '][' . $this->options['fields']['value'] .
+              '<=' . $value_ramp[$i + 1] . '';
+          }
         }
       }
       return $points;
