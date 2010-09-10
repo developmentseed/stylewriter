@@ -50,7 +50,7 @@ class views_plugin_style_mapfile extends views_plugin_style {
     /**
      * Form helper: get all views that can be used by
      */
-    function data_options() {
+    private function data_options() {
       $views = views_get_all_views();
       $options = array();
       foreach ($views as $view) {
@@ -327,7 +327,7 @@ class views_plugin_style_mapfile extends views_plugin_style {
      * return a string representing the URL of a view that returns a Mapnik style
      * with arguments inherited from the current view
      */
-    function viewurlargs($view_display) {
+    private function viewurlargs($view_display) {
       global $base_url;
       list($view_name, $display_name) = explode(':', $view_display);
       if ($view = views_get_view($view_name)) {
@@ -347,7 +347,7 @@ class views_plugin_style_mapfile extends views_plugin_style {
      * Execute a view and return its data
      * @param $view_display colon-separated name of a view and display
      */
-    function viewdata($view_display) {
+    public function viewdata($view_display) {
       global $base_url;
       list($view_name, $display_name) = explode(':', $view_display);
       if ($view = views_get_view($view_name)) {
@@ -367,7 +367,7 @@ class views_plugin_style_mapfile extends views_plugin_style {
      * Accessor for URL
      * @return string $url
      */
-    function data_url() {
+    public function data_url() {
       return $this->viewurlargs($this->options['fields']['data_view']);
     }
 
@@ -375,7 +375,7 @@ class views_plugin_style_mapfile extends views_plugin_style {
      * field_names
      * @return array of field names on this view
      */
-    function field_names() {
+    public function field_names() {
       return array_keys($this->view->field);
     }
 
@@ -478,11 +478,13 @@ class views_plugin_style_mapfile extends views_plugin_style {
           $points[$i]['marker'] = array(
             'marker-width' =>  intval($scale_ramp[$i]),
             'marker-height' => intval($scale_ramp[$i]));
-          if ($i == 0) {
+          if ($i == 0) { 
+            // lower bound
             $points[$i]['filter'] = $this->options['fields']['value'] .
               '<=' . $value_ramp[$i + 1] . '';
           }
           elseif ($i == ($this->options['scale']['steps'] - 2)) {
+            // upper bound
             $points[$i]['filter'] = $this->options['fields']['value'] .
               '>=' . $value_ramp[$i];
           } else {
@@ -603,7 +605,7 @@ class views_plugin_style_mapfile extends views_plugin_style {
           stylewriter_range(
             $value_min,
             $value_max,
-            $this->options['colors']['choropleth']['steps']));
+            ($this->options['colors']['choropleth']['steps'] + 1)));
 
         $legend = array(
           'points' => array(),
@@ -617,6 +619,8 @@ class views_plugin_style_mapfile extends views_plugin_style {
           $legend['points'][] = array(
             'color' => $color_ramp[$i],
             'dist' => $dist[$i],
+            'value_min' => $value_ramp[$i],
+            'value_max' => $value_ramp[$i + 1],
           );
         }
         return $legend;
@@ -635,7 +639,7 @@ class views_plugin_style_mapfile extends views_plugin_style {
     function theme_legend($points, $values, $label) {
       $swatches = '';
       foreach ($points as $point) {
-        $swatches .= theme('stylewriter_swatch', $point['color'], $point['dist']);
+        $swatches .= theme('stylewriter_swatch', $point['color'], $point['dist'], $point['value_min'], $point['value_max'], $label);
       }
       $first = current($points);
       $last = end($points);

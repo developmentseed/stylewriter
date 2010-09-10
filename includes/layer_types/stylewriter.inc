@@ -36,8 +36,11 @@ class openlayers_layer_type_stylewriter extends openlayers_layer_type {
 
   /**
    * Get all views that could be used for data sources
+   * This is only a helper for the form below.
+   *
+   * @return $options array of eligable views
    */
-  function stylewriter_options() {
+  private function stylewriter_options() {
     $views = views_get_all_views();
     $options = array();
     foreach ($views as $view) {
@@ -96,7 +99,6 @@ class openlayers_layer_type_stylewriter extends openlayers_layer_type {
         '#default_value' => isset($this->data['resolutions']) ? 
           $this->data['resolutions'] : 
           array_map('strval', openlayers_get_resolutions('900913'))
-
       ),
       'minzoom' => array(
         '#type' => 'textfield',
@@ -114,7 +116,7 @@ class openlayers_layer_type_stylewriter extends openlayers_layer_type {
    * @param string $view_display colon-separated view id
    * @return string $themed_legend html for the final legend
    */
-  function get_legend($view_display, $layer_name) {
+  private function get_legend($view_display, $layer_name) {
     list($view_name, $display_name) = explode(':', $view_display);
     if ($view = views_get_view($view_name)) {
       $args = array();
@@ -142,12 +144,15 @@ class openlayers_layer_type_stylewriter extends openlayers_layer_type {
   }
 
   /**
-   * get legend data
+   * get a key map
+   *
+   * A key map is a Javascript object output with a page that 
+   * allows gridded primary keys to be used for polygon interaction.
    * 
    * @param string $view_display colon-separated view id
-   * @return string $themed_legend html for the final legend
+   * @return array $keymap_data associative array of keys to information
    */
-  function get_keymap($view_display) {
+  private function get_keymap($view_display) {
     list($view_name, $display_name) = explode(':', $view_display);
     if ($view = views_get_view($view_name)) {
       $args = array();
@@ -175,7 +180,7 @@ class openlayers_layer_type_stylewriter extends openlayers_layer_type {
    * @param string $view_display colon-separated view id
    * @return string $field_name join field name
    */
-  function get_joinfield() {
+  public function get_joinfield() {
     list($view_name, $display_name) = explode(':', $this->data['style_view']);
     if ($view = views_get_view($view_name)) {
       $view->set_display($display_name);
@@ -192,7 +197,7 @@ class openlayers_layer_type_stylewriter extends openlayers_layer_type {
    * return a string representing the URL of a view that returns a Mapnik style
    * with arguments inherited from the current view
    */
-  function viewurlargs($view_display) {
+  private function viewurlargs($view_display) {
     global $base_url;
     list($view_name, $display_name) = explode(':', $view_display);
     if ($view = views_get_view($view_name)) {
@@ -218,6 +223,7 @@ class openlayers_layer_type_stylewriter extends openlayers_layer_type {
     drupal_add_css(drupal_get_path('module', 'stylewriter') . 
       '/stylewriter.css');
 
+    // avoid overwriting pre-existing options, like a legend key
     $this->data['options'] = array_merge(array(
       'legend' => $this->get_legend($this->data['style_view'], $this->title),
       'keymap' => $this->get_keymap($this->data['style_view'])

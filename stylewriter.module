@@ -54,6 +54,9 @@ function stylewriter_theme() {
       'arguments' => array(
         'color' => '',
         'dist' => '',
+        'value_min' => '',
+        'value_max' => '',
+        'layer_label' => '',
       ),
       'file' => 'stylewriter.theme.inc',
       'template' => 'stylewriter-swatch',

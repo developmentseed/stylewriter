@@ -24,6 +24,7 @@
   float:left;
   }
 
+  /*
 .stylewriter-swatch,
 .stylewriter-swatch-color {
   position:relative;
@@ -39,6 +40,7 @@
   left:0px;
   min-height:2px;
   }
+    */
 
 .stylewriter-swatch-color-dist-0 { height: 5%; }
 .stylewriter-swatch-color-dist-01 { height: 10%; }
@@ -51,3 +53,72 @@
 .stylewriter-swatch-color-dist-08 { height: 80%; }
 .stylewriter-swatch-color-dist-09 { height: 90%; }
 .stylewriter-swatch-color-dist-1  { height: 100%; }
+
+.openlayers-tooltip {
+  background:#333;
+  color:#c4c8bc;
+  z-index:2500;
+  position:absolute;
+  right:10px;
+  top:10px;
+  padding:4px 9px;
+  border:1px solid #44483c;
+
+  -moz-border-radius:2px;
+  -webkit-border-radius:2px;
+  -moz-box-shadow:#ccc 0px 1px 3px;
+  -webkit-box-shadow:#ccc 0px 1px 3px;
+  }
+
+.openlayers-tooltip em {
+  font-style:normal;
+  display:block;
+  }
+
+.openlayers-tooltip b {
+  display:block;
+  font-size:20px;
+  font-weight:bold;
+  color:#fff;
+  }
+
+.openlayers-tooltip b label {
+  font-size:11px;
+  color:#999;
+  }
+
+/** === NEW STYLE LEGEND === */
+.stylewriter-legend {
+  width:200px;
+  }
+
+div.stylewriter-label {
+  clear:both;
+  }
+
+.stylewriter-value {
+  display:none;
+  }
+
+.stylewriter-swatches {
+  width:190px;
+  margin-bottom:5px;
+  }
+
+.stylewriter-swatch {
+  float:left;
+  width:190px;
+  }
+
+.stylewriter-swatch-color {
+  float:left;
+  margin:4px;
+  height:10px;
+  width:10px;
+  border-bottom:1px solid #aaa;
+  border-right:1px solid #aaa;
+  }
+
+.stylewriter-swatch-label {
+  font-size:10.5px;
+}
