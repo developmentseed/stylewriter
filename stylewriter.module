@@ -50,7 +50,7 @@ function stylewriter_theme() {
       'template' => 'stylewriter-rule',
       'path' => $path . "/views",
     ),
-    'stylewriter_swatch' => array(
+    'stylewriter_color_swatch' => array(
       'arguments' => array(
         'color' => '',
         'dist' => '',
@@ -59,9 +59,22 @@ function stylewriter_theme() {
         'layer_label' => '',
       ),
       'file' => 'stylewriter.theme.inc',
-      'template' => 'stylewriter-swatch',
+      'template' => 'stylewriter-color-swatch',
       'path' => $path . "/views",
     ),
+    'stylewriter_point_swatch' => array(
+      'arguments' => array(
+        'color' => '',
+        'dist' => '',
+        'value_min' => '',
+        'value_max' => '',
+        'layer_label' => '',
+      ),
+      'file' => 'stylewriter.theme.inc',
+      'template' => 'stylewriter-point-swatch',
+      'path' => $path . "/views",
+    ),
+
     'stylewriter_document' => array(
       'arguments' => array(
         'rules' => '',

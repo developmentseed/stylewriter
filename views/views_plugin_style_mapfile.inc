@@ -547,9 +547,21 @@ class views_plugin_style_mapfile extends views_plugin_style {
      */
     function legend_data($rows) {
       // TODO: make disable-able
-      if ($this->options['colors']['choropleth']['enable']) {
-        $renders = $formatted_renders = array();
+      if ($this->options['colors']['choropleth']['enable'] || $this->options['scale']['enable']) {
+        $points = $values = $formatted_values = $renders = $formatted_renders = array();
         $keys = array_keys($this->view->field);
+
+        if ($this->options['colors']['choropleth']['enable']) {
+          $steps = $this->options['colors']['choropleth']['steps'];
+          $symbol_ramp = stylewriter_color_ramp(
+            $this->options['colors']['choropleth']['color_min'], 
+            $this->options['colors']['choropleth']['color_max'], 
+            $this->options['colors']['choropleth']['steps']);
+        }
+        else {
+          $steps = $this->options['scale']['steps'];
+          $symbol_ramp = array_reverse(range(0,$this->options['scale']['steps'] - 1));
+        }
 
         foreach ($rows as $count => $row) {
           foreach ($keys as $id) {
@@ -557,8 +569,6 @@ class views_plugin_style_mapfile extends views_plugin_style {
             $formatted_renders[$count][$id] = $this->view->field[$id]->theme($row);
           }
         }  
-
-        $points = $values = $formatted_values = array();
         
         foreach ($renders as $id => $row) {
           foreach ($this->view->field as $key => $field) {
@@ -577,13 +587,13 @@ class views_plugin_style_mapfile extends views_plugin_style {
         $value_range = $value_max - $value_min;
 
         // Build distribution counts.
-        $dist = array_fill(0, $this->options['colors']['choropleth']['steps'], 0);
+        $dist = array_fill(0, $steps, 0);
         foreach ($values as $value) {
           $rank = ($value - $value_min) / $value_range; // 0 -> 1
           // Include high endpoint.
           $ramp_idx = ($rank == 1) ? 
             count($dist) - 1 : 
-            floor($rank * $this->options['colors']['choropleth']['steps']);
+            floor($rank * $steps);
           $dist[$ramp_idx] = isset($dist[$ramp_idx]) ? $dist[$ramp_idx] + 1 : 1;
         }
 
@@ -596,16 +606,11 @@ class views_plugin_style_mapfile extends views_plugin_style {
           $d = str_replace('.', '', strval(round(($d - $dist_min) / $dist_range, 1)));
         }
 
-        $color_ramp = stylewriter_color_ramp(
-          $this->options['colors']['choropleth']['color_min'], 
-          $this->options['colors']['choropleth']['color_max'], 
-          $this->options['colors']['choropleth']['steps']);
-
         $value_ramp = array_map('strval', 
           stylewriter_range(
             $value_min,
             $value_max,
-            ($this->options['colors']['choropleth']['steps'] + 1)));
+            ($steps + 1)));
 
         $legend = array(
           'points' => array(),
@@ -615,13 +620,16 @@ class views_plugin_style_mapfile extends views_plugin_style {
           ),
         );
 
-        for ($i = 0; $i < $this->options['colors']['choropleth']['steps']; $i++) {
+        for ($i = 0; $i < $steps; $i++) {
           $legend['points'][] = array(
-            'color' => $color_ramp[$i],
+            'color' => $symbol_ramp[$i],
             'dist' => $dist[$i],
             'value_min' => $value_ramp[$i],
             'value_max' => $value_ramp[$i + 1],
           );
+        }
+        if ($this->options['scale']['enable']) {
+          $legend['points'] = array_reverse($legend['points']);
         }
         return $legend;
       }
@@ -639,7 +647,12 @@ class views_plugin_style_mapfile extends views_plugin_style {
     function theme_legend($points, $values, $label) {
       $swatches = '';
       foreach ($points as $point) {
-        $swatches .= theme('stylewriter_swatch', $point['color'], $point['dist'], $point['value_min'], $point['value_max'], $label);
+        if ($this->options['colors']['choropleth']['enable']) {
+          $swatches .= theme('stylewriter_color_swatch', $point['color'], $point['dist'], $point['value_min'], $point['value_max'], $label);
+        }
+        else {
+          $swatches .= theme('stylewriter_point_swatch', $point['color'], $point['dist'], $point['value_min'], $point['value_max'], $label);
+        }
       }
       $first = current($points);
       $last = end($points);
