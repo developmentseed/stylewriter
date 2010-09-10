@@ -474,7 +474,7 @@ class views_plugin_style_mapfile extends views_plugin_style {
           $this->options['scale']['max_size'], 
           $this->options['scale']['steps']);
 
-        for ($i = 0; $i < ($this->options['scale']['steps'] - 1); $i++) {
+        for ($i = 0; $i < $this->options['scale']['steps']; $i++) {
           $points[$i]['marker'] = array(
             'marker-width' =>  intval($scale_ramp[$i]),
             'marker-height' => intval($scale_ramp[$i]));
@@ -483,7 +483,7 @@ class views_plugin_style_mapfile extends views_plugin_style {
             $points[$i]['filter'] = $this->options['fields']['value'] .
               '<=' . $value_ramp[$i + 1] . '';
           }
-          elseif ($i == ($this->options['scale']['steps'] - 2)) {
+          elseif ($i == ($this->options['scale']['steps'] - 1)) {
             // upper bound
             $points[$i]['filter'] = $this->options['fields']['value'] .
               '>=' . $value_ramp[$i];
