@@ -144,7 +144,7 @@ OpenLayers.Layer.StyleWriter = OpenLayers.Class(OpenLayers.Layer.Grid, {
             'x': x, 
             'y': y, 
             'z': z,
-            'format': 'png',
+            'format': 'png'
           }
         );
 
