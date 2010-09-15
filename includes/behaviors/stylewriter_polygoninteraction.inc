@@ -21,6 +21,7 @@ class stylewriter_polygoninteraction extends openlayers_behavior {
     $form = parent::options_form();
     $form['layer'] = array(
       '#type' => 'select',
+      '#multiple' => TRUE,
       '#options' => $this->map['layers'],
       '#default_value' => $this->options['layer']
     );
@@ -37,8 +38,9 @@ class stylewriter_polygoninteraction extends openlayers_behavior {
    * Render.
    */
   function render(&$map) {
-    $layer = openlayers_layer_load($this->options['layer']);
-    $this->options['join_field'] = $layer->get_joinfield();
+    $this->options['join_field'] = is_array($this->options['layer']) ?
+      openlayers_layer_load(array_shift($this->options['layer']))->get_joinfield()
+      : NULL;
 
     drupal_add_js(drupal_get_path('module', 'stylewriter') 
       .'/includes/behaviors/stylewriter_tooltip.js');
