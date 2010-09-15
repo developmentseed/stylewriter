@@ -16,9 +16,9 @@
  */
 OpenLayers.Control.PointInteraction = OpenLayers.Class(OpenLayers.Control, {
     encode_base64: function(data) {
-      var out = "", c1, c2, c3, e1, e2, e3, e4;
+      var out = '', c1, c2, c3, e1, e2, e3, e4;
       // modified for function names
-      var tab = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789___";
+      var tab = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
       for (var i = 0; i < data.length; ) {
          c1 = data.charCodeAt(i++);
          c2 = data.charCodeAt(i++);
@@ -64,8 +64,8 @@ OpenLayers.Control.PointInteraction = OpenLayers.Class(OpenLayers.Control, {
      *      {<OpenLayers.Handler.Click>} object created when the hover
      *      option is set to false. Default is "click".
      */
-    clickCallback: "click",
-    
+    clickCallback: 'click',
+
     /**
      * Property: layers
      * {Array(<OpenLayers.Layer.WMS>)} The layers to query for feature info.
@@ -87,20 +87,13 @@ OpenLayers.Control.PointInteraction = OpenLayers.Class(OpenLayers.Control, {
      *     of the first eligible layer will be used.
      */
     url: null,
-    
+
     /**
      * Property: format
      * {<OpenLayers.Format>} A format for parsing GetFeatureInfo responses.
      *     Default is <OpenLayers.Format.WMSGetFeatureInfo>.
      */
     format: null,
-    
-    /**
-     * Property: formatOptions
-     * {Object} Optional properties to set on the format (if one is not provided
-     *     in the <format> property.
-     */
-    formatOptions: null,
 
     /**
      * APIProperty: handlerOptions
@@ -113,27 +106,27 @@ OpenLayers.Control.PointInteraction = OpenLayers.Class(OpenLayers.Control, {
      * (end)
      */
     handlerOptions: null,
-    
+
     /**
      * Property: handler
      * {Object} Reference to the <OpenLayers.Handler> for this control
      */
     handlers: null,
-    
+
     /**
      * Property: hoverRequest
      * {<OpenLayers.Request>} contains the currently running hover request
      *     (if any).
      */
     hoverRequest: null,
-    
+
     archive: {},
     /**
      * Constant: EVENT_TYPES
      *
      * Supported event types (in addition to those from <OpenLayers.Control>):
      * beforegetfeatureinfo - Triggered before the request is sent.
-     *      The event object has an *xy* property with the position of the 
+     *      The event object has an *xy* property with the position of the
      *      mouse click or hover event that triggers the request.
      * getfeatureinfo - Triggered when a GetFeatureInfo response is received.
      *      The event object has a *text* property with the body of the
@@ -145,27 +138,21 @@ OpenLayers.Control.PointInteraction = OpenLayers.Class(OpenLayers.Control, {
      *      layers, *text* and *request* will only contain the response body
      *      and request object of the last request.
      */
-    EVENT_TYPES: ["beforegetfeatureinfo", "getfeatureinfo"],
+    EVENT_TYPES: ['beforegetfeatureinfo', 'getfeatureinfo'],
 
     /**
      * Constructor: <OpenLayers.Control.WMSGetFeatureInfo>
      *
      * Parameters:
-     * options - {Object} 
+     * options - {Object}
      */
     initialize: function(options) {
-        // concatenate events specific to vector with those from the base
-        // this.EVENT_TYPES =
-        //     OpenLayers.Control.WMSGetFeatureInfo.prototype.EVENT_TYPES.concat(
-        //     OpenLayers.Control.prototype.EVENT_TYPES
-        // );
-
         options = options || {};
         options.handlerOptions = options.handlerOptions || {};
 
         OpenLayers.Control.prototype.initialize.apply(this, [options]);
-        
-        if(this.drillDown === true) {
+
+        if (this.drillDown === true) {
             this.hover = false;
         }
         this.format = new OpenLayers.Format.GeoJSON();
@@ -188,12 +175,12 @@ OpenLayers.Control.PointInteraction = OpenLayers.Class(OpenLayers.Control, {
           )};
     },
 
-    /** 
+    /**
      * Method: setMap
-     * Set the map property for the control. 
-     * 
+     * Set the map property for the control.
+     *
      * Parameters:
-     * map - {<OpenLayers.Map>} 
+     * map - {<OpenLayers.Map>}
      */
     setMap: function(map) {
         this.handlers.hover.setMap(map);
@@ -204,7 +191,7 @@ OpenLayers.Control.PointInteraction = OpenLayers.Class(OpenLayers.Control, {
     /**
      * Method: activate
      * Activates the control.
-     * 
+     *
      * Returns:
      * {Boolean} The control was effectively activated.
      */
@@ -221,27 +208,28 @@ OpenLayers.Control.PointInteraction = OpenLayers.Class(OpenLayers.Control, {
     /**
      * Method: deactivate
      * Deactivates the control.
-     * 
+     *
      * Returns:
      * {Boolean} The control was effectively deactivated.
      */
-    deactivate: function () {
+    deactivate: function() {
         return OpenLayers.Control.prototype.deactivate.apply(
             this, arguments
         );
     },
-    
+
     /**
-     * Method: getInfoForClick 
+     * Method: getInfoForClick
      * Called on click
      *
      * Parameters:
-     * evt - {<OpenLayers.Event>} 
+     * evt - {<OpenLayers.Event>}
      */
     getInfoForClick: function(evt) {
-      this.target = evt.target;
-      if (this.archive[$(this.target).attr('src')]) {
-        grid = this.archive[$(this.target).attr('src')]
+      this.target = evt.target || evt.srcElement;
+      var code_string = this.fString($(this.target).attr('src'));
+      if (this.archive[code_string]) {
+        grid = this.archive[code_string];
         if (grid === true || grid == undefined) { // is downloading
           return;
         }
@@ -249,27 +237,38 @@ OpenLayers.Control.PointInteraction = OpenLayers.Class(OpenLayers.Control, {
         point && this.callbacks['click'](point, this.layer);
       }
       else {
-        if (!this.archive[$(evt.target).attr('src')]) {
+        if (!this.archive[code_string]) {
           this.target.req = true;
           try {
-            this.archive[$(evt.target).attr('src')] = true;
+            this.archive[code_string] = true;
             this.target.hoverRequest = this.reqTile(evt);
-          } catch(err) {
-            this.archive[$(evt.target).attr('src')] = false;
+          } catch (err) {
+            this.archive[code_string] = false;
           }
         }
       }
     },
 
+    /**
+     * Generate a function-safe string from a URL string
+     */
+    fString: function(src) {
+      if ( !src) return;
+      pts = src.split('/').slice(-4).join('_').replace(/=/g, '_').split('.');
+      pts.pop();
+      return pts.pop();
+    },
+
     reqTile: function(evt) {
+      this.target = evt.target || evt.srcElement;
       return $.ajax(
         {
-          'url': $(evt.target).attr('src').replace('png', 'json'), 
+          'url': $(this.target).attr('src').replace('png', 'json'),
           context: this,
           success: $.proxy(this.readDone, this),
           error: function() {},
           dataType: 'jsonp',
-          jsonpCallback: "f" +this.encode_base64($(evt.target).attr('src'))
+          jsonpCallback: this.fString($(this.target).attr('src'))
         }
       );
     },
@@ -278,13 +277,20 @@ OpenLayers.Control.PointInteraction = OpenLayers.Class(OpenLayers.Control, {
       lonLat = this.map.getLonLatFromPixel(evt.xy);
       lonLat.transform(new OpenLayers.Projection('EPSG:900913'), new OpenLayers.Projection('EPSG:4326'));
       here = new OpenLayers.Geometry.Point(lonLat.lon, lonLat.lat);
-      for(var i = 0; i < grid.length; i++) {
-        if(grid[i].geometry.containsPoint(here)) {
+      for (var i = 0; i < grid.length; i++) {
+        if (grid[i].geometry.containsPoint(here)) {
           return grid[i].attributes;
         }
       }
     },
-   
+    
+    layerOnTop: function(tile) {
+      layers = this.map.getLayersBy('baselayer', 0);
+      return $(layers).filter(function(i) {
+        return (layers[i].visibility == 1) && (layers[i].options.symbolizer == 'point');
+      })[0];
+    },
+
     /**
      * Method: getInfoForHover
      * Pause callback for the hover handler
@@ -295,35 +301,37 @@ OpenLayers.Control.PointInteraction = OpenLayers.Class(OpenLayers.Control, {
      * This can be called, at max, once every 250 ms
      */
     getInfoForHover: function(evt) {
-        this.target = evt.target;
-        if (this.archive[$(this.target).attr('src')]) {
-          grid = this.archive[$(this.target).attr('src')]
-          if (grid === true || grid == undefined) { // is downloading
-            return;
+        this.target = evt.target || evt.srcElement;
+        var layer = this.layerOnTop(this.target);
+        var code_string = this.fString($(this.target).attr('src'));
+        if (layer) {
+          if (this.archive[code_string]) {
+            grid = this.archive[code_string];
+            if (grid === true || grid == undefined) { // is downloading
+              return;
+            }
+            point = this.getPoint(evt, grid);
+            point ? this.callbacks['over']({'name': point.name, 'description': point[layer.options.value_field]}, layer) :
+              this.callbacks['out']({}, layer);
           }
-          point = this.getPoint(evt, grid);
-          point ? this.callbacks['over'](point, this.layer) :
-            this.callbacks['out']();
-        }
-        else {
-          this.callbacks['out']({}, this.layer);
-          if (!this.archive[$(evt.target).attr('src')]) {
-            this.target.req = true;
-            try {
-              this.archive[$(evt.target).attr('src')] = true;
-              this.target.hoverRequest = this.reqTile(evt);
-            } catch(err) {
-              this.archive[$(evt.target).attr('src')] = false;
+          else {
+            this.callbacks['out']({}, layer);
+            if (!this.archive[code_string]) {
+              this.target.req = true;
+              try {
+                this.archive[code_string] = true;
+                this.target.hoverRequest = this.reqTile(evt);
+              } catch (err) {
+                this.archive[code_string] = false;
+              }
             }
           }
         }
     },
 
     readDone: function(data) {
-      var l = new OpenLayers.Layer.Vector('new vec');
-      l.addFeatures(this.format.read(data));
-      this.layer.map.addLayer(l);
-      this.archive[$(this.target).attr('src')] = this.format.read(data);
+      this.archive[data.code_string] = this.format.read(data.features);
     },
-    CLASS_NAME: "OpenLayers.Control.PointInteraction"
+
+    CLASS_NAME: 'OpenLayers.Control.PointInteraction'
 });

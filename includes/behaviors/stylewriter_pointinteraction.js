@@ -3,12 +3,10 @@
 /**
  * OpenLayers Zoom to Layer Behavior
  */
-Drupal.behaviors.stylewriter_pointhover = function(context) {
+Drupal.behaviors.stylewriter_pointinteraction = function(context) {
   var layers, data = $(context).data('openlayers');
-  if (data && data.map.behaviors['stylewriter_pointhover']) {
+  if (data && data.map.behaviors['stylewriter_pointinteraction']) {
     map = data.openlayers;
-    layer = map.getLayersBy('drupalID', 
-      data.map.behaviors['stylewriter_pointhover'].layer)[0];
     h = new OpenLayers.Control.PointInteraction({
       layer: layer,
       callbacks: {

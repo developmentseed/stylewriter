@@ -44,7 +44,7 @@ Drupal.StyleWriterTooltips.select = function(feature, layer) {
   $(layer.map.div).append(tooltip);
 };
 
-Drupal.StyleWriterTooltips.unselect = function(feature) {
+Drupal.StyleWriterTooltips.unselect = function(feature, layer) {
   $(layer.map.div).css('cursor', 'default');
   $(layer.map.div).children('div.openlayers-tooltip').fadeOut('fast', function() { $(this).remove(); });
 };

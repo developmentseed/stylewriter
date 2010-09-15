@@ -19,32 +19,8 @@ OpenLayers.Control.PolygonInteraction = OpenLayers.Class(OpenLayers.Control, {
 
     // TODO: unify in a javascript file instead of scattering
     encode_base64: function(data) {
-      var out = "", c1, c2, c3, e1, e2, e3, e4;
-      var tab = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
-      for (var i = 0; i < data.length; ) {
-         c1 = data.charCodeAt(i++);
-         c2 = data.charCodeAt(i++);
-         c3 = data.charCodeAt(i++);
-         e1 = c1 >> 2;
-         e2 = ((c1 & 3) << 4) + (c2 >> 4);
-         e3 = ((c2 & 15) << 2) + (c3 >> 6);
-         e4 = c3 & 63;
-         if (isNaN(c2))
-           e3 = e4 = 64;
-         else if (isNaN(c3))
-           e4 = 64;
-         out += tab.charAt(e1) + tab.charAt(e2) + tab.charAt(e3) + tab.charAt(e4);
-      }
-      return out;
-    },
-
-    /**
-     * A variation of base64 that's function-safe. This could be improved;
-     * in this case it doesn't have to be decodable, just onto
-     */
-    encode_base64_fsafe: function(data) {
-      var out = "", c1, c2, c3, e1, e2, e3, e4;
-      var tab = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789___";
+      var out = '', c1, c2, c3, e1, e2, e3, e4;
+      var tab = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
       for (var i = 0; i < data.length; ) {
          c1 = data.charCodeAt(i++);
          c2 = data.charCodeAt(i++);
@@ -74,7 +50,7 @@ OpenLayers.Control.PolygonInteraction = OpenLayers.Class(OpenLayers.Control, {
      *      {<OpenLayers.Handler.Click>} object created when the hover
      *      option is set to false. Default is "click".
      */
-    clickCallback: "click",
+    clickCallback: 'click',
 
     /**
      * Property: queryVisible
@@ -101,27 +77,27 @@ OpenLayers.Control.PolygonInteraction = OpenLayers.Class(OpenLayers.Control, {
      * (end)
      */
     handlerOptions: null,
-    
+
     /**
      * Property: handler
      * {Object} Reference to the <OpenLayers.Handler> for this control
      */
     handlers: null,
-    
+
     /**
      * Property: hoverRequest
      * {<OpenLayers.Request>} contains the currently running hover request
      *     (if any).
      */
     hoverRequest: null,
-    
+
     archive: {},
     /**
      * Constant: EVENT_TYPES
      *
      * Supported event types (in addition to those from <OpenLayers.Control>):
      * beforegetfeatureinfo - Triggered before the request is sent.
-     *      The event object has an *xy* property with the position of the 
+     *      The event object has an *xy* property with the position of the
      *      mouse click or hover event that triggers the request.
      * getfeatureinfo - Triggered when a GetFeatureInfo response is received.
      *      The event object has a *text* property with the body of the
@@ -133,21 +109,15 @@ OpenLayers.Control.PolygonInteraction = OpenLayers.Class(OpenLayers.Control, {
      *      layers, *text* and *request* will only contain the response body
      *      and request object of the last request.
      */
-    EVENT_TYPES: ["beforegetfeatureinfo", "getfeatureinfo"],
+    EVENT_TYPES: ['beforegetfeatureinfo', 'getfeatureinfo'],
 
     /**
      * Constructor: <OpenLayers.Control.PolygonInteraction>
      *
      * Parameters:
-     * options - {Object} 
+     * options - {Object}
      */
     initialize: function(options) {
-        // concatenate events specific to vector with those from the base
-        // this.EVENT_TYPES =
-        //     OpenLayers.Control.WMSGetFeatureInfo.prototype.EVENT_TYPES.concat(
-        //     OpenLayers.Control.prototype.EVENT_TYPES
-        // );
-
         options = options || {};
         options.handlerOptions = options.handlerOptions || {};
 
@@ -160,7 +130,7 @@ OpenLayers.Control.PolygonInteraction = OpenLayers.Class(OpenLayers.Control, {
                 'pause': this.getInfoForHover
             },
             OpenLayers.Util.extend(this.handlerOptions.hover || {}, {
-                'delay': 30
+                'delay': ($.browser.msie) ? 40 : 10
               }
             )
           ),
@@ -168,22 +138,16 @@ OpenLayers.Control.PolygonInteraction = OpenLayers.Class(OpenLayers.Control, {
             this, {
                 'click': this.getInfoForClick
             }
-            /*
-            OpenLayers.Util.extend(this.handlerOptions.hover || {}, {
-                'delay': 30
-              }
-            )
-            */
           )
         };
     },
 
-    /** 
+    /**
      * Method: setMap
-     * Set the map property for the control. 
-     * 
+     * Set the map property for the control.
+     *
      * Parameters:
-     * map - {<OpenLayers.Map>} 
+     * map - {<OpenLayers.Map>}
      */
     setMap: function(map) {
         this.handlers.hover.setMap(map);
@@ -194,11 +158,11 @@ OpenLayers.Control.PolygonInteraction = OpenLayers.Class(OpenLayers.Control, {
     /**
      * Method: activate
      * Activates the control.
-     * 
+     *
      * Returns:
      * {Boolean} The control was effectively activated.
      */
-    activate: function () {
+    activate: function() {
         if (!this.active) {
             this.handlers.hover.activate();
             this.handlers.click.activate();
@@ -211,73 +175,105 @@ OpenLayers.Control.PolygonInteraction = OpenLayers.Class(OpenLayers.Control, {
     /**
      * Method: deactivate
      * Deactivates the control.
-     * 
+     *
      * Returns:
      * {Boolean} The control was effectively deactivated.
      */
-    deactivate: function () {
+    deactivate: function() {
         return OpenLayers.Control.prototype.deactivate.apply(
             this, arguments
         );
     },
-    
+
 
     getGridCell: function(evt) {
-      grid = this.archive[$(this.target).attr('src')];
+      var etarget = evt.target || evt.srcElement;
+      var code_string = this.fString($(etarget).attr('src'))
+      grid = this.archive[code_string];
 
       if (grid === true) { // is downloading
         return;
       }
 
-      offset = [
-        Math.floor((evt.pageX - $(evt.target).offset().left) / 4),
-        Math.floor((evt.pageY - $(evt.target).offset().top) / 4)];
+      pX = evt.pageX || evt.clientX;
+      pY = evt.pageY || evt.clientY;
 
-      return grid[offset[1]][offset[0]];
+      offset = [
+        Math.floor((pX - $(etarget).offset().left) / 4),
+        Math.floor((pY - $(etarget).offset().top) / 4)];
+
+      return grid[offset[1]] && grid[offset[1]][offset[0]];
     },
-   
+
+    /**
+     * Generate a function-safe string from a URL string
+     */
+    fString: function(src) {
+      if ( !src) return;
+      pts = src.split('/').slice(-4).join('_').replace(/=/g, '_').split('.');
+      pts.pop();
+      return pts.pop();
+    },
+
+    /**
+     * Method: reqTile
+     * Requests a single tile
+     *
+     * Parameters:
+     * evt - {Browser Event}
+     */
     reqTile: function(evt) {
-      this.archive[$(evt.target).attr('src')] = true;
+      var etarget = evt.target || evt.srcElement;
+      var code_string = this.fString($(etarget).attr('src'))
+
+      this.archive[code_string] = true;
       this.target.hoverRequest = $.ajax(
         {
-          'url': $(evt.target).attr('src').replace(
-            'png', 
-            this.encode_base64(this.join_field) + '.grid.json'), 
+          'url': $(etarget).attr('src').replace(
+            'png',
+            this.encode_base64(this.join_field) + '.grid.json'),
           context: this,
           success: $.proxy(this.readDone, this),
           error: function() {},
           dataType: 'jsonp',
-          jsonpCallback: "f" + this.encode_base64_fsafe($(evt.target).attr('src'))
+          jsonpCallback: code_string
         }
       );
     },
 
     /**
-     * Method: getInfoForClick 
+     * Method: getInfoForClick
      * Called on click
      *
      * Parameters:
-     * evt - {<OpenLayers.Event>} 
+     * evt - {<OpenLayers.Event>}
      */
     getInfoForClick: function(evt) {
-      this.target = evt.target;
+      this.target = evt.target || evt.srcElement;
+      var code_string = this.fString($(this.target).attr('src'))
       if (this.archive[$(this.target).attr('src')]) {
         key = this.getGridCell(evt);
         key && this.callbacks['click'](this.layer.options.keymap[this.key], this.layer);
       }
       else {
-        if (!this.archive[$(evt.target).attr('src')]) {
+        if (!this.archive[code_string]) {
           this.target.req = true;
           try {
             // TODO: recall getInfoForClick
             this.target.hoverRequest = this.reqTile(evt);
-          } catch(err) {
-            this.archive[$(evt.target).attr('src')] = false;
+          } catch (err) {
+            this.archive[code_string] = false;
           }
         }
       }
     },
 
+    layerOnTop: function(tile) {
+      layers = this.map.getLayersBy('baselayer', 0);
+      return $(layers).filter(function(i) {
+        return (layers[i].visibility == 1) && (layers[i].options.symbolizer == 'polygon');
+      })[0];
+    },
 
     /**
      * Method: getInfoForHover
@@ -289,29 +285,36 @@ OpenLayers.Control.PolygonInteraction = OpenLayers.Class(OpenLayers.Control, {
      * This can be called, at max, once every 250 ms
      */
     getInfoForHover: function(evt) {
-        this.target = evt.target;
-        if (this.archive[$(this.target).attr('src')]) {
-          key = this.getGridCell(evt);
-          if(key) {
-            if (key !== this.key) {
-              this.key = key;
-              this.callbacks['out'](this.layer.options.keymap[this.key], this.layer);
-              this.layer.options.keymap[key] &&
-                this.callbacks['over'](this.layer.options.keymap[this.key], this.layer);
+        this.target = evt.target || evt.srcElement;
+        var layer = this.layerOnTop();
+        if (layer) {
+          var code_string = this.fString($(this.target).attr('src'))
+          if (this.archive[code_string]) {
+            key = this.getGridCell(evt);
+            if (key) {
+              if (key !== this.key) {
+                this.key = key;
+                this.callbacks['out'](layer.options.keymap[this.key], layer);
+                if (layer.options.keymap[key]) {
+                  this.callbacks['over'](layer.options.keymap[this.key], layer);
+                }
+                else {
+                }
+              }
+            }
+            else {
+              this.callbacks['out'](layer.options.keymap[this.key], layer);
             }
           }
           else {
-            this.callbacks['out'](this.layer.options.keymap[this.key], this.layer);
-          }
-        }
-        else {
-          this.callbacks['out']({}, this.layer);
-          if (!this.archive[$(evt.target).attr('src')]) {
-            this.target.req = true;
-            try {
-              this.target.hoverRequest = this.reqTile(evt);
-            } catch(err) {
-              this.archive[$(evt.target).attr('src')] = false;
+            this.callbacks['out']({}, layer);
+            if (!this.archive[code_string]) {
+              this.target.req = true;
+              try {
+                this.target.hoverRequest = this.reqTile(evt);
+              } catch (err) {
+                this.archive[code_string] = false;
+              }
             }
           }
         }
@@ -339,7 +342,7 @@ OpenLayers.Control.PolygonInteraction = OpenLayers.Class(OpenLayers.Control, {
       for (var i = 0; i < 64; i++) {
         grid[i] = x.splice(0, 64);
       }
-      this.archive[$(this.target).attr('src')] = grid;
+      this.archive[data.code_string] = grid;
     },
-    CLASS_NAME: "OpenLayers.Control.PolygonInteraction"
+    CLASS_NAME: 'OpenLayers.Control.PolygonInteraction'
 });
