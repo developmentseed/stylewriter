@@ -116,6 +116,61 @@ class openlayers_layer_type_stylewriter extends openlayers_layer_type {
    * @param string $view_display colon-separated view id
    * @return string $themed_legend html for the final legend
    */
+  private function get_symbolizer($view_display) {
+    list($view_name, $display_name) = explode(':', $view_display);
+    if ($view = views_get_view($view_name)) {
+      $args = array();
+      // Retrieve args/filters from current view
+      // to pass on to our vector layer.
+      $current_view = views_get_current_view();
+      if (isset($current_view)) {
+        $args = $current_view->args;
+        if (isset($current_view->exposed_input)) {
+          $view->set_exposed_input($current_view->exposed_input);
+        }
+      }
+
+      // views sucks
+      if ($view->display[$display_name]->display_options['style_options']['colors']['choropleth']['enable']) {
+        return 'polygon';
+      }
+      if ($view->display[$display_name]->display_options['style_options']['scale']['enable']) {
+        return 'point';
+      }
+    }
+  }
+
+  
+  /**
+   * get legend data
+   * 
+   * @param string $view_display colon-separated view id
+   * @return string $themed_legend html for the final legend
+   */
+  private function get_value_field($view_display) {
+    list($view_name, $display_name) = explode(':', $view_display);
+    if ($view = views_get_view($view_name)) {
+      $args = array();
+      // Retrieve args/filters from current view
+      // to pass on to our vector layer.
+      $current_view = views_get_current_view();
+      if (isset($current_view)) {
+        $args = $current_view->args;
+        if (isset($current_view->exposed_input)) {
+          $view->set_exposed_input($current_view->exposed_input);
+        }
+      }
+      // views sucks
+      return $view->display[$display_name]->display_options['style_options']['fields']['value'] . '_rendered';
+    }
+  }
+
+  /**
+   * get legend data
+   * 
+   * @param string $view_display colon-separated view id
+   * @return string $themed_legend html for the final legend
+   */
   private function get_legend($view_display, $layer_name) {
     list($view_name, $display_name) = explode(':', $view_display);
     if ($view = views_get_view($view_name)) {
@@ -160,13 +215,15 @@ class openlayers_layer_type_stylewriter extends openlayers_layer_type {
       // to pass on to our vector layer.
       $current_view = views_get_current_view();
       if (isset($current_view)) {
+        /*
         $args = $current_view->args;
         if (isset($current_view->exposed_input)) {
           $view->set_exposed_input($current_view->exposed_input);
         }
+         */
       }
+      $view->set_items_per_page(1000);
       $view->set_display($display_name);
-      // $view->set_arguments($args);
       $view->execute();
       if ($view->style_plugin instanceof views_plugin_style_mapfile) {
         return $view->style_plugin->keymap_data($view->result);
@@ -226,6 +283,8 @@ class openlayers_layer_type_stylewriter extends openlayers_layer_type {
     // avoid overwriting pre-existing options, like a legend key
     $this->data['options'] = array_merge(array(
       'legend' => $this->get_legend($this->data['style_view'], $this->title),
+      'symbolizer' => $this->get_symbolizer($this->data['style_view']),
+      'value_field' => $this->get_value_field($this->data['style_view']),
       'keymap' => $this->get_keymap($this->data['style_view'])
     ), isset($this->data['options']) ? $this->data['options'] : array());
 
