@@ -227,16 +227,15 @@ OpenLayers.Control.PolygonInteraction = OpenLayers.Class(OpenLayers.Control, {
       var code_string = this.fString($(etarget).attr('src'))
 
       this.archive[code_string] = true;
-      this.target.hoverRequest = $.ajax(
+      this.target.hoverRequest = $.jsonp(
         {
           'url': $(etarget).attr('src').replace(
             'png',
             this.encode_base64(this.join_field) + '.grid.json'),
           context: this,
-          success: $.proxy(this.readDone, this),
+          success: this.readDone,
           error: function() {},
-          dataType: 'jsonp',
-          jsonpCallback: code_string
+          callback: code_string
         }
       );
     },

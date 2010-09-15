@@ -261,14 +261,13 @@ OpenLayers.Control.PointInteraction = OpenLayers.Class(OpenLayers.Control, {
 
     reqTile: function(evt) {
       this.target = evt.target || evt.srcElement;
-      return $.ajax(
+      return $.jsonp(
         {
           'url': $(this.target).attr('src').replace('png', 'json'),
           context: this,
-          success: $.proxy(this.readDone, this),
+          success: this.readDone,
           error: function() {},
-          dataType: 'jsonp',
-          jsonpCallback: this.fString($(this.target).attr('src'))
+          callback: this.fString($(this.target).attr('src'))
         }
       );
     },
