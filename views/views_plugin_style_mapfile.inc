@@ -204,7 +204,7 @@ class views_plugin_style_mapfile extends views_plugin_style {
         );
           $form['fields']['data_view'] = array(
             '#type' => 'select',
-            '#default_value' => $this->options['data_view'],
+            '#default_value' => $this->options['fields']['data_view'],
             '#title' => t('Data View'),
             '#process' => array('views_process_dependency'),
             '#dependency' => array('data-type-select' => array('ogr')),
