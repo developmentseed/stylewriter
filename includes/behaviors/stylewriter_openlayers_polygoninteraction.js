@@ -222,18 +222,16 @@ OpenLayers.Control.PolygonInteraction = OpenLayers.Class(OpenLayers.Control, {
      * Parameters:
      * evt - {Browser Event}
      */
-    reqTile: function(etarget) {
+    reqTile: function(etarget, layer) {
       var code_string = this.fString($(etarget).attr('src'))
 
       this.archive[code_string] = true;
-      var that = this;
-      var src = $(etarget).attr('src');
 
       etarget.hoverRequest = $.jsonp(
         {
           'url': $(etarget).attr('src').replace(
             'png',
-            this.encode_base64(this.join_field) + '.grid.json'),
+            this.encode_base64(layer.options.join_field) + '.grid.json'),
           context: this,
           success: this.readDone,
           error: function() {},
@@ -313,7 +311,7 @@ OpenLayers.Control.PolygonInteraction = OpenLayers.Class(OpenLayers.Control, {
             if (!this.archive[code_string]) {
               this.target.req = true;
               try {
-                this.target.hoverRequest = this.reqTile(this.target);
+                this.target.hoverRequest = this.reqTile(this.target, layer);
               } catch (err) {
                 this.archive[code_string] = false;
               }

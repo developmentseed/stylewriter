@@ -38,10 +38,6 @@ class stylewriter_polygoninteraction extends openlayers_behavior {
    * Render.
    */
   function render(&$map) {
-    $this->options['join_field'] = is_array($this->options['layer']) ?
-      openlayers_layer_load(array_shift($this->options['layer']))->get_joinfield()
-      : NULL;
-
     drupal_add_js(drupal_get_path('module', 'stylewriter') 
       .'/includes/behaviors/jquery.jsonp-2.1.2.min.js');
     drupal_add_js(drupal_get_path('module', 'stylewriter') 

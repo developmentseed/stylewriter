@@ -140,6 +140,26 @@ class openlayers_layer_type_stylewriter extends openlayers_layer_type {
     }
   }
 
+
+  /**
+   */
+  private function get_join_field($view_display) {
+    list($view_name, $display_name) = explode(':', $view_display);
+    if ($view = views_get_view($view_name)) {
+      $args = array();
+      // Retrieve args/filters from current view
+      // to pass on to our vector layer.
+      $current_view = views_get_current_view();
+      if (isset($current_view)) {
+        $args = $current_view->args;
+        if (isset($current_view->exposed_input)) {
+          $view->set_exposed_input($current_view->exposed_input);
+        }
+      }
+      // views sucks
+      return $view->display[$display_name]->display_options['style_options']['fields']['join_field_name'];
+    }
+  }
   
   /**
    * get legend data
@@ -284,6 +304,7 @@ class openlayers_layer_type_stylewriter extends openlayers_layer_type {
     $this->data['options'] = array_merge(array(
       'legend' => $this->get_legend($this->data['style_view'], $this->title),
       'symbolizer' => $this->get_symbolizer($this->data['style_view']),
+      'join_field' => $this->get_join_field($this->data['style_view']),
       'value_field' => $this->get_value_field($this->data['style_view']),
       'keymap' => $this->get_keymap($this->data['style_view'])
     ), isset($this->data['options']) ? $this->data['options'] : array());
