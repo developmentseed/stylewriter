@@ -6,22 +6,19 @@
   height:20px;
   line-height:20px;
   padding:5px;
+  float:left;
   }
 
 .stylewriter-label {
-  float:left;
-  clear:both;
   }
 
 .stylewriter-value {
   padding:0px 5px;
-  float:left;
   font-size:11px;
   }
 
 .stylewriter-swatches {
   padding:0px 5px;
-  float:left;
   }
 
   /*
