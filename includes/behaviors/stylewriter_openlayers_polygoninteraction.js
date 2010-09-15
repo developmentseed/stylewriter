@@ -222,12 +222,14 @@ OpenLayers.Control.PolygonInteraction = OpenLayers.Class(OpenLayers.Control, {
      * Parameters:
      * evt - {Browser Event}
      */
-    reqTile: function(evt) {
-      var etarget = evt.target || evt.srcElement;
+    reqTile: function(etarget) {
       var code_string = this.fString($(etarget).attr('src'))
 
       this.archive[code_string] = true;
-      this.target.hoverRequest = $.jsonp(
+      var that = this;
+      var src = $(etarget).attr('src');
+
+      etarget.hoverRequest = $.jsonp(
         {
           'url': $(etarget).attr('src').replace(
             'png',
@@ -235,7 +237,8 @@ OpenLayers.Control.PolygonInteraction = OpenLayers.Class(OpenLayers.Control, {
           context: this,
           success: this.readDone,
           error: function() {},
-          callback: code_string
+          callback: code_string,
+          callbackParameter: 'callback'
         }
       );
     },
@@ -259,7 +262,7 @@ OpenLayers.Control.PolygonInteraction = OpenLayers.Class(OpenLayers.Control, {
           this.target.req = true;
           try {
             // TODO: recall getInfoForClick
-            this.target.hoverRequest = this.reqTile(evt);
+            this.target.hoverRequest = this.reqTile(this.target);
           } catch (err) {
             this.archive[code_string] = false;
           }
@@ -285,7 +288,7 @@ OpenLayers.Control.PolygonInteraction = OpenLayers.Class(OpenLayers.Control, {
      */
     getInfoForHover: function(evt) {
         this.target = evt.target || evt.srcElement;
-        var layer = this.layerOnTop();
+        var layer = this.layerOnTop(this.target);
         if (layer) {
           var code_string = this.fString($(this.target).attr('src'))
           if (this.archive[code_string]) {
@@ -310,7 +313,7 @@ OpenLayers.Control.PolygonInteraction = OpenLayers.Class(OpenLayers.Control, {
             if (!this.archive[code_string]) {
               this.target.req = true;
               try {
-                this.target.hoverRequest = this.reqTile(evt);
+                this.target.hoverRequest = this.reqTile(this.target);
               } catch (err) {
                 this.archive[code_string] = false;
               }

@@ -267,7 +267,8 @@ OpenLayers.Control.PointInteraction = OpenLayers.Class(OpenLayers.Control, {
           context: this,
           success: this.readDone,
           error: function() {},
-          callback: this.fString($(this.target).attr('src'))
+          callback: this.fString($(this.target).attr('src')),
+          callbackParameter: 'callback'
         }
       );
     },
