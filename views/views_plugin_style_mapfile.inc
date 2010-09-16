@@ -183,6 +183,36 @@ class views_plugin_style_mapfile extends views_plugin_style {
           '#dependency' => array('choropleth-enable' => array('1')),
           '#default_value' => $this->options['colors']['choropleth']['opacity'],
         );
+          $form['colors']['choropleth']['special'] = array(
+            '#type' => 'fieldset'
+          );
+          $form['colors']['choropleth']['special']['enable'] = array(
+            '#type' => 'checkbox',
+            '#title' => t('Enable special'),
+            '#default_value' => $this->options['colors']['choropleth']['special']['enable'],
+            '#id' => 'special-enable'
+          );
+          $form['colors']['choropleth']['special']['value'] = array(
+            '#type' => 'textfield',
+            '#title' => t('Special Value'),
+            '#default_value' => $this->options['colors']['choropleth']['special']['value'],
+            '#process' => array('views_process_dependency'),
+            '#dependency' => array('special-enable' => array('1')),
+          );
+          $form['colors']['choropleth']['special']['color'] = array(
+            '#type' => 'textfield',
+            '#title' => t('Special Color'),
+            '#default_value' => $this->options['colors']['choropleth']['special']['color'],
+            '#process' => array('views_process_dependency'),
+            '#dependency' => array('special-enable' => array('1')),
+          );
+          $form['colors']['choropleth']['special']['label'] = array(
+            '#type' => 'textfield',
+            '#title' => t('Special Label'),
+            '#default_value' => $this->options['colors']['choropleth']['special']['label'],
+            '#process' => array('views_process_dependency'),
+            '#dependency' => array('special-enable' => array('1')),
+          );
 
         /* -- Data Options -- */
         $form['fields']['data_strategy'] = array(
@@ -413,8 +443,14 @@ class views_plugin_style_mapfile extends views_plugin_style {
               $join_field_value = $row[$key];
             }
             if ($key == $this->options['fields']['value']) {
-              $point['value'] = $row[$key];
-              $values[] = floatval($row[$key]);
+              if ($this->options['colors']['choropleth']['special']['enable'] && 
+                $row[$key] == $this->options['colors']['choropleth']['special']['value']) {
+                $point['special'] = TRUE;
+              }
+              else {
+                $point['value'] = $row[$key];
+                $values[] = floatval($row[$key]);
+              }
             }
           }
           switch ($this->options['fields']['join_field_type']) {
@@ -438,14 +474,21 @@ class views_plugin_style_mapfile extends views_plugin_style {
           $this->options['colors']['choropleth']['steps']);
 
         foreach ($points as $i => $point) {
-          $rank = (floatval($point['value']) - $value_min) / $value_range; // 0 -> 1
-          // Include high endpoint.
-          $ramp_idx = ($rank == 1) ? 
-            count($color_ramp) - 1 : 
-            floor($rank * $this->options['colors']['choropleth']['steps']);
-          $points[$i]['polygon'] = array(
-            'polygon-fill' => $color_ramp[$ramp_idx],
-            'polygon-opacity' => $this->options['colors']['choropleth']['opacity']);
+          if (!empty($point['special'])) {
+            $points[$i]['polygon'] = array(
+              'polygon-fill' => $this->options['colors']['choropleth']['special']['color'],
+              'polygon-opacity' => $this->options['colors']['choropleth']['opacity']);
+          }
+          else {
+            $rank = (floatval($point['value']) - $value_min) / $value_range; // 0 -> 1
+            // Include high endpoint.
+            $ramp_idx = ($rank == 1) ? 
+              count($color_ramp) - 1 : 
+              floor($rank * $this->options['colors']['choropleth']['steps']);
+            $points[$i]['polygon'] = array(
+              'polygon-fill' => $color_ramp[$ramp_idx],
+              'polygon-opacity' => $this->options['colors']['choropleth']['opacity']);
+          }
         }
       }
       elseif ($this->options['scale']['enable']) {
@@ -525,7 +568,13 @@ class views_plugin_style_mapfile extends views_plugin_style {
               $point['name'] = $row[$key];
               break;
             case $this->options['fields']['value']:
-              $point['description'] = $row[$key];
+              if ($this->options['colors']['choropleth']['special']['enable'] && 
+                $renders[$id][$key] == $this->options['colors']['choropleth']['special']['value']) {
+                $point['description'] = $this->options['colors']['choropleth']['special']['label'];
+              }
+              else {
+                $point['description'] = $row[$key];
+              }
               break;
           }
         }
