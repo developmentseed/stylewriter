@@ -122,6 +122,7 @@ class views_plugin_style_mapfile extends views_plugin_style {
           '#title' => t('Include stroke'),
           '#id' => 'stroke-enable',
           '#default_value' => $this->options['colors']['stroke']['enable'],
+          '#description' => t('Provide a stroke around points.'),
         );
         $form['colors']['stroke']['line-color'] = array(
           '#type' => 'textfield',
@@ -154,6 +155,9 @@ class views_plugin_style_mapfile extends views_plugin_style {
           '#title' => t('Enable Choropleth'),
           '#id' => 'choropleth-enable',
           '#default_value' => $this->options['colors']['choropleth']['enable'],
+          '#description' => t('For polygon data, the StyleWriter module can 
+            output polygon-fill and polygon-opacity attributes based on a value 
+            in given data.')
         );
         $form['colors']['choropleth']['color_min'] = array(
           '#type' => 'textfield',
@@ -275,6 +279,9 @@ class views_plugin_style_mapfile extends views_plugin_style {
             'int' => t('Integer / Number'),
             'string' => t('String')
           ),
+          '#description' => t('Mapnik needs numbers and strings to be formatted 
+            as such when making comparisons - check the type of the join field 
+            in the shapefile or GeoJSON data.'),
           '#default_value' => $this->options['fields']['join_field_type'],
         );
         $form['fields']['value'] = array(
@@ -293,6 +300,8 @@ class views_plugin_style_mapfile extends views_plugin_style {
           '#title' => t('Enable Scaled Markers'),
           '#id' => 'scale-enable',
           '#default_value' => $this->options['scale']['enable'],
+          '#description' => t('Scaled markers work with point datasources 
+            to provide points that get larger and smaller based on value.')
         );
           $form['scale']['min_size'] = array(
             '#type' => 'textfield',
@@ -332,6 +341,8 @@ class views_plugin_style_mapfile extends views_plugin_style {
           '#title' => t('Include Metawriter'),
           '#id' => 'metawriter-enable',
           '#default_value' => $this->options['metawriter']['enable'],
+          '#description' => t('MetaWriters are a capability of Mapnik 2.0 
+            that allow GeoJSON to be simultaneously output with raster data')
         );
           $form['metawriter']['meta-output'] = array(
             '#type' => 'textfield',
@@ -339,6 +350,9 @@ class views_plugin_style_mapfile extends views_plugin_style {
             '#process' => array('views_process_dependency'),
             '#dependency' => array('metawriter-enable' => array(1)),
             '#default_value' => $this->options['metawriter']['meta-output'],
+            '#description' => t('Name the fields in the datasource that should 
+              be output by the MetaWriter. In the case of Drupal-generated 
+              GeoJSON, these fields might be named field_alias_rendered.')
           );
           $form['metawriter']['meta-writer'] = array(
             '#type' => 'textfield',
@@ -347,6 +361,8 @@ class views_plugin_style_mapfile extends views_plugin_style {
             '#dependency' => array('metawriter-enable' => array(1)),
             '#process' => array('views_process_dependency'),
             '#default_value' => $this->options['metawriter']['meta-writer'],
+            '#description' => t('Name the metawriter that will be used by 
+              this mapfile')
           );
       }
     }
