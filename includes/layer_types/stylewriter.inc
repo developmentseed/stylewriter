@@ -205,6 +205,7 @@ class openlayers_layer_type_stylewriter extends openlayers_layer_type {
         }
       }
 
+      $view->set_items_per_page(1000);
       $view->set_display($display_name);
       $view->set_arguments($args);
       $view->execute();
