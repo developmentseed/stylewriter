@@ -638,7 +638,9 @@ class views_plugin_style_mapfile extends views_plugin_style {
           foreach ($this->view->field as $key => $field) {
             // TODO temporary hack
             // TODO getting bad invalid output here
-            if ($key == $this->options['fields']['value']) {
+            if ($key == $this->options['fields']['value'] &&
+             !($this->options['colors']['choropleth']['special']['enable'] && $row[$key] == 
+               $this->options['colors']['choropleth']['special']['value'])) {
               $point['value'] = $row[$key];
               $values[$id] = floatval($row[$key]);
               $formatted_values[$id] = $formatted_renders[$id][$key];
