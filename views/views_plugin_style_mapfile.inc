@@ -490,6 +490,7 @@ class views_plugin_style_mapfile extends views_plugin_style {
         $value_min = min($values);
         $value_max = max($values);
         $value_range = $value_max - $value_min;
+        if ($value_range == 0) return; // lots of divisions coming up
 
         $color_ramp = stylewriter_color_ramp(
           $this->options['colors']['choropleth']['color_min'], 
@@ -658,6 +659,7 @@ class views_plugin_style_mapfile extends views_plugin_style {
         $value_min = min($values);
         $value_max = max($values);
         $value_range = $value_max - $value_min;
+        if ($value_range == 0) return; // There are lots of divisions by zero coming up
 
         // Build distribution counts.
         $dist = array_fill(0, $steps, 0);
