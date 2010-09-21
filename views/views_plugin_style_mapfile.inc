@@ -210,6 +210,13 @@ class views_plugin_style_mapfile extends views_plugin_style {
             '#process' => array('views_process_dependency'),
             '#dependency' => array('special-enable' => array('1')),
           );
+          $form['colors']['choropleth']['special']['opacity'] = array(
+            '#type' => 'textfield',
+            '#title' => t('Special Opacity'),
+            '#default_value' => $this->options['colors']['choropleth']['special']['opacity'],
+            '#process' => array('views_process_dependency'),
+            '#dependency' => array('special-enable' => array('1')),
+          );
           $form['colors']['choropleth']['special']['label'] = array(
             '#type' => 'textfield',
             '#title' => t('Special Label'),
@@ -493,7 +500,7 @@ class views_plugin_style_mapfile extends views_plugin_style {
           if (!empty($point['special'])) {
             $points[$i]['polygon'] = array(
               'polygon-fill' => $this->options['colors']['choropleth']['special']['color'],
-              'polygon-opacity' => $this->options['colors']['choropleth']['opacity']);
+              'polygon-opacity' => $this->options['colors']['choropleth']['special']['opacity']);
           }
           else {
             $rank = (floatval($point['value']) - $value_min) / $value_range; // 0 -> 1
@@ -578,7 +585,7 @@ class views_plugin_style_mapfile extends views_plugin_style {
         foreach ($this->view->field as $key => $field) {
           switch($key) {
             case $this->options['fields']['join_field']:
-              $join_field_value = $row[$key];
+              $join_field_value = $renders[$id][$key];
               break;
             case $this->options['fields']['name_field']:
               $point['name'] = $row[$key];
@@ -618,8 +625,8 @@ class views_plugin_style_mapfile extends views_plugin_style {
         if ($this->options['colors']['choropleth']['enable']) {
           $steps = $this->options['colors']['choropleth']['steps'];
           $symbol_ramp = stylewriter_color_ramp(
-            $this->options['colors']['choropleth']['color_min'], 
-            $this->options['colors']['choropleth']['color_max'], 
+            $this->options['colors']['choropleth']['color_min'],
+            $this->options['colors']['choropleth']['color_max'],
             $this->options['colors']['choropleth']['steps']);
         }
         else {
@@ -632,7 +639,7 @@ class views_plugin_style_mapfile extends views_plugin_style {
             $renders[$count][$id] = $row->{$this->view->field[$id]->field_alias};
             $formatted_renders[$count][$id] = $this->view->field[$id]->theme($row);
           }
-        }  
+        }
         
         foreach ($renders as $id => $row) {
           foreach ($this->view->field as $key => $field) {

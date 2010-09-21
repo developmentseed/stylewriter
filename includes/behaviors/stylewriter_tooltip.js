@@ -44,6 +44,14 @@ Drupal.StyleWriterTooltips.select = function(feature, layer) {
   $(layer.map.div).append(tooltip);
 };
 
+Drupal.StyleWriterTooltips.positionedSelect = function(feature, layer, evt) {
+  var tooltip = Drupal.StyleWriterTooltips.getToolTip(feature);
+  // var point  = new OpenLayers.LonLat(feature.geometry.x, feature.geometry.y);
+  // var offset = feature.layer.getViewPortPxFromLonLat(point);
+  $(tooltip).css({zIndex: '1000', position: 'absolute', left: evt.pageX, top: evt.pageY});
+  $('body').append(tooltip);
+};
+
 Drupal.StyleWriterTooltips.unselect = function(feature, layer) {
   $(layer.map.div).css('cursor', 'default');
   $(layer.map.div).children('div.openlayers-tooltip').fadeOut('fast', function() { $(this).remove(); });

@@ -294,16 +294,16 @@ OpenLayers.Control.PolygonInteraction = OpenLayers.Class(OpenLayers.Control, {
             if (key) {
               if (key !== this.key) {
                 this.key = key;
-                this.callbacks['out'](layer.options.keymap[this.key], layer);
+                this.callbacks['out'](layer.options.keymap[this.key], layer, evt);
                 if (layer.options.keymap[key]) {
-                  this.callbacks['over'](layer.options.keymap[this.key], layer);
+                  this.callbacks['over'](layer.options.keymap[this.key], layer, evt);
                 }
                 else {
                 }
               }
             }
             else {
-              this.callbacks['out'](layer.options.keymap[this.key], layer);
+              this.callbacks['out'](layer.options.keymap[this.key], layer, evt);
             }
           }
           else {

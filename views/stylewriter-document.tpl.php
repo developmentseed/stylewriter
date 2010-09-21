@@ -1,7 +1,6 @@
 <?php
 // $Id$
 /**
- * @param $bgcolor 
  * @param $data_url 
  * @param $rules array of style rules
  * @param $data_type 

@@ -27,12 +27,7 @@ function template_preprocess_stylewriter_mapfile(&$vars) {
       $rows, 
       $view->style_plugin->options['fields']['data_url'],
       $view->style_plugin->options['fields']['data_type'],
-      // layer: OGRGeoJSON
-      array(
-        'file' => '[tile_dir]/[z]/[x]/[y].json',
-        'type' => 'json',
-        'name' => 'meta1',
-      )
+      FALSE
     ));
   }
   else {
