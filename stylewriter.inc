@@ -88,6 +88,9 @@ function stylewriter_color_ramp_grad($a, $b, $steps) {
     stylewriter_range($a, $b, $steps);
 }
 
+/**
+ * Curry color_pack with TRUE
+ */
 function _stylewriter_color_pack($c) {
   return _color_pack($c, TRUE);
 }
