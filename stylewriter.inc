@@ -7,6 +7,21 @@
  */
 
 /**
+ * Get quantile breaks for a dataset
+ *
+ * @param $data
+ * @param $n number of breaks
+ *
+ * @return $bounds upper & lower bounds for data
+ */
+function stylewriter_distribution_quantile($data, $n) {
+  sort($data);
+  $bounds = array_map('min', array_chunk($data, count($data) / $n));
+  $bounds[] = end($data);
+  return $bounds;
+}
+
+/**
  * Blend two colors to make a ramp
  * 
  * @param $a
