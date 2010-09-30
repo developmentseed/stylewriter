@@ -31,15 +31,21 @@ class views_plugin_style_mapfile extends views_plugin_style {
       $options['colors'] = array(
         'default' => array(
           'choropleth' => array(
+            'enable' => FALSE,
             'color_min' => '',
             'color_max' => '',
-            'steps' => '',
+            'steps' => '5',
+            'ramp_type' => 'equal',
             'opacity' => 0.5,
+            'special' => array(
+              'enable' => FALSE
+            )
           )
         ),
       );
       $options['metawriter'] = array(
         'default' => array(
+          'enable' => FALSE,
           'marker-meta-writer' => 'meta1',
           'marker-meta-output' => '',
         ),
@@ -172,6 +178,17 @@ class views_plugin_style_mapfile extends views_plugin_style {
           '#process' => array('views_process_dependency'),
           '#dependency' => array('choropleth-enable' => array('1')),
           '#default_value' => $this->options['colors']['choropleth']['color_max'],
+        );
+        $form['colors']['choropleth']['ramp_type'] = array(
+          '#type' => 'select',
+          '#title' => t('Ramp Type'),
+          '#process' => array('views_process_dependency'),
+          '#dependency' => array('choropleth-enable' => array('1')),
+          '#options' => array(
+            'equal' => t('Equal Intervals'),
+            'quantiles' => t('Quantiles')
+          ),
+          '#default_value' => $this->options['colors']['choropleth']['ramp_type'],
         );
         $form['colors']['choropleth']['steps'] = array(
           '#type' => 'textfield',
@@ -433,6 +450,14 @@ class views_plugin_style_mapfile extends views_plugin_style {
     }
 
     /**
+     * Shortcut for determining whether values are special
+     */
+    private function is_special($value) {
+      return ($this->options['colors']['choropleth']['special']['enable'] && 
+        $value == $this->options['colors']['choropleth']['special']['value']);
+    }
+
+    /**
      * @param $rows the rows of a rendered view
      * @return $points all of the rows in that view which formed
      *  valid coordinates, organized into coordinates and attributes
@@ -466,8 +491,7 @@ class views_plugin_style_mapfile extends views_plugin_style {
               $join_field_value = $row[$key];
             }
             if ($key == $this->options['fields']['value']) {
-              if ($this->options['colors']['choropleth']['special']['enable'] && 
-                $row[$key] == $this->options['colors']['choropleth']['special']['value']) {
+              if ($this->is_special($row[$key])) {
                 $point['special'] = TRUE;
               }
               else {
@@ -504,11 +528,16 @@ class views_plugin_style_mapfile extends views_plugin_style {
               'polygon-opacity' => $this->options['colors']['choropleth']['special']['opacity']);
           }
           else {
-            $rank = (floatval($point['value']) - $value_min) / $value_range; // 0 -> 1
-            // Include high endpoint.
-            $ramp_idx = ($rank == 1) ? 
-              count($color_ramp) - 1 : 
-              floor($rank * $this->options['colors']['choropleth']['steps']);
+            if ($this->options['colors']['choropleth']['ramp_type'] == 'equal') {
+              $rank = (floatval($point['value']) - $value_min) / $value_range; // 0 -> 1
+              // Include high endpoint.
+              $ramp_idx = ($rank == 1) ? 
+                count($color_ramp) - 1 : 
+                floor($rank * $this->options['colors']['choropleth']['steps']);
+            }
+            if ($this->options['colors']['choropleth']['ramp_type'] == 'quantile') {
+              // TODO
+            }
             $points[$i]['polygon'] = array(
               'polygon-fill' => $color_ramp[$ramp_idx],
               'polygon-opacity' => $this->options['colors']['choropleth']['opacity']);
@@ -592,8 +621,7 @@ class views_plugin_style_mapfile extends views_plugin_style {
               $point['name'] = $row[$key];
               break;
             case $this->options['fields']['value']:
-              if ($this->options['colors']['choropleth']['special']['enable'] && 
-                $renders[$id][$key] == $this->options['colors']['choropleth']['special']['value']) {
+              if ($this->is_special($renders[$id][$key])) {
                 $point['description'] = $this->options['colors']['choropleth']['special']['label'];
               }
               else {
@@ -611,12 +639,12 @@ class views_plugin_style_mapfile extends views_plugin_style {
      * Return the data for a legend
      *
      * array(
-     *    'data_type' => array(
-     *    'color' => value
-     *    'color' => value
-     *    'color' => value
+     *    'points' => array()
+     *    'values' => array(
+     *      'min' => value
+     *      'max' => value
      *    )
-     *    )
+     * )
      */
     function legend_data($rows) {
       if ($this->options['colors']['choropleth']['enable'] || $this->options['scale']['enable']) {
@@ -647,8 +675,7 @@ class views_plugin_style_mapfile extends views_plugin_style {
             // TODO temporary hack
             // TODO getting bad invalid output here
             if ($key == $this->options['fields']['value'] &&
-             !($this->options['colors']['choropleth']['special']['enable'] && $row[$key] == 
-               $this->options['colors']['choropleth']['special']['value'])) {
+             !$this->is_special($row[$key])) {
               $point['value'] = $row[$key];
               $values[$id] = floatval($row[$key]);
               $formatted_values[$id] = $formatted_renders[$id][$key];
@@ -723,10 +750,12 @@ class views_plugin_style_mapfile extends views_plugin_style {
       $swatches = '';
       foreach ($points as $point) {
         if ($this->options['colors']['choropleth']['enable']) {
-          $swatches .= theme('stylewriter_color_swatch', $point['color'], $point['dist'], $point['value_min'], $point['value_max'], $label);
+          $swatches .= theme('stylewriter_color_swatch', 
+            $point['color'], $point['dist'], $point['value_min'], $point['value_max'], $label);
         }
         else {
-          $swatches .= theme('stylewriter_point_swatch', $point['color'], $point['dist'], $point['value_min'], $point['value_max'], $label);
+          $swatches .= theme('stylewriter_point_swatch', 
+            $point['color'], $point['dist'], $point['value_min'], $point['value_max'], $label);
         }
       }
       $first = current($points);
