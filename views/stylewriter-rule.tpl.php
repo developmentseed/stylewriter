@@ -33,25 +33,6 @@
   <?php endforeach; ?>
 <?php endif; ?>
 
-/* metawriter */
-
-<?php /* if ($metawriter): ?>
-<?php unset($metawriter['enable']); ?>
-  <?php foreach($metawriter as $k => $v): ?>
-    <?php echo "$k: \"$v\";"; ?>
-  <?php endforeach; ?>
-<?php endif; */ ?>
-
-/* point */
-
-<?php if ($point): ?>
-<?php unset($point['enable']); ?>
-  <?php foreach($point as $k => $v): ?>
-    <?php echo "$k: $v;"; ?>
-  <?php endforeach; ?>
-  point-file: url('http://cascadenik-sampledata.s3.amazonaws.com/purple-point.png');
-<?php endif; ?>
-
 /* marker */
 <?php if ($marker): ?>
 <?php unset($marker['enable']); ?>
